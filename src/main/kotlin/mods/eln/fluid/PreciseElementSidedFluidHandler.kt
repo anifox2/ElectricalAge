@@ -1,6 +1,6 @@
 package mods.eln.fluid
 
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundTag
 import net.minecraftforge.common.util.ForgeDirection
 
 class PreciseElementSidedFluidHandler: ElementSidedFluidHandler {
@@ -20,14 +20,14 @@ class PreciseElementSidedFluidHandler: ElementSidedFluidHandler {
 
     private var fixup = ForgeDirection.VALID_DIRECTIONS.map {Pair(it, 0.0)}.toMap().toMutableMap()
 
-    override fun readFromNBT(nbt: NBTTagCompound, str: String) {
+    override fun readFromNBT(nbt: CompoundTag, str: String) {
         super.readFromNBT(nbt, str)
         ForgeDirection.VALID_DIRECTIONS.forEach {
             fixup[it] = nbt.getDouble(str + "fixup" + it.name)
         }
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound, str: String) {
+    override fun writeToNBT(nbt: CompoundTag, str: String) {
         super.writeToNBT(nbt, str)
         ForgeDirection.VALID_DIRECTIONS.forEach {
             nbt.setDouble(str + "fixup" + it.name, fixup[it]?: 0.0)

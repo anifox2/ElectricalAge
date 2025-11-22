@@ -5,7 +5,7 @@ import mods.eln.misc.Obj3D
 import mods.eln.misc.preserveMatrix
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
-import net.minecraft.item.ItemStack
+import net.minecraft.world.item.ItemStack
 import net.minecraft.util.Vec3
 import net.minecraftforge.client.IItemRenderer
 

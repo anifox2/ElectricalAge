@@ -3,7 +3,8 @@ package mods.eln.sixnode
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.GuiHelper
-import mods.eln.gui.GuiScreenEln
+import mods.eln.gui.GuiHelperContainer
+import mods.eln.gui.ScreenEln
 import mods.eln.gui.GuiTextFieldEln
 import mods.eln.i18n.I18N.tr
 import mods.eln.item.IConfigurable
@@ -22,11 +23,10 @@ import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.CurrentSource
 import mods.eln.sim.nbt.NbtElectricalLoad
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import org.lwjgl.opengl.GL11
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
@@ -41,53 +41,39 @@ class PowerSinkDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, Po
         main.draw()
     }
 
-    override fun addInformation(itemStack: ItemStack, entityPlayer: EntityPlayer, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        Collections.addAll<String>(list, *tr("Provides an ideal power sink\nwithout energy or power limitation.").split("\n").toTypedArray())
-        list.add("")
-        list.add(tr("Internal resistance: %1$\u2126", Utils.plotValue(Eln.instance.lowVoltageCableDescriptor.electricalRs)))
-        list.add("")
-        list.add(tr("Creative block."))
-    }
-
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType): Boolean {
-        return true
-    }
-
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
-        when (type) {
-            IItemRenderer.ItemRenderType.ENTITY -> draw()
-            IItemRenderer.ItemRenderType.EQUIPPED, IItemRenderer.ItemRenderType.EQUIPPED_FIRST_PERSON -> {
-                GL11.glPushMatrix()
-                GL11.glTranslatef(0.8f, 0.3f, 0.2f)
-                GL11.glRotatef(150f, 0f, 0f, 1f)
-                draw()
-                GL11.glPopMatrix()
-            }
-            IItemRenderer.ItemRenderType.INVENTORY, IItemRenderer.ItemRenderType.FIRST_PERSON_MAP -> super.renderItem(type, item, *data)
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
+        val lines = tr("Provides an ideal power sink\nwithout energy or power limitation.").split("\n")
+        for (line in lines) {
+            list.add(net.minecraft.network.chat.Component.literal(line))
         }
+        list.add(net.minecraft.network.chat.Component.literal(""))
+        list.add(net.minecraft.network.chat.Component.literal(tr("Internal resistance: %1$\u2126", Utils.plotValue(Eln.lowVoltageCableDescriptor!!.electricalRs))))
+        list.add(net.minecraft.network.chat.Component.literal(""))
+        list.add(net.minecraft.network.chat.Component.literal(tr("Creative block.")))
     }
 
-    override fun canBePlacedOnSide(player: EntityPlayer?, side: Direction) = true
+    override fun canBePlacedOnSide(player: Player?, side: Direction) = true
 
     init {
         voltageLevelColor = VoltageLevelColor.Neutral
     }
 }
 
-
-class PowerSinkElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor) : SixNodeElement(sixNode, side, descriptor), IConfigurable {
+class PowerSinkElement(_sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor) : SixNodeElement(_sixNode, side, descriptor), IConfigurable {
     var electricalLoad = NbtElectricalLoad("electricalLoad")
+// ...existing code...
+
     var currentSource = CurrentSource("currSrc", electricalLoad, null)
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         currentSource.current = nbt.getDouble("current")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
-        nbt.setDouble("current", currentSource.current)
+        nbt.putDouble("current", currentSource.current)
     }
 
     override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad {
@@ -143,7 +129,7 @@ class PowerSinkElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDes
         Eln.applySmallRs(electricalLoad)
     }
 
-    override fun onBlockActivated(entityPlayer: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(entityPlayer: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         return onBlockActivatedRotate(entityPlayer)
     }
 
@@ -151,15 +137,15 @@ class PowerSinkElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDes
         return true
     }
 
-    override fun readConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
-        if (compound.hasKey("current")) {
+    override fun readConfigTool(compound: CompoundTag, invoker: Player) {
+        if (compound.contains("current")) {
             currentSource.current = compound.getDouble("current")
             needPublish()
         }
     }
 
-    override fun writeConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
-        compound.setDouble("current", currentSource.current)
+    override fun writeConfigTool(compound: CompoundTag, invoker: Player) {
+        compound.putDouble("current", currentSource.current)
     }
 
     init {
@@ -170,23 +156,23 @@ class PowerSinkElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDes
     val setVoltageId: Byte = 1
 }
 
-class PowerSinkGui(var render: PowerSinkRender) : GuiScreenEln() {
+class PowerSinkGui(var render: PowerSinkRender) : ScreenEln(), GuiTextFieldEln.GuiTextFieldElnObserver {
     var current: GuiTextFieldEln? = null
-    override fun newHelper(): GuiHelper {
-        return GuiHelper(this, 50 + 12, 12 + 12)
+    override fun newHelper(): GuiHelperContainer {
+        return GuiHelperContainer(this, 50 + 12, 12 + 12)
     }
 
     override fun initGui() {
         super.initGui()
         current = newGuiTextField(6, 6, 50)
-        current!!.setText(render.current.toFloat())
+        current!!.value = render.current.toString()
         current!!.setObserver(this)
-        current!!.setComment(arrayOf(tr("Power sourced")))
+        current!!.setComment(listOf(tr("Power sunk")))
     }
 
     override fun textFieldNewValue(textField: GuiTextFieldEln, value: String) {
 
-        val newCurrent = current!!.text.toDoubleOrNull()?: 0.0
+        val newCurrent = current!!.value.toDoubleOrNull()?: 0.0
 
         try {
             val bos = ByteArrayOutputStream()
@@ -201,7 +187,7 @@ class PowerSinkGui(var render: PowerSinkRender) : GuiScreenEln() {
 }
 
 class PowerSinkRender(tileEntity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) : SixNodeElementRender(tileEntity, side, descriptor) {
-    var descriptor: CurrentSourceDescriptor = descriptor as CurrentSourceDescriptor
+    var descriptor: PowerSinkDescriptor = descriptor as PowerSinkDescriptor
     var voltage = 0.0
     @JvmField
     var current = 0.0
@@ -214,18 +200,18 @@ class PowerSinkRender(tileEntity: SixNodeEntity, side: Direction, descriptor: Si
     override fun publishUnserialize(stream: DataInputStream) {
         super.publishUnserialize(stream)
         try {
-            current = stream.readFloat().toDouble()
+            current = stream.readDouble()
             needRedrawCable()
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
 
-    override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen {
+    override fun newGuiDraw(side: Direction, player: Player): Screen {
         return PowerSinkGui(this)
     }
 
-    override fun getCableRender(lrdu: LRDU): CableRenderDescriptor {
-        return Eln.instance.veryHighVoltageCableDescriptor.render
+    override fun getCableRender(lrdu: LRDU): CableRenderDescriptor? {
+        return Eln.veryHighVoltageCableDescriptor!!.render
     }
 }

@@ -9,16 +9,16 @@ import mods.eln.misc.Obj3D.Obj3DPart
 import mods.eln.misc.Utils
 import mods.eln.misc.UtilsClient
 import mods.eln.wiki.Data
-import net.minecraft.block.Block
+import net.minecraft.world.level.block.Block
 import net.minecraft.entity.Entity
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.player.EntityPlayerMP
-import net.minecraft.init.Blocks
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.entity.player.ServerPlayer
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.MathHelper
-import net.minecraft.world.World
+import net.minecraft.world.level.Level
 import net.minecraftforge.client.IItemRenderer.ItemRenderType
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
 import org.lwjgl.opengl.GL11
@@ -41,7 +41,7 @@ class PortableOreScannerItem(name: String?, private val obj: Obj3D,
 
     override fun onUpdate(stack: ItemStack, world: World, entity: Entity, par4: Int, par5: Boolean) {
         if (world.isRemote) return
-        if (entity !is EntityPlayerMP) return
+        if (entity !is ServerPlayer) return
         val state = getState(stack)
         var counter = getCounter(stack)
 
@@ -66,7 +66,7 @@ class PortableOreScannerItem(name: String?, private val obj: Obj3D,
         }
     }
 
-    override fun onItemRightClick(s: ItemStack, w: World, p: EntityPlayer): ItemStack {
+    override fun onItemRightClick(s: ItemStack, w: World, p: Player): ItemStack {
         if (w.isRemote) return s
         val energy = getEnergy(s)
         val state = getState(s)
@@ -90,8 +90,8 @@ class PortableOreScannerItem(name: String?, private val obj: Obj3D,
         Data.addPortable(newItemStack())
     }
 
-    override fun getDefaultNBT(): NBTTagCompound? {
-        val nbt = NBTTagCompound()
+    override fun getDefaultNBT(): CompoundTag? {
+        val nbt = CompoundTag()
         nbt.setDouble("e", energyStorage * 0.2)
         nbt.setByte("s", State.Boot.serialized)
         nbt.setShort("c", bootTime)
@@ -99,8 +99,8 @@ class PortableOreScannerItem(name: String?, private val obj: Obj3D,
         return nbt
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
         list.add(tr("Discharge power: %1\$W", Utils.plotValue(dischargePower)))
         if (itemStack != null) {
             list.add(tr("Stored energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
@@ -140,7 +140,7 @@ class PortableOreScannerItem(name: String?, private val obj: Obj3D,
         getNbt(stack!!).setByte("d", value)
     }
 
-    override fun onDroppedByPlayer(item: ItemStack, player: EntityPlayer?): Boolean {
+    override fun onDroppedByPlayer(item: ItemStack, player: Player?): Boolean {
         setState(item, State.Idle)
         return super.onDroppedByPlayer(item, player)
     }
@@ -169,8 +169,8 @@ class PortableOreScannerItem(name: String?, private val obj: Obj3D,
         return type != ItemRenderType.INVENTORY
     }
 
-    override fun onBlockStartBreak(itemstack: ItemStack?, x: Int, y: Int, z: Int, player: EntityPlayer?): Boolean {
-        if (!player!!.worldObj.isRemote) {
+    override fun onBlockStartBreak(itemstack: ItemStack?, x: Int, y: Int, z: Int, player: Player?): Boolean {
+        if (!player!!.level.isRemote) {
             setDamage(itemstack, (getDamage(itemstack) + 1).toByte())
             //Utils.println("Break");
         }
@@ -223,7 +223,7 @@ class PortableOreScannerItem(name: String?, private val obj: Obj3D,
             var oRender = Eln.clientLiveDataManager.getData(item, 1)
             if (oRender == null) oRender = Eln.clientLiveDataManager.newData(item, RenderStorage(viewRange, viewYAlpha, resWidth, resHeight), 1)
             val render = oRender as RenderStorage
-            render.generate(e!!.worldObj, e.posX, Utils.getHeadPosY(e), e.posZ, e.rotationYaw * Math.PI.toFloat() / 180.0f, e.rotationPitch * Math.PI.toFloat() / 180.0f)
+            render.generate(e!!.level, e.posX, Utils.getHeadPosY(e), e.posZ, e.rotationYaw * Math.PI.toFloat() / 180.0f, e.rotationPitch * Math.PI.toFloat() / 180.0f)
             val scale = 1f / resWidth * 0.50f
             GL11.glTranslatef(0.90668f, 0.163f, -0.25078f)
             GL11.glRotatef(270f, 1f, 0f, 0f)

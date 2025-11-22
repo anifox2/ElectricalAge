@@ -1,15 +1,15 @@
 package mods.eln.node.simple
 
 import mods.eln.misc.Coordinate
-import net.minecraft.block.Block
-import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.entity.player.Player
 import net.minecraft.item.ItemBlock
-import net.minecraft.item.ItemStack
-import net.minecraft.world.World
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
 
 class SimpleNodeItem(b: Block) : ItemBlock(b) {
     var block: SimpleNodeBlock
-    override fun placeBlockAt(stack: ItemStack, player: EntityPlayer, world: World, x: Int, y: Int, z: Int, side: Int, hitX: Float, hitY: Float, hitZ: Float, metadata: Int): Boolean {
+    override fun placeBlockAt(stack: ItemStack, player: Player, world: World, x: Int, y: Int, z: Int, side: Int, hitX: Float, hitY: Float, hitZ: Float, metadata: Int): Boolean {
         var node: SimpleNode? = null
         if (!world.isRemote) {
             node = block.newNode()

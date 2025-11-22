@@ -1,11 +1,11 @@
 package mods.eln.fluid
 
 import mods.eln.misc.INBTTReady
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundTag
 import net.minecraftforge.common.util.ForgeDirection
 import net.minecraftforge.fluids.*
 
-open class ElementSidedFluidHandler: IFluidHandler, INBTTReady {
+open class ElementSidedFluidHandler: net.minecraftforge.fluids.capability.IFluidHandler, INBTTReady {
 
     protected val tanks = mutableMapOf<ForgeDirection, TankData>()
 
@@ -139,7 +139,7 @@ open class ElementSidedFluidHandler: IFluidHandler, INBTTReady {
         return tank.tank.fluid.getFluid().id == fluid.id
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound, str: String) {
+    override fun readFromNBT(nbt: CompoundTag, str: String) {
         val tankList = mutableListOf<TankData>()
         val numTanks = nbt.getInteger("${str}numTanks")
         for (idx in 0 .. numTanks) {
@@ -160,7 +160,7 @@ open class ElementSidedFluidHandler: IFluidHandler, INBTTReady {
         //println("tanks: $tanks")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound, str: String) {
+    override fun writeToNBT(nbt: CompoundTag, str: String) {
         val tanksList = mutableListOf<TankData>()
         tanks.forEach {
             if (it.value !in tanksList) {

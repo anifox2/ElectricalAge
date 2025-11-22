@@ -7,10 +7,10 @@ import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeElement
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.player.EntityPlayerMP
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.entity.player.ServerPlayer
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.Vec3
 import org.apache.commons.lang3.tuple.Pair
 
@@ -31,7 +31,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     }
 
     /* Connect one GridNode to another. */
-    override fun onBlockActivated(player: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         // Check if user is holding an appropriate tool.
         val stack = player.currentEquippedItem
         val itemDesc = GenericItemBlockUsingDamageDescriptor.getDescriptor(stack)
@@ -42,7 +42,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         return false
     }
 
-    private fun onTryGridConnect(entityPlayer: EntityPlayer, stack: ItemStack, cable: ElectricalCableDescriptor, side: Direction): Boolean {
+    private fun onTryGridConnect(entityPlayer: Player, stack: ItemStack, cable: ElectricalCableDescriptor, side: Direction): Boolean {
         // First node, or second node?
         val uuid = entityPlayer.persistentID
         val p = pending[uuid]
@@ -69,7 +69,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             val range = Math.min(connectRange, other.connectRange)
             val stackSize = entityPlayer.totalItemsCarried(stack)
 
-            if (stackSize < distance && !Utils.isCreative(entityPlayer as EntityPlayerMP)) {
+            if (stackSize < distance && !Utils.isCreative(entityPlayer as ServerPlayer)) {
                 Utils.addChatMessage(entityPlayer, "You need $cableLength units of cable")
             } else if (distance > range) {
                 Utils.addChatMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks")
@@ -130,7 +130,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         }
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
 
         val gridLinks = Utils.newNbtTagCompund(nbt, "gridLinks")
@@ -139,7 +139,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         }
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
 
         assert(gridLinkList.isEmpty())

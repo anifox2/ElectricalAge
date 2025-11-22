@@ -23,12 +23,12 @@ import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sound.IPlayer
 import mods.eln.sound.SoundCommand
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.player.EntityPlayerMP
-import net.minecraft.inventory.Container
-import net.minecraft.inventory.IInventory
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.entity.player.ServerPlayer
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.Container
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -59,7 +59,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     open val isProvidingWeakPower: Int
         get() = 0
 
-    override fun inventoryChange(inventory: IInventory?) {
+    override fun inventoryChange(inventory: Container?) {
         inventoryChanged()
     }
 
@@ -77,7 +77,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     override val ghostObserverCoordonate: Coordinate?
         get() = coordinate
 
-    protected fun onBlockActivatedRotate(entityPlayer: EntityPlayer?): Boolean {
+    protected fun onBlockActivatedRotate(entityPlayer: Player?): Boolean {
         if (isPlayerUsingWrench(entityPlayer)) {
             front = front.nextClockwise
             sixNode!!.reconnect()
@@ -95,7 +95,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
         sixNode!!.sendPacketToAllClient(bos, range)
     }
 
-    fun sendPacketToClient(bos: ByteArrayOutputStream?, player: EntityPlayerMP?) {
+    fun sendPacketToClient(bos: ByteArrayOutputStream?, player: ServerPlayer?) {
         sixNode!!.sendPacketToClient(bos, player)
     }
 
@@ -117,7 +117,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     }
 
     open fun networkUnserialize(stream: DataInputStream) {}
-    open fun networkUnserialize(stream: DataInputStream, player: EntityPlayerMP?) {
+    open fun networkUnserialize(stream: DataInputStream, player: ServerPlayer?) {
         networkUnserialize(stream)
     }
 
@@ -128,10 +128,10 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
         return false
     }
 
-    open val inventory: IInventory?
+    open val inventory: Container?
         get() = null
 
-    open fun newContainer(side: Direction, player: EntityPlayer): Container? {
+    open fun newContainer(side: Direction, player: Player): AbstractContainerMenu? {
         return null
     }
 
@@ -171,7 +171,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
         }
     }
 
-    open fun destroy(entityPlayer: EntityPlayerMP?) {
+    open fun destroy(entityPlayer: ServerPlayer?) {
         if (useUuid()) {
             stop(uuid)
         }
@@ -192,14 +192,14 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
      * @param vz ?
      * @return True if we've done something, otherwise false.
      */
-    open fun onBlockActivated(entityPlayer: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    open fun onBlockActivated(entityPlayer: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         return onBlockActivatedRotate(entityPlayer)
     }
 
     val dropItemStack: ItemStack
         get() = ItemStack(Eln.sixNodeBlock, 1, itemStackDamageId) //sixNode.sideElementIdList[side.getInt()]
 
-    open fun readFromNBT(nbt: NBTTagCompound) {
+    open fun readFromNBT(nbt: CompoundTag) {
         front = readFromNBT(nbt, "sixFront")
         val inv = inventory
         if (inv != null) {
@@ -226,7 +226,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
         }
     }
 
-    open fun writeToNBT(nbt: NBTTagCompound) {
+    open fun writeToNBT(nbt: CompoundTag) {
         front.writeToNBT(nbt, "sixFront")
         val inv = inventory
         if (inv != null) {
@@ -282,7 +282,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
         }
     }
 
-    override fun ghostBlockActivated(UUID: Int, entityPlayer: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun ghostBlockActivated(UUID: Int, entityPlayer: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         if (UUID == sixNodeElementDescriptor.ghostGroupUuid) {
             sixNode!!.onBlockActivated(entityPlayer, this.side, vx, vy, vz)
         }

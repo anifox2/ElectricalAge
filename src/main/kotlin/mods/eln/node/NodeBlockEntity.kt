@@ -1,7 +1,5 @@
 package mods.eln.node
 
-import cpw.mods.fml.relauncher.Side
-import cpw.mods.fml.relauncher.SideOnly
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.Coordinate
@@ -14,16 +12,16 @@ import mods.eln.misc.Utils.println
 import mods.eln.misc.UtilsClient
 import mods.eln.server.DelayedBlockRemove.Companion.add
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.Container
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.client.gui.Screen
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.Packet
-import net.minecraft.network.play.server.S3FPacketCustomPayload
-import net.minecraft.tileentity.TileEntity
-import net.minecraft.util.AxisAlignedBB
-import net.minecraft.world.EnumSkyBlock
+import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.level.LightLayer
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -31,7 +29,8 @@ import java.io.IOException
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
-abstract class NodeBlockEntity : TileEntity(), ITileEntitySpawnClient, INodeEntity {
+abstract class NodeBlockEntity(type: net.minecraft.world.level.block.entity.BlockEntityType<*>, pos: net.minecraft.core.BlockPos, state: net.minecraft.world.level.block.state.BlockState) : BlockEntity(type, pos, state), ITileEntitySpawnClient, INodeEntity {
+
     val block: NodeBlock
         get() = getBlockType() as NodeBlock
     var redstone = false
@@ -49,7 +48,7 @@ abstract class NodeBlockEntity : TileEntity(), ITileEntitySpawnClient, INodeEnti
             val newRedstone = b.toInt() and 0x10 != 0
             if (redstone != newRedstone) {
                 redstone = newRedstone
-                worldObj.notifyBlockChange(xCoord, yCoord, zCoord, getBlockType())
+                level.notifyBlockChange(xCoord, yCoord, zCoord, getBlockType())
             } else {
                 redstone = newRedstone
             }
@@ -59,10 +58,10 @@ abstract class NodeBlockEntity : TileEntity(), ITileEntitySpawnClient, INodeEnti
         /*	if(lastLight == 0xFF) //boot trololol
         {
 			lastLight = 15;
-			worldObj.updateLightByType(EnumSkyBlock.Block,xCoord,yCoord,zCoord);
+			level.updateLightByType(EnumSkyBlock.Block,xCoord,yCoord,zCoord);
 		}*/if (lastLight != light) {
             lastLight = light
-            worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord)
+            level.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord)
         }
     }
 
@@ -74,38 +73,38 @@ abstract class NodeBlockEntity : TileEntity(), ITileEntitySpawnClient, INodeEnti
 
     val node: Node?
         get() {
-            if (worldObj.isRemote) {
+            if (level.isRemote) {
                 fatal()
             }
             if (internalNode == null) {
-                val nodeFromCoordonate = NodeManager.instance!!.getNodeFromCoordonate(Coordinate(xCoord, yCoord, zCoord, worldObj))
+                val nodeFromCoordonate = NodeManager.instance!!.getNodeFromCoordonate(Coordinate(xCoord, yCoord, zCoord, level))
                 if (nodeFromCoordonate is Node) {
                     internalNode = nodeFromCoordonate
                 } else {
-                    println("ASSERT WRONG TYPE public Node getNode " + Coordinate(xCoord, yCoord, zCoord, worldObj))
+                    println("ASSERT WRONG TYPE public Node getNode " + Coordinate(xCoord, yCoord, zCoord, level))
                 }
                 if (internalNode == null) {
                     Utils.println("This is actually used?")
-                    add(Coordinate(xCoord, yCoord, zCoord, worldObj))
+                    add(Coordinate(xCoord, yCoord, zCoord, level))
                 }
             }
             return internalNode
         }
 
-    override fun newContainer(side: Direction, player: EntityPlayer): Container? {
+    override fun newContainer(side: Direction, player: Player): AbstractContainerMenu? {
         return null
     }
 
-    override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen? {
+    override fun newGuiDraw(side: Direction, player: Player): Screen? {
         // Debugging tip: If the GUI isn't working, but you can see it trying to open in the client debug log,
         // check that you have the renderer (client) class set correctly in the descriptor
         return null
     }
 
     @SideOnly(Side.CLIENT)
-    override fun getRenderBoundingBox(): AxisAlignedBB {
+    override fun getRenderBoundingBox(): AABB {
         return if (cameraDrawOptimisation()) {
-            AxisAlignedBB.getBoundingBox((xCoord - 1).toDouble(), (yCoord - 1).toDouble(), (zCoord - 1).toDouble(), (xCoord + 1).toDouble(), (yCoord + 1).toDouble(), (zCoord + 1).toDouble())
+            AABB.getBoundingBox((xCoord - 1).toDouble(), (yCoord - 1).toDouble(), (zCoord - 1).toDouble(), (xCoord + 1).toDouble(), (yCoord + 1).toDouble(), (zCoord + 1).toDouble())
         } else {
             INFINITE_EXTENT_AABB
         }
@@ -116,7 +115,7 @@ abstract class NodeBlockEntity : TileEntity(), ITileEntitySpawnClient, INodeEnti
     }
 
     val lightValue: Int
-        get() = if (worldObj.isRemote) {
+        get() = if (level.isRemote) {
             if (lastLight == 0xFF) {
                 0
             } else lastLight
@@ -127,14 +126,14 @@ abstract class NodeBlockEntity : TileEntity(), ITileEntitySpawnClient, INodeEnti
     /**
      * Reads a tile entity from NBT.
      */
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
     }
 
     /**
      * Writes a tile entity to NBT.
      */
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
     }
 
@@ -144,7 +143,7 @@ abstract class NodeBlockEntity : TileEntity(), ITileEntitySpawnClient, INodeEnti
         return 4096.0 * 4 * 4
     }
 
-    @Suppress("UNUSED_PARAMETER") fun onBlockPlacedBy(front: Direction?, entityLiving: EntityLivingBase?, metadata: Int) {}
+    @Suppress("UNUSED_PARAMETER") fun onBlockPlacedBy(front: Direction?, entityLiving: LivingEntity?, metadata: Int) {}
     override fun canUpdate(): Boolean {
         return true
     }
@@ -153,8 +152,8 @@ abstract class NodeBlockEntity : TileEntity(), ITileEntitySpawnClient, INodeEnti
     override fun updateEntity() {
         if (updateEntityFirst) {
             updateEntityFirst = false
-            if (!worldObj.isRemote) {
-                // worldObj.setBlock(xCoord, yCoord, zCoord, 0);
+            if (!level.isRemote) {
+                // level.setBlock(xCoord, yCoord, zCoord, 0);
             } else {
                 clientList.add(this)
             }
@@ -162,20 +161,20 @@ abstract class NodeBlockEntity : TileEntity(), ITileEntitySpawnClient, INodeEnti
     }
 
     fun onBlockAdded() {
-        if (!worldObj.isRemote && node == null) {
-            worldObj.setBlockToAir(xCoord, yCoord, zCoord)
+        if (!level.isRemote && node == null) {
+            level.setBlockToAir(xCoord, yCoord, zCoord)
         }
     }
 
     fun onBreakBlock() {
-        if (!worldObj.isRemote) {
+        if (!level.isRemote) {
             if (node == null) return
             node!!.onBreakBlock()
         }
     }
 
     override fun onChunkUnload() {
-        if (worldObj.isRemote) {
+        if (level.isRemote) {
             destructor()
         }
     }
@@ -186,14 +185,14 @@ abstract class NodeBlockEntity : TileEntity(), ITileEntitySpawnClient, INodeEnti
     }
 
     override fun invalidate() {
-        if (worldObj.isRemote) {
+        if (level.isRemote) {
             destructor()
         }
         super.invalidate()
     }
 
-    fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
-        if (!worldObj.isRemote) {
+    fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
+        if (!level.isRemote) {
             if (node == null) return false
             node!!.onBlockActivated(entityPlayer!!, side!!, vx, vy, vz)
             return true
@@ -204,7 +203,7 @@ abstract class NodeBlockEntity : TileEntity(), ITileEntitySpawnClient, INodeEnti
     }
 
     fun onNeighborBlockChange() {
-        if (!worldObj.isRemote) {
+        if (!level.isRemote) {
             if (node == null) return
             node!!.onNeighborBlockChange()
         }
@@ -225,7 +224,7 @@ abstract class NodeBlockEntity : TileEntity(), ITileEntitySpawnClient, INodeEnti
             stream.writeInt(xCoord)
             stream.writeInt(yCoord)
             stream.writeInt(zCoord)
-            stream.writeByte(worldObj.provider.dimensionId)
+            stream.writeByte(level.provider.dimensionId)
             stream.writeUTF(nodeUuid)
         } catch (e: IOException) {
             e.printStackTrace()
@@ -245,7 +244,7 @@ abstract class NodeBlockEntity : TileEntity(), ITileEntitySpawnClient, INodeEnti
     }
 
     fun canConnectRedstone(@Suppress("UNUSED_PARAMETER") xn: Direction?): Boolean {
-        return if (worldObj.isRemote) redstone else {
+        return if (level.isRemote) redstone else {
             if (node == null) false else node!!.canConnectRedstone()
         }
     }

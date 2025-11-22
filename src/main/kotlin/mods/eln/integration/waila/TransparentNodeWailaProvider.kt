@@ -1,17 +1,16 @@
 package mods.eln.integration.waila
 
 import com.google.common.cache.CacheLoader
-import cpw.mods.fml.common.Optional
 import mcp.mobius.waila.api.IWailaConfigHandler
 import mcp.mobius.waila.api.IWailaDataAccessor
 import mcp.mobius.waila.api.IWailaDataProvider
 import mcp.mobius.waila.api.SpecialChars
 import mods.eln.misc.Coordinate
-import net.minecraft.entity.player.EntityPlayerMP
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.entity.player.ServerPlayer
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.tileentity.TileEntity
-import net.minecraft.world.World
+import net.minecraft.world.level.Level
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
 class TransparentNodeWailaProvider : IWailaDataProvider {
@@ -36,7 +35,7 @@ class TransparentNodeWailaProvider : IWailaDataProvider {
         return currenttip
     }
 
-    override fun getNBTData(player: EntityPlayerMP?, te: TileEntity?, tag: NBTTagCompound?, world: World?, x: Int, y: Int, z: Int): NBTTagCompound? {
+    override fun getNBTData(player: ServerPlayer?, te: TileEntity?, tag: CompoundTag?, world: World?, x: Int, y: Int, z: Int): CompoundTag? {
         return null
     }
 

@@ -1,7 +1,5 @@
 package mods.eln.node.six
 
-import cpw.mods.fml.relauncher.Side
-import cpw.mods.fml.relauncher.SideOnly
 import mods.eln.cable.CableRender
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.cable.CableRenderType
@@ -20,9 +18,9 @@ import mods.eln.misc.UtilsClient.glGenListsSafe
 import mods.eln.sound.LoopedSound
 import mods.eln.sound.LoopedSoundManager
 import mods.eln.sound.SoundCommand
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.IInventory
+import net.minecraft.client.gui.Screen
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.Container
 import org.lwjgl.opengl.GL11
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
@@ -171,11 +169,11 @@ abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmFiel
         loopedSoundManager.dispose()
     }
 
-    open fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen? {
+    open fun newGuiDraw(side: Direction, player: Player): Screen? {
         return null
     }
 
-    open val inventory: IInventory?
+    open val inventory: Container?
         get() = null
 
     fun preparePacketForServer(stream: DataOutputStream) {

@@ -1,10 +1,10 @@
 package mods.eln.node
 
-import net.minecraft.block.Block
-import net.minecraft.entity.EntityLivingBase
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.entity.LivingEntity
 import net.minecraft.item.ItemBlock
-import net.minecraft.item.ItemStack
-import net.minecraft.world.World
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
 
 class NodeBlockItem(b: Block?) : ItemBlock(b) {
 

@@ -14,10 +14,11 @@ import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sixnode.genericcable.GenericCableDescriptor
 import net.minecraft.client.Minecraft
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
-import net.minecraft.util.ResourceLocation
-import net.minecraftforge.client.IItemRenderer
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.network.chat.Component
+import net.minecraft.world.item.TooltipFlag
 import org.lwjgl.opengl.GL11
 import java.util.HashMap
 
@@ -46,38 +47,24 @@ class PortableNaNDescriptor(name: String, renderIn: CableRenderDescriptor): Gene
 
     override fun applyTo(thermalLoad: ThermalLoad) = thermalLoad.set(Double.NaN, Double.NaN, Double.NaN)
 
-    override fun addInformation(itemStack: ItemStack, entityPlayer: EntityPlayer, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
+    override fun appendHoverText(itemStack: ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<Component>, flag: TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
 
-        list.add(tr("Nominal Ratings:"))
-        list.add("  " + tr("Voltage: Yes"))
-        list.add("  " + tr("Current: No"))
-        list.add("  " + tr("Serial Resistance: OK Ω"))
-    }
-
-    override fun addRealismContext(list: MutableList<String>?): RealisticEnum {
-        list?.add(tr("A debugging feature that throws NaN (Not a Number) anywhere it can in the simulator to find bugs"))
-        return RealisticEnum.UNREALISTIC
+        list.add(Component.literal(tr("Nominal Ratings:")))
+        list.add(Component.literal("  " + tr("Voltage: Yes")))
+        list.add(Component.literal("  " + tr("Current: No")))
+        list.add(Component.literal("  " + tr("Serial Resistance: OK Ω")))
+        list.add(Component.literal(tr("A debugging feature that throws NaN (Not a Number) anywhere it can in the simulator to find bugs")))
     }
 
     override fun getNodeMask(): Int {
         return NodeBase.maskElectricalAll
     }
-
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType): Boolean {
-        return true
-    }
-
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
-        if (icon == null)
-            return
-        val icon = icon.iconName.substring(4)
-        UtilsClient.drawIcon(type, ResourceLocation("eln", "textures/blocks/$icon.png"))
-    }
 }
 
-class PortableNaNElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor): SixNodeElement(sixNode, side, descriptor) {
+class PortableNaNElement(_sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor): SixNodeElement(_sixNode, side, descriptor) {
     val electricalLoad = NbtElectricalLoad("Portable NaN")
+
     val thermalLoad = NbtThermalLoad("Portable NaN")
     val descriptor: PortableNaNDescriptor
     init {
@@ -139,18 +126,18 @@ class PortableNaNRender(tileEntity: SixNodeEntity, side: Direction, descriptor: 
     }
 
     override fun draw() {
-        Minecraft.getMinecraft().mcProfiler.startSection("ACable")
+        Minecraft.getInstance().profiler.push("ACable")
 
         UtilsClient.bindTexture(descriptor.render?.cableTexture)
         glListCall()
 
         GL11.glColor3f(1f, 1f, 1f)
-        Minecraft.getMinecraft().mcProfiler.endSection()
+        Minecraft.getInstance().profiler.pop()
     }
 
     override fun glListDraw() {
-        CableRender.drawCable(descriptor.render, connectedSide, CableRender.connectionType(this, side))
-        CableRender.drawNode(descriptor.render, connectedSide, CableRender.connectionType(this, side))
+        CableRender.drawCable(descriptor.render!!, connectedSide, CableRender.connectionType(this, side))
+        CableRender.drawNode(descriptor.render!!, connectedSide, CableRender.connectionType(this, side))
     }
 
     override fun glListEnable(): Boolean {

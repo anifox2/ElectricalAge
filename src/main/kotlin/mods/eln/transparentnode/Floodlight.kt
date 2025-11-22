@@ -6,7 +6,7 @@ import mods.eln.misc.Obj3D
 import mods.eln.node.transparent.*
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
-import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.world.entity.player.Player
 import org.lwjgl.opengl.GL11
 
 class BasicFloodlightDescriptor(val name: String, val obj: Obj3D): TransparentNodeDescriptor(name, BasicFloodlightElement::class.java, BasicFloodlightRender::class.java) {
@@ -60,7 +60,7 @@ class BasicFloodlightElement(node: TransparentNode, descriptor: TransparentNodeD
         return null
     }
 
-    override fun onBlockActivated(player: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         return false
     }
 
@@ -153,7 +153,7 @@ class MotorizedFloodlightElement(node: TransparentNode, descriptor: TransparentN
         return null
     }
 
-    override fun onBlockActivated(player: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         return false
     }
 

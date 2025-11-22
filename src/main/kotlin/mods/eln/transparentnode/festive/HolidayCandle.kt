@@ -8,7 +8,7 @@ import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.IOException
 
-class HolidayCandleDescriptor(val name: String, val obj: Obj3D): TransparentNodeDescriptor(name, FestiveElement::class.java, HolidayCandleRender::class.java) {
+class HolidayCandleDescriptor(name: String, val obj: Obj3D) : TransparentNodeDescriptor(name, FestiveElement::class.java, HolidayCandleRender::class.java) {
     private var base: Obj3D.Obj3DPart? = null
     private var glass: Obj3D.Obj3DPart? = null
     private var light: Obj3D.Obj3DPart? = null

@@ -1,6 +1,6 @@
 package mods.eln.misc
 
-import net.minecraft.item.ItemStack
+import net.minecraft.world.item.ItemStack
 import java.util.*
 
 class Recipe {
@@ -22,23 +22,12 @@ class Recipe {
         this.output = arrayOf(output)
         this.energy = energy
     }
-
-    fun canBeCraftedBy(stack: ItemStack?): Boolean {
-        return if (stack == null) false else input.stackSize <= stack.stackSize && Utils.areSame(stack, input)
+    
+    fun setMachineList(machines: ArrayList<ItemStack>) {
+        // Stub
     }
 
-    val outputCopy: Array<ItemStack?>
-        get() {
-            val cpy = arrayOfNulls<ItemStack>(output.size)
-            for (idx in output.indices) {
-                cpy[idx] = output[idx].copy()
-            }
-            return cpy
-        }
-
-    @JvmField
-    var machineList = ArrayList<ItemStack>()
-    fun setMachineList(machineList: ArrayList<ItemStack>) {
-        this.machineList = machineList
+    fun getOutputCopy(): Array<ItemStack> {
+        return output.map { it.copy() }.toTypedArray()
     }
 }

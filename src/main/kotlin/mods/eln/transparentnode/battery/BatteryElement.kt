@@ -22,8 +22,8 @@ import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.entity.player.Player
+import net.minecraft.nbt.CompoundTag
 import java.io.DataOutputStream
 import java.io.IOException
 import java.util.*
@@ -107,7 +107,7 @@ class BatteryElement(transparentNode: TransparentNode, descriptor: TransparentNo
         connect()
     }
 
-    override fun onBlockActivated(player: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         return false
     }
 
@@ -115,17 +115,17 @@ class BatteryElement(transparentNode: TransparentNode, descriptor: TransparentNo
         return true
     }
 
-    override fun readItemStackNBT(nbt: NBTTagCompound?) {
+    override fun readItemStackNBT(nbt: CompoundTag?) {
         super.readItemStackNBT(nbt)
-        fromItemstackCharge = nbt?.getDouble("charge")?: descriptor.getChargeInTag(this.descriptor.newItemStack())
-        fromItemstackLife = nbt?.getDouble("life")?: descriptor.getLifeInTag(this.descriptor.newItemStack())
+        fromItemstackCharge = nbt?.getDouble("charge")?: descriptor.getChargeInTag(this.descriptor.getStack())
+        fromItemstackLife = nbt?.getDouble("life")?: descriptor.getLifeInTag(this.descriptor.getStack())
         fromItemStack = true
     }
 
-    override fun getItemStackNBT(): NBTTagCompound {
-        val nbt = NBTTagCompound()
-        nbt.setDouble("charge", batteryProcess.charge)
-        nbt.setDouble("life", batteryProcess.life)
+    override fun getItemStackNBT(): CompoundTag {
+        val nbt = CompoundTag()
+        nbt.putDouble("charge", batteryProcess.charge)
+        nbt.putDouble("life", batteryProcess.life)
         return nbt
     }
 
@@ -134,12 +134,12 @@ class BatteryElement(transparentNode: TransparentNode, descriptor: TransparentNo
         info[tr("Charge")] = Utils.plotPercent("", batteryProcess.charge)
         info[tr("Energy")] = Utils.plotEnergy("", batteryProcess.energy)
         info[tr("Life")] = Utils.plotPercent("", batteryProcess.life)
-        if (Eln.wailaEasyMode) {
+        // if (Eln.wailaEasyMode) {
             info[tr("Voltage")] = Utils.plotVolt("", batteryProcess.u)
             info[tr("Current")] = Utils.plotAmpere("", batteryProcess.dischargeCurrent)
             info[tr("Temperature")] = Utils.plotCelsius("", thermalLoad.temperatureCelsius)
-        }
-        info[tr("Subsystem Matrix Size")] = Utils.renderSubSystemWaila(positiveLoad.subSystem)
+        // }
+        // info[tr("Subsystem Matrix Size")] = Utils.renderSubSystemWaila(positiveLoad.subSystem)
         return info
     }
 

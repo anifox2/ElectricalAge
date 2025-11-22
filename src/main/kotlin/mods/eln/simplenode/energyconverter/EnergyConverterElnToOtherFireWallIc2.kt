@@ -1,6 +1,7 @@
 package mods.eln.simplenode.energyconverter
 
 import cpw.mods.fml.common.FMLCommonHandler
+import cpw.mods.fml.relauncher.Side
 import ic2.api.energy.event.EnergyTileLoadEvent
 import ic2.api.energy.event.EnergyTileUnloadEvent
 import ic2.api.info.Info
@@ -33,7 +34,7 @@ object EnergyConverterElnToOtherFireWallIc2 {
      * Both invalidate and onChunkUnload have to be used.
      */
     fun invalidate(e: EnergyConverterElnToOtherEntity) {
-        e.onChunkUnload()
+        onChunkUnload(e)
     }
 
     /**

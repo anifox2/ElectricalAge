@@ -1,10 +1,10 @@
 package mods.eln.server
 
 import mods.eln.Eln
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.world.WorldSavedData
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.level.saveddata.SavedData
 
-class SaveConfig(par1Str: String) : WorldSavedData(par1Str) {
+class SaveConfig : SavedData() {
     @JvmField
     var heatFurnaceFuel = true
     var electricalLampAging = true
@@ -13,34 +13,36 @@ class SaveConfig(par1Str: String) : WorldSavedData(par1Str) {
     var infinitePortableBattery = false
     var reGenOre = false
     var cableRsFactor_lastUsed = 1.0
-    override fun readFromNBT(nbt: NBTTagCompound) {
-        heatFurnaceFuel = nbt.getBoolean("heatFurnaceFuel")
-        electricalLampAging = nbt.getBoolean("electricalLampAging")
-        batteryAging = nbt.getBoolean("batteryAging")
-        infinitePortableBattery = nbt.getBoolean("infinitPortableBattery")
-        reGenOre = nbt.getBoolean("reGenOre")
-        cableRsFactor_lastUsed = nbt.getDouble("cableRsFactor_lastUsed")
-        Eln.wind.readFromNBT(nbt, "wind")
-    }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
-        nbt.setBoolean("heatFurnaceFuel", heatFurnaceFuel)
-        nbt.setBoolean("electricalLampAging", electricalLampAging)
-        nbt.setBoolean("batteryAging", batteryAging)
-        nbt.setBoolean("infinitPortableBattery", infinitePortableBattery)
-        nbt.setBoolean("reGenOre", reGenOre)
+    override fun save(nbt: CompoundTag): CompoundTag {
+        nbt.putBoolean("heatFurnaceFuel", heatFurnaceFuel)
+        nbt.putBoolean("electricalLampAging", electricalLampAging)
+        nbt.putBoolean("batteryAging", batteryAging)
+        nbt.putBoolean("infinitPortableBattery", infinitePortableBattery)
+        nbt.putBoolean("reGenOre", reGenOre)
         Eln.wind.writeToNBT(nbt, "wind")
-    }
-
-    override fun isDirty(): Boolean {
-        return true
+        return nbt
     }
 
     companion object {
         @JvmField
         var instance: SaveConfig? = null
-    }
 
+        fun load(nbt: CompoundTag): SaveConfig {
+            val config = SaveConfig()
+            config.heatFurnaceFuel = nbt.getBoolean("heatFurnaceFuel")
+            config.electricalLampAging = nbt.getBoolean("electricalLampAging")
+            config.batteryAging = nbt.getBoolean("batteryAging")
+            config.infinitePortableBattery = nbt.getBoolean("infinitPortableBattery")
+            config.reGenOre = nbt.getBoolean("reGenOre")
+            if (nbt.contains("cableRsFactor_lastUsed"))
+                config.cableRsFactor_lastUsed = nbt.getDouble("cableRsFactor_lastUsed")
+            Eln.wind.readFromNBT(nbt, "wind")
+            instance = config
+            return config
+        }
+    }
+    
     init {
         instance = this
     }

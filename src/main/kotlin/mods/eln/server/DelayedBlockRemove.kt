@@ -3,13 +3,16 @@ package mods.eln.server
 import mods.eln.Eln
 import mods.eln.misc.Coordinate
 import mods.eln.server.DelayedTaskManager.ITask
-import net.minecraft.init.Blocks
+import net.minecraft.world.level.block.Blocks
 import java.util.*
 
 class DelayedBlockRemove private constructor(var c: Coordinate) : ITask {
     override fun run() {
         BLOCKS.remove(c)
-        c.block = Blocks.air
+        val level = mods.eln.misc.Utils.getLevel(c.dimension)
+        if (level != null) {
+            level.setBlock(c.toBlockPos(), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3)
+        }
     }
 
     companion object {

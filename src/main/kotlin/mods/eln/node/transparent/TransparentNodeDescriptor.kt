@@ -11,29 +11,30 @@ import mods.eln.misc.Utils.entityLivingViewDirection
 import mods.eln.misc.UtilsClient.drawIcon
 import mods.eln.misc.VoltageLevelColor
 import mods.eln.node.transparent.TransparentNode.FrontType
-import net.minecraft.block.Block
-import net.minecraft.block.BlockHopper
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.init.Blocks
-import net.minecraft.item.ItemStack
-import net.minecraft.util.AxisAlignedBB
-import net.minecraft.util.ResourceLocation
-import net.minecraft.world.World
-import net.minecraftforge.client.IItemRenderer
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.HopperBlock
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.phys.AABB
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.level.Level
+// import net.minecraftforge.client.IItemRenderer
+// import net.minecraftforge.client.IItemRenderer.ItemRenderType
+// import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
 import org.lwjgl.opengl.GL11
 
 open class TransparentNodeDescriptor @JvmOverloads constructor(
     name: String?,
     var ElementClass: Class<*>,
     var RenderClass: Class<*>,
-    val tileEntityMetaTag: EntityMetaTag = EntityMetaTag.Basic) : GenericItemBlockUsingDamageDescriptor(name), IItemRenderer {
+    val tileEntityMetaTag: EntityMetaTag = EntityMetaTag.Basic) : GenericItemBlockUsingDamageDescriptor(name!!) /*, IItemRenderer */ {
     @JvmField
     protected var voltageLevelColor = VoltageLevelColor.None
     @JvmField
     var ghostGroup: GhostGroup? = null
 
+    /*
     override fun handleRenderType(item: ItemStack, type: ItemRenderType): Boolean {
         return voltageLevelColor !== VoltageLevelColor.None
     }
@@ -54,6 +55,7 @@ open class TransparentNodeDescriptor @JvmOverloads constructor(
         val icon = icon.iconName.substring(4)
         drawIcon(type, ResourceLocation("eln", "textures/blocks/$icon.png"))
     }
+    */
 
     fun objItemScale(obj: Obj3D?) {
         if (obj == null) return
@@ -83,51 +85,53 @@ open class TransparentNodeDescriptor @JvmOverloads constructor(
         return false
     }
 
-    open fun checkCanPlace(coord: Coordinate?, front: Direction): String? {
-        var block: Block
+    open fun checkCanPlace(coord: Coordinate?, front: Direction?, world: net.minecraft.world.level.Level?): String? {
+        if (world == null || coord == null || front == null) return null
+        
         if (mustHaveFloor()) {
-            val temp = Coordinate(coord!!)
+            val temp = Coordinate(coord)
             temp.move(Direction.YN)
-            block = temp.block
-            if (!block.isOpaqueCube && block !is BlockHopper) return tr("You can't place this block at this side")
+            val pos = temp.toBlockPos()
+            val state = world.getBlockState(pos)
+            if (!state.isSolidRender(world, pos) && state.block !is HopperBlock) return tr("You can't place this block at this side")
         }
         if (mustHaveCeiling()) {
-            val temp = Coordinate(coord!!)
+            val temp = Coordinate(coord)
             temp.move(Direction.YP)
-            block = temp.block
-            if (!block.isOpaqueCube) return tr("You can't place this block at this side")
+            val pos = temp.toBlockPos()
+            val state = world.getBlockState(pos)
+            if (!state.isSolidRender(world, pos)) return tr("You can't place this block at this side")
+        }
+        if (mustHaveWallFront()) {
+            val temp = Coordinate(coord)
+            temp.move(front)
+            val pos = temp.toBlockPos()
+            val state = world.getBlockState(pos)
+            if (!state.isSolidRender(world, pos)) return tr("You can't place this block at this side")
         }
         if (mustHaveWallFrontInverse()) {
-            val temp = Coordinate(coord!!)
-            temp.move(front.inverse)
-            block = temp.block
-            if (!block.isOpaqueCube) return tr("You can't place this block at this side")
+            val temp = Coordinate(coord)
+            temp.move(front.inverse())
+            val pos = temp.toBlockPos()
+            val state = world.getBlockState(pos)
+            if (!state.isSolidRender(world, pos)) return tr("You can't place this block at this side")
         }
         if (mustHaveWall()) {
             var wall = false
-            var temp = Coordinate(coord!!)
-            temp.move(Direction.XN)
-            block = temp.block
-            if (block.isOpaqueCube) wall = true
-            temp = Coordinate(coord)
-            temp.move(Direction.XP)
-            block = temp.block
-            if (block.isOpaqueCube) wall = true
-            temp = Coordinate(coord)
-            temp.move(Direction.ZN)
-            block = temp.block
-            if (block.isOpaqueCube) wall = true
-            temp = Coordinate(coord)
-            temp.move(Direction.ZP)
-            block = temp.block
-            if (block.isOpaqueCube) wall = true
+            for (dir in arrayOf(Direction.XN, Direction.XP, Direction.ZN, Direction.ZP)) {
+                val temp = Coordinate(coord)
+                temp.move(dir)
+                val pos = temp.toBlockPos()
+                val state = world.getBlockState(pos)
+                if (state.isSolidRender(world, pos)) wall = true
+            }
             if (!wall) return tr("You can't place this block at this side")
         }
         val ghostGroup = getGhostGroupFront(front)
-        return if (ghostGroup != null && !ghostGroup.canBePloted(coord!!)) tr("Not enough space for this block") else null
+        return if (ghostGroup != null && !ghostGroup.canBePloted(coord)) tr("Not enough space for this block") else null
     }
 
-    open fun getFrontFromPlace(side: Direction, entityLiving: EntityLivingBase?): Direction? {
+    open fun getFrontFromPlace(side: Direction, entityLiving: LivingEntity?): Direction? {
         var front = Direction.XN
         when (frontType) {
             FrontType.BlockSide -> front = side
@@ -152,8 +156,8 @@ open class TransparentNodeDescriptor @JvmOverloads constructor(
     open val spawnDeltaZ: Int
         get() = 0
 
-    open fun addCollisionBoxesToList(par5AxisAlignedBB: AxisAlignedBB, list: MutableList<AxisAlignedBB?>, world: World?, x: Int, y: Int, z: Int) {
+    open fun addCollisionBoxesToList(par5AABB: AABB, list: MutableList<AABB?>, world: World?, x: Int, y: Int, z: Int) {
         val bb = Blocks.stone.getCollisionBoundingBoxFromPool(world, x, y, z)
-        if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb)
+        if (par5AABB.intersectsWith(bb)) list.add(bb)
     }
 }

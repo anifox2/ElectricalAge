@@ -1,6 +1,6 @@
 package mods.eln.misc
 
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.Vec3
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
@@ -152,7 +152,7 @@ enum class LRDU(var dir: Int) {
         }
     }
 
-    fun writeToNBT(nbt: NBTTagCompound, name: String?) {
+    fun writeToNBT(nbt: CompoundTag, name: String?) {
         nbt.setByte(name, toInt().toByte())
     }
 
@@ -177,7 +177,7 @@ enum class LRDU(var dir: Int) {
         }
 
         @JvmStatic
-        fun readFromNBT(nbt: NBTTagCompound, name: String?): LRDU {
+        fun readFromNBT(nbt: CompoundTag, name: String?): LRDU {
             return fromInt(nbt.getByte(name).toInt())
         }
 

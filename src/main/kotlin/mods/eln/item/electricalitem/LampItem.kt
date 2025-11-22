@@ -4,10 +4,10 @@ import mods.eln.Eln
 import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.sixnode.lampsocket.LightBlockEntity
 import net.minecraft.entity.Entity
-import net.minecraft.init.Blocks
-import net.minecraft.item.ItemStack
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.item.ItemStack
 import net.minecraft.util.MathHelper
-import net.minecraft.world.World
+import net.minecraft.world.level.Level
 
 abstract class LampItem(name: String?) : GenericItemUsingDamageDescriptor(name!!) {
     abstract fun getLightState(stack: ItemStack): Int

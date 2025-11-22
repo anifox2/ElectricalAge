@@ -18,7 +18,7 @@ import mods.eln.misc.Utils.plotUIP
 import mods.eln.misc.Utils.plotValue
 import mods.eln.misc.Utils.plotVolt
 import mods.eln.misc.Utils.renderSubSystemWaila
-import mods.eln.misc.Utils.setGlColorFromDye
+import mods.eln.misc.UtilsClient.setGlColorFromDye
 import mods.eln.misc.UtilsClient.bindTexture
 import mods.eln.misc.VoltageLevelColor
 import mods.eln.node.NodeBase
@@ -34,9 +34,9 @@ import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad
 import mods.eln.sixnode.genericcable.GenericCableDescriptor
 import net.minecraft.client.Minecraft
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -99,15 +99,16 @@ class CurrentCableDescriptor(
         thermalLoad.Rp = thermalRp
     }
 
-    override fun addInformation(itemStack: ItemStack, entityPlayer: EntityPlayer, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        list.add(tr("Nominal Ratings:"))
-        list.add("  " + tr("Voltage: %1\$V", plotValue(electricalNominalVoltage)))
-        list.add("  " + tr("Current: %1\$A", plotValue(electricalNominalPower / electricalNominalVoltage)))
-        list.add("  " + tr("Power: %1\$W", plotValue(electricalNominalPower)))
-        list.add("  " + tr("Serial resistance: %1$\u2126", plotValue(electricalRs * 2)))
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
+        list.add(net.minecraft.network.chat.Component.literal(tr("Nominal Ratings:")))
+        list.add(net.minecraft.network.chat.Component.literal("  " + tr("Voltage: %1\$V", plotValue(electricalNominalVoltage))))
+        list.add(net.minecraft.network.chat.Component.literal("  " + tr("Current: %1\$A", plotValue(electricalNominalPower / electricalNominalVoltage))))
+        list.add(net.minecraft.network.chat.Component.literal("  " + tr("Power: %1\$W", plotValue(electricalNominalPower))))
+        list.add(net.minecraft.network.chat.Component.literal("  " + tr("Serial resistance: %1$\u2126", plotValue(electricalRs * 2))))
     }
 
+    /*
     override fun addRealismContext(list: MutableList<String>): RealisticEnum? {
         list.add(tr("Has some caveats:"))
         list.add(tr("  * Wire resistance is much higher than normal"))
@@ -116,18 +117,19 @@ class CurrentCableDescriptor(
         list.add(tr("  * Wire current limits are arbitrary values, added as a gameplay mechanic"))
         return RealisticEnum.REALISTIC
     }
+    */
 
     override fun getNodeMask(): Int {
         return NodeBase.maskElectricalPower
     }
 
     fun bindCableTexture() {
-        render.bindCableTexture()
+        render!!.bindCableTexture()
     }
 }
 
-open class CurrentCableElement(sixNode: SixNode?, side: Direction?, descriptor: SixNodeDescriptor) :
-    SixNodeElement(sixNode!!, side!!, descriptor) {
+open class CurrentCableElement(_sixNode: SixNode?, side: Direction?, descriptor: SixNodeDescriptor) :
+    SixNodeElement(_sixNode!!, side!!, descriptor) {
     var descriptor: CurrentCableDescriptor
     var electricalLoad = NbtElectricalLoad("electricalLoad")
     var thermalLoad = NbtThermalLoad("thermalLoad")
@@ -156,16 +158,16 @@ open class CurrentCableElement(sixNode: SixNode?, side: Direction?, descriptor: 
             .setDestroys(WorldExplosion(this).cableExplosion())
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         val b = nbt.getByte("color")
         color = b.toInt() and 0xF
         colorCare = b.toInt() shr 4 and 1
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
-        nbt.setByte("color", (color + (colorCare shl 4)).toByte())
+        nbt.putByte("color", (color + (colorCare shl 4)).toByte())
     }
 
     override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad? {
@@ -177,7 +179,7 @@ open class CurrentCableElement(sixNode: SixNode?, side: Direction?, descriptor: 
     }
 
     override fun getConnectionMask(lrdu: LRDU): Int {
-        return descriptor.nodeMask /*+ NodeBase.maskElectricalWire*/ + (color shl NodeBase.maskColorShift) + (colorCare shl NodeBase.maskColorCareShift)
+        return descriptor.getNodeMask() /*+ NodeBase.maskElectricalWire*/ + (color shl NodeBase.maskColorShift) + (colorCare shl NodeBase.maskColorCareShift)
     }
 
     override fun multiMeterString(): String {
@@ -220,17 +222,17 @@ open class CurrentCableElement(sixNode: SixNode?, side: Direction?, descriptor: 
     }
 
     override fun onBlockActivated(
-        entityPlayer: EntityPlayer,
+        entityPlayer: Player,
         side: Direction,
         vx: Float,
         vy: Float,
         vz: Float
     ): Boolean {
-        val currentItemStack = entityPlayer.currentEquippedItem
+        val currentItemStack = entityPlayer.mainHandItem
         if (isPlayerUsingWrench(entityPlayer)) {
             colorCare = colorCare xor 1
             addChatMessage(entityPlayer, "Wire color care $colorCare")
-            sixNode!!.reconnect()
+            (this as SixNodeElement).sixNode.reconnect()
         } else if (currentItemStack != null) {
             val gen = getDescriptor(currentItemStack)
             if (gen is BrushDescriptor) {
@@ -238,7 +240,7 @@ open class CurrentCableElement(sixNode: SixNode?, side: Direction?, descriptor: 
                 val brushColor = brush.getColor(currentItemStack)
                 if (brushColor != color && brush.use(currentItemStack, entityPlayer)) {
                     color = brushColor
-                    sixNode!!.reconnect()
+                    (this as SixNodeElement).sixNode.reconnect()
                 }
             }
         }
@@ -261,17 +263,17 @@ class CurrentCableRender(tileEntity: SixNodeEntity?, side: Direction?, descripto
     }
 
     override fun draw() {
-        Minecraft.getMinecraft().mcProfiler.startSection("ECable")
+        Minecraft.getInstance().profiler.push("ECable")
         setGlColorFromDye(color, 1.0f)
-        bindTexture(descriptor.render.cableTexture)
+        bindTexture(descriptor.render!!.cableTexture)
         glListCall()
         GL11.glColor3f(1f, 1f, 1f)
-        Minecraft.getMinecraft().mcProfiler.endSection()
+        Minecraft.getInstance().profiler.pop()
     }
 
     override fun glListDraw() {
-        CableRender.drawCable(descriptor.render, connectedSide, CableRender.connectionType(this, side))
-        CableRender.drawNode(descriptor.render, connectedSide, CableRender.connectionType(this, side))
+        CableRender.drawCable(descriptor.render!!, connectedSide, CableRender.connectionType(this, side))
+        CableRender.drawNode(descriptor.render!!, connectedSide, CableRender.connectionType(this, side))
     }
 
     override fun glListEnable(): Boolean {

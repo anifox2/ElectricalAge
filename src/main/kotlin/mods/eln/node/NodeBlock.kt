@@ -3,106 +3,74 @@ package mods.eln.node
 import mods.eln.misc.Direction
 import mods.eln.misc.Direction.Companion.fromIntMinecraftSide
 import mods.eln.misc.Utils.isRemote
-import net.minecraft.block.Block
-import net.minecraft.block.material.Material
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.tileentity.TileEntity
-import net.minecraft.world.IBlockAccess
-import net.minecraft.world.World
+import net.minecraft.core.BlockPos
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.BlockGetter
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.EntityBlock
+import net.minecraft.world.level.block.RenderShape
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.BlockHitResult
 
-abstract class NodeBlock(material: Material?, tileEntityClass: Class<*>, blockItemNbr: Int) : Block(material) {
+abstract class NodeBlock(properties: Properties, val blockEntityFactory: (BlockPos, BlockState) -> BlockEntity, blockItemNbr: Int) : Block(properties), EntityBlock {
 
     var blockItemNbr: Int
-    var tileEntityClass: Class<*>
-    override fun getBlockHardness(world: World, x: Int, y: Int, z: Int): Float {
-        return 1.0f
+
+    override fun getSignal(state: BlockState, level: BlockGetter, pos: BlockPos, direction: net.minecraft.core.Direction): Int {
+        val entity = level.getBlockEntity(pos) as? NodeBlockEntity ?: return 0
+        return entity.isProvidingWeakPower(fromIntMinecraftSide(direction.ordinal))
     }
 
-    override fun isProvidingWeakPower(block: IBlockAccess, x: Int, y: Int, z: Int, side: Int): Int {
-        val entity = block.getTileEntity(x, y, z) as NodeBlockEntity
-        return entity.isProvidingWeakPower(fromIntMinecraftSide(side))
+    override fun getRenderShape(state: BlockState): RenderShape {
+        return RenderShape.MODEL
     }
 
-    override fun canConnectRedstone(block: IBlockAccess, x: Int, y: Int, z: Int, side: Int): Boolean {
-        val entity = block.getTileEntity(x, y, z) as NodeBlockEntity
-        return entity.canConnectRedstone(Direction.XN)
+    override fun setPlacedBy(level: Level, pos: BlockPos, state: BlockState, placer: LivingEntity?, stack: ItemStack) {
+        val tileEntity = level.getBlockEntity(pos) as? NodeBlockEntity
+        tileEntity?.onBlockPlacedBy(null, placer, 0)
     }
 
-    override fun isOpaqueCube(): Boolean {
-        return true
-    }
-
-    override fun renderAsNormalBlock(): Boolean {
-        return false
-    }
-
-    override fun getRenderType(): Int {
-        return -1
-    }
-
-    override fun getLightValue(world: IBlockAccess, x: Int, y: Int, z: Int): Int {
-        val entity = world.getTileEntity(x, y, z)
-        if (entity == null || entity !is NodeBlockEntity) return 0
-        return entity.lightValue
-    }
-
-    //client server
-    open fun onBlockPlacedBy(world: World, x: Int, y: Int, z: Int, front: Direction?, entityLiving: EntityLivingBase?, metadata: Int): Boolean {
-        // If you're getting a mysterious NPE here, it's probably because your ghost group overrides the base node. You're welcome.
-        val tileEntity = world.getTileEntity(x, y, z) as NodeBlockEntity
-        tileEntity.onBlockPlacedBy(front, entityLiving, metadata)
-        return true
-    }
-
-    //server   
-    override fun onBlockAdded(par1World: World, x: Int, y: Int, z: Int) {
-        if (!par1World.isRemote) {
-            val entity = par1World.getTileEntity(x, y, z) as NodeBlockEntity
-            entity.onBlockAdded()
+    override fun onPlace(state: BlockState, level: Level, pos: BlockPos, oldState: BlockState, isMoving: Boolean) {
+        if (!level.isClientSide) {
+            val entity = level.getBlockEntity(pos) as? NodeBlockEntity
+            entity?.onBlockAdded()
         }
     }
 
-    //server
-    override fun breakBlock(par1World: World, x: Int, y: Int, z: Int, par5: Block, par6: Int) {
-        run {
-            val entity = par1World.getTileEntity(x, y, z) as NodeBlockEntity
-            entity.onBreakBlock()
-            super.breakBlock(par1World, x, y, z, par5, par6)
+    override fun onRemove(state: BlockState, level: Level, pos: BlockPos, newState: BlockState, isMoving: Boolean) {
+        if (!state.`is`(newState.block)) {
+            val entity = level.getBlockEntity(pos) as? NodeBlockEntity
+            entity?.onBreakBlock()
+            super.onRemove(state, level, pos, newState, isMoving)
         }
     }
 
-    override fun onNeighborBlockChange(world: World, x: Int, y: Int, z: Int, b: Block) {
-        if (!isRemote(world)) {
-            val entity = world.getTileEntity(x, y, z) as NodeBlockEntity
-            entity.onNeighborBlockChange()
+    override fun neighborChanged(state: BlockState, level: Level, pos: BlockPos, block: Block, fromPos: BlockPos, isMoving: Boolean) {
+        if (!level.isClientSide) {
+            val entity = level.getBlockEntity(pos) as? NodeBlockEntity
+            entity?.onNeighborBlockChange()
         }
     }
 
-    override fun damageDropped(metadata: Int): Int {
-        return metadata
+    override fun use(state: BlockState, level: Level, pos: BlockPos, player: Player, hand: InteractionHand, hit: BlockHitResult): InteractionResult {
+        if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS
+        val entity = level.getBlockEntity(pos) as? NodeBlockEntity ?: return InteractionResult.PASS
+        val side = hit.direction
+        val vec = hit.location.subtract(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())
+        return if (entity.onBlockActivated(player, fromIntMinecraftSide(side.ordinal), vec.x.toFloat(), vec.y.toFloat(), vec.z.toFloat())) InteractionResult.SUCCESS else InteractionResult.PASS
     }
 
-    //client server
-    override fun onBlockActivated(world: World, x: Int, y: Int, z: Int, entityPlayer: EntityPlayer, side: Int, vx: Float, vy: Float, vz: Float): Boolean {
-        val entity = world.getTileEntity(x, y, z) as NodeBlockEntity
-        return entity.onBlockActivated(entityPlayer, fromIntMinecraftSide(side), vx, vy, vz)
-    }
-
-    override fun hasTileEntity(metadata: Int): Boolean {
-        return true
-    }
-
-    override fun createTileEntity(var1: World, meta: Int): TileEntity {
-        return tileEntityClass.getConstructor().newInstance() as TileEntity
+    override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity? {
+        return blockEntityFactory(pos, state)
     }
 
     init {
-        setBlockName("NodeBlock")
-        this.tileEntityClass = tileEntityClass
-        useNeighborBrightness = true
         this.blockItemNbr = blockItemNbr
-        setHardness(1.0f)
-        setResistance(1.0f)
     }
 }

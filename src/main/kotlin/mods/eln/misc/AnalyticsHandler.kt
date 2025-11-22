@@ -1,7 +1,5 @@
 package mods.eln.misc
 
-import cpw.mods.fml.common.FMLCommonHandler
-import cpw.mods.fml.relauncher.Side
 import mods.eln.Eln
 import mods.eln.i18n.I18N
 import mods.eln.misc.Version.simpleVersionName

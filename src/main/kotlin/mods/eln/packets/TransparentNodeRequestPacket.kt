@@ -1,7 +1,5 @@
 package mods.eln.packets
 
-import cpw.mods.fml.common.network.ByteBufUtils
-import cpw.mods.fml.common.network.simpleimpl.IMessage
 import io.netty.buffer.ByteBuf
 import mods.eln.misc.Coordinate
 

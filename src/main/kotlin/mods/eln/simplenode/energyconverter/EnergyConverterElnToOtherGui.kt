@@ -2,16 +2,18 @@ package mods.eln.simplenode.energyconverter
 
 import mods.eln.gui.GuiButtonEln
 import mods.eln.gui.GuiHelper
-import mods.eln.gui.GuiScreenEln
+import mods.eln.gui.GuiHelperContainer
+import mods.eln.gui.ScreenEln
 import mods.eln.gui.GuiTextFieldEln
 import mods.eln.gui.GuiVerticalTrackBar
 import mods.eln.gui.IGuiObject
 import mods.eln.i18n.I18N
 import mods.eln.misc.Utils
+import net.minecraft.client.gui.GuiGraphics
 import kotlin.math.log
 import kotlin.math.pow
 
-class EnergyConverterElnToOtherGui(var render: EnergyConverterElnToOtherEntity) : GuiScreenEln() {
+class EnergyConverterElnToOtherGui(var render: EnergyConverterElnToOtherEntity) : ScreenEln() {
 
     var resistanceSelector: GuiVerticalTrackBar? = null
     var ic2tier1: GuiButtonEln? = null
@@ -44,7 +46,7 @@ class EnergyConverterElnToOtherGui(var render: EnergyConverterElnToOtherEntity) 
         ic2tier4!!.enabled = true
         ic2tier4!!.setComment(0, "Set output to 2048 EU/t max")
         powerEntry = newGuiTextField(6, 96, 70)
-        powerEntry!!.enabled
+        powerEntry!!.enabled = true
         powerEntry!!.setComment(listOf("Select the resistance").toTypedArray())
         syncVoltage()
     }
@@ -72,8 +74,8 @@ class EnergyConverterElnToOtherGui(var render: EnergyConverterElnToOtherEntity) 
         return 100 * (((maxResistance / 100) + 1).pow(slider.toDouble()) - 1)
     }
 
-    override fun guiObjectEvent(guiObject: IGuiObject) {
-        super.guiObjectEvent(guiObject)
+    fun guiObjectEvent(guiObject: IGuiObject) {
+        // super.guiObjectEvent(guiObject) // super takes Int
         when {
             guiObject === resistanceSelector -> {
                 render.selectedResistance = sliderToSelectedResistance(resistanceSelector!!.value)
@@ -94,13 +96,13 @@ class EnergyConverterElnToOtherGui(var render: EnergyConverterElnToOtherEntity) 
         }
     }
 
-    override fun preDraw(f: Float, x: Int, y: Int) {
-        super.preDraw(f, x, y)
+    override fun preDraw(guiGraphics: GuiGraphics, f: Float, x: Int, y: Int) {
+        super.preDraw(guiGraphics, f, x, y)
         if (render.hasChanges) syncVoltage()
         resistanceSelector!!.setComment(0, Utils.plotOhm(render.selectedResistance))
     }
 
-    override fun newHelper(): GuiHelper {
-        return GuiHelper(this, 82, 115)
+    override fun newHelper(): GuiHelperContainer {
+        return GuiHelperContainer(this, 82, 115, 0, 0)
     }
 }

@@ -1,7 +1,5 @@
 package mods.eln.node.six
 
-import cpw.mods.fml.relauncher.Side
-import cpw.mods.fml.relauncher.SideOnly
 import mods.eln.Eln
 import mods.eln.misc.Direction
 import mods.eln.misc.Direction.Companion.fromIntMinecraftSide
@@ -13,29 +11,29 @@ import mods.eln.misc.Utils.updateAllLightTypes
 import mods.eln.misc.Utils.updateSkylight
 import mods.eln.node.NodeBase
 import mods.eln.node.NodeBlock
-import net.minecraft.block.Block
+import net.minecraft.world.level.block.Block
 import net.minecraft.block.material.Material
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.texture.IIconRegister
 import net.minecraft.creativetab.CreativeTabs
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.player.EntityPlayerMP
-import net.minecraft.init.Blocks
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.entity.player.ServerPlayer
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.util.AxisAlignedBB
+import net.minecraft.world.item.ItemStack
+import net.minecraft.util.AABB
 import net.minecraft.util.IIcon
 import net.minecraft.util.MovingObjectPosition
 import net.minecraft.util.Vec3
 import net.minecraft.world.IBlockAccess
-import net.minecraft.world.World
+import net.minecraft.world.level.Level
 import java.util.*
 
 class SixNodeBlock  // public static ArrayList<Integer> repertoriedItemStackId = new ArrayList<Integer>();
 // private IIcon icon;
 (material: Material?, tileEntityClass: Class<*>?) : NodeBlock(material, tileEntityClass!!, 0) {
-    override fun getPickBlock(target: MovingObjectPosition, world: World, x: Int, y: Int, z: Int, player: EntityPlayer): ItemStack {
+    override fun getPickBlock(target: MovingObjectPosition, world: World, x: Int, y: Int, z: Int, player: Player): ItemStack {
         val entity = world.getTileEntity(x, y, z) as SixNodeEntity?
         if (entity != null) {
             val render = entity.elementRenderList[fromIntMinecraftSide(target.sideHit)!!.int]
@@ -51,7 +49,7 @@ class SixNodeBlock  // public static ArrayList<Integer> repertoriedItemStackId =
         blockIcon = r.registerIcon("eln:air")
     }
 
-    override fun getCollisionBoundingBoxFromPool(par1World: World, par2: Int, par3: Int, par4: Int): AxisAlignedBB? {
+    override fun getCollisionBoundingBoxFromPool(par1World: World, par2: Int, par3: Int, par4: Int): AABB? {
         return if (nodeHasCache(par1World, par2, par3, par4) || hasVolume(par1World, par2, par3, par4)) super.getCollisionBoundingBoxFromPool(par1World, par2, par3, par4) else null
     }
 
@@ -162,22 +160,22 @@ class SixNodeBlock  // public static ArrayList<Integer> repertoriedItemStackId =
         return false
     }
 
-    override fun onBlockPlacedBy(world: World, x: Int, y: Int, z: Int, front: Direction?, entityLiving: EntityLivingBase?, metadata: Int): Boolean {
+    override fun onBlockPlacedBy(world: World, x: Int, y: Int, z: Int, front: Direction?, entityLiving: LivingEntity?, metadata: Int): Boolean {
         return true
     }
 
     /*
-     * @Override public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityPlayer, int minecraftSide, float vx, float vy, float vz) { SixNodeEntity tileEntity = (SixNodeEntity) world.getBlockTileEntity(x, y, z);
+     * @Override public boolean onBlockActivated(World world, int x, int y, int z, Player entityPlayer, int minecraftSide, float vx, float vy, float vz) { SixNodeEntity tileEntity = (SixNodeEntity) world.getBlockTileEntity(x, y, z);
      *
      * return tileEntity.onBlockActivated(entityPlayer, Direction.fromIntMinecraftSide(minecraftSide),vx,vy,vz); }
      */
-    override fun removedByPlayer(world: World, entityPlayer: EntityPlayer, x: Int, y: Int, z: Int, willHarvest: Boolean): Boolean {
+    override fun removedByPlayer(world: World, entityPlayer: Player, x: Int, y: Int, z: Int, willHarvest: Boolean): Boolean {
         if (world.isRemote) return false
         val tileEntity = world.getTileEntity(x, y, z) as SixNodeEntity
         val MOP = collisionRayTrace(world, x, y, z, entityPlayer) ?: return false
         val sixNode = tileEntity.node as SixNode? ?: return true
         if (sixNode.sixNodeCacheBlock !== Blocks.air) {
-            if (isCreative((entityPlayer as EntityPlayerMP)) == false) {
+            if (isCreative((entityPlayer as ServerPlayer)) == false) {
                 val stack = ItemStack(sixNode.sixNodeCacheBlock, 1, sixNode.sixNodeCacheBlockMeta.toInt())
                 sixNode.dropItem(stack)
             }
@@ -190,7 +188,7 @@ class SixNodeBlock  // public static ArrayList<Integer> repertoriedItemStackId =
             sixNode.needPublish = true
             return false
         }
-        if (false == sixNode.playerAskToBreakSubBlock(entityPlayer as EntityPlayerMP, fromIntMinecraftSide(MOP.sideHit)!!)) return false
+        if (false == sixNode.playerAskToBreakSubBlock(entityPlayer as ServerPlayer, fromIntMinecraftSide(MOP.sideHit)!!)) return false
         @Suppress("DEPRECATION")
         return if (sixNode.ifSideRemain) true else super.removedByPlayer(world, entityPlayer, x, y, z)
     }
@@ -349,7 +347,7 @@ class SixNodeBlock  // public static ArrayList<Integer> repertoriedItemStackId =
         return null
     }
 
-    fun collisionRayTrace(world: World, x: Int, y: Int, z: Int, entityLiving: EntityPlayer): MovingObjectPosition? {
+    fun collisionRayTrace(world: World, x: Int, y: Int, z: Int, entityLiving: Player): MovingObjectPosition? {
 
         // double distanceMax = (double)Minecraft.getMinecraft().playerController.getBlockReachDistance();
         val distanceMax = 5.0
@@ -399,7 +397,7 @@ class SixNodeBlock  // public static ArrayList<Integer> repertoriedItemStackId =
         get() = "s"
 
     @SideOnly(Side.CLIENT)
-    override fun getSelectedBoundingBoxFromPool(w: World, x: Int, y: Int, z: Int): AxisAlignedBB {
+    override fun getSelectedBoundingBoxFromPool(w: World, x: Int, y: Int, z: Int): AABB {
         if (hasVolume(w, x, y, z)) return super.getSelectedBoundingBoxFromPool(w, x, y, z)
         val col = collisionRayTrace(w, x, y, z, Minecraft.getMinecraft().thePlayer)
         val h = 0.2
@@ -409,17 +407,17 @@ class SixNodeBlock  // public static ArrayList<Integer> repertoriedItemStackId =
         if (col != null) {
             // Utils.println(Direction.fromIntMinecraftSide(col.sideHit));
             when (fromIntMinecraftSide(col.sideHit)) {
-                Direction.XN -> return AxisAlignedBB.getBoundingBox(x.toDouble() + b, y.toDouble(), z.toDouble(), x.toDouble() + h, y.toDouble() + 1, z.toDouble() + 1)
-                Direction.XP -> return AxisAlignedBB.getBoundingBox(x.toDouble() + hn, y.toDouble(), z.toDouble(), x.toDouble() + bn, y.toDouble() + 1, z.toDouble() + 1)
-                Direction.YN -> return AxisAlignedBB.getBoundingBox(x.toDouble(), y.toDouble() + b, z.toDouble(), x.toDouble() + 1, y.toDouble() + h, z.toDouble() + 1)
-                Direction.YP -> return AxisAlignedBB.getBoundingBox(x.toDouble(), y.toDouble() + hn, z.toDouble(), x.toDouble() + 1, y.toDouble() + bn, z.toDouble() + 1)
-                Direction.ZN -> return AxisAlignedBB.getBoundingBox(x.toDouble(), y.toDouble(), z.toDouble() + b, x.toDouble() + 1, y.toDouble() + 1, z.toDouble() + h)
-                Direction.ZP -> return AxisAlignedBB.getBoundingBox(x.toDouble(), y.toDouble(), z.toDouble() + hn, x.toDouble() + 1, y.toDouble() + 1, z.toDouble() + bn)
+                Direction.XN -> return AABB.getBoundingBox(x.toDouble() + b, y.toDouble(), z.toDouble(), x.toDouble() + h, y.toDouble() + 1, z.toDouble() + 1)
+                Direction.XP -> return AABB.getBoundingBox(x.toDouble() + hn, y.toDouble(), z.toDouble(), x.toDouble() + bn, y.toDouble() + 1, z.toDouble() + 1)
+                Direction.YN -> return AABB.getBoundingBox(x.toDouble(), y.toDouble() + b, z.toDouble(), x.toDouble() + 1, y.toDouble() + h, z.toDouble() + 1)
+                Direction.YP -> return AABB.getBoundingBox(x.toDouble(), y.toDouble() + hn, z.toDouble(), x.toDouble() + 1, y.toDouble() + bn, z.toDouble() + 1)
+                Direction.ZN -> return AABB.getBoundingBox(x.toDouble(), y.toDouble(), z.toDouble() + b, x.toDouble() + 1, y.toDouble() + 1, z.toDouble() + h)
+                Direction.ZP -> return AABB.getBoundingBox(x.toDouble(), y.toDouble(), z.toDouble() + hn, x.toDouble() + 1, y.toDouble() + 1, z.toDouble() + bn)
                 null -> TODO()
             }
         }
-        return AxisAlignedBB.getBoundingBox(0.5, 0.5, 0.5, 0.5, 0.5, 0.5) //super.getSelectedBoundingBoxFromPool(w, x, y, z);
-        // return AxisAlignedBB.getBoundingBox((double)p_149633_2_ , (double)p_149633_3_ , (double)p_149633_4_ + this.minZ+0.2, (double)p_149633_2_ + this.maxX, (double)p_149633_3_ + this.maxY, (double)p_149633_4_ + this.maxZ);
+        return AABB.getBoundingBox(0.5, 0.5, 0.5, 0.5, 0.5, 0.5) //super.getSelectedBoundingBoxFromPool(w, x, y, z);
+        // return AABB.getBoundingBox((double)p_149633_2_ , (double)p_149633_3_ , (double)p_149633_4_ + this.minZ+0.2, (double)p_149633_2_ + this.maxX, (double)p_149633_3_ + this.maxY, (double)p_149633_4_ + this.maxZ);
         // return super.getSelectedBoundingBoxFromPool(w, x, y, z);
     }
 

@@ -4,6 +4,8 @@
 /.vscode/
 /run/
 /build/
+/modern/run/
+/modern/build/
 /eclipse/
 .classpath
 .project

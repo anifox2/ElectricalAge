@@ -2,10 +2,10 @@ package mods.eln.sound
 
 import mods.eln.client.IUuidEntity
 import mods.eln.misc.Utils.println
-import net.minecraft.client.audio.ISound
-import net.minecraft.client.audio.SoundManager
+import net.minecraft.client.resources.sounds.SoundInstance
+import net.minecraft.client.sounds.SoundManager
 
-class SoundClientEntity(var sm: SoundManager, var sound: ISound) : IUuidEntity {
+class SoundClientEntity(var sm: SoundManager, var sound: SoundInstance) : IUuidEntity {
     var borneTimer: Int = 5
 
     override fun isAlive(): Boolean {
@@ -13,11 +13,11 @@ class SoundClientEntity(var sm: SoundManager, var sound: ISound) : IUuidEntity {
             borneTimer--
             return true
         }
-        return sm.isSoundPlaying(sound)
+        return sm.isActive(sound)
     }
 
     override fun kill() {
         println("Sound deleted")
-        sm.stopSound(sound)
+        sm.stop(sound)
     }
 }

@@ -1,6 +1,5 @@
 package mods.eln.integration.waila
 
-import cpw.mods.fml.common.Optional
 import mcp.mobius.waila.api.IWailaRegistrar
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaRegistrar", modid = "Waila")

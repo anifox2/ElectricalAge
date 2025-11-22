@@ -1,7 +1,5 @@
 package mods.eln.node.simple
 
-import cpw.mods.fml.relauncher.Side
-import cpw.mods.fml.relauncher.SideOnly
 import mods.eln.Eln
 import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
@@ -13,27 +11,30 @@ import mods.eln.node.NodeEntityClientSender
 import mods.eln.node.NodeManager
 import mods.eln.node.simple.DescriptorManager.get
 import mods.eln.server.DelayedBlockRemove.Companion.add
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.Container
+import net.minecraft.client.gui.Screen
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.network.Packet
 import net.minecraft.network.play.server.S3FPacketCustomPayload
 import net.minecraft.tileentity.TileEntity
 import java.io.DataInputStream
 import java.io.IOException
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.block.state.BlockState
 
-abstract class SimpleNodeEntity(override val nodeUuid: String) : TileEntity(), INodeEntity {
+abstract class SimpleNodeEntity(override val nodeUuid: String, pos: BlockPos, state: BlockState) : BlockEntity(null!!, pos, state), INodeEntity {
     open var node: SimpleNode? = null
         get() {
-            if (worldObj.isRemote) {
+            if (level!!.isClientSide) {
                 fatal()
                 return null
             }
-            if (worldObj == null) return null
+            if (level == null) return null
             if (field == null) {
-                field = NodeManager.instance!!.getNodeFromCoordonate(Coordinate(xCoord, yCoord, zCoord, worldObj)) as SimpleNode?
+                field = NodeManager.instance!!.getNodeFromCoordonate(Coordinate(blockPos.x, blockPos.y, blockPos.z, level!!)) as SimpleNode?
                 if (field == null) {
-                    add(Coordinate(xCoord, yCoord, zCoord, worldObj))
+                    add(Coordinate(blockPos.x, blockPos.y, blockPos.z, level!!))
                     return null
                 }
             }
@@ -42,20 +43,20 @@ abstract class SimpleNodeEntity(override val nodeUuid: String) : TileEntity(), I
 
     //***************** Wrapping **************************
     /*
-	public void onBlockPlacedBy(Direction front, EntityLivingBase entityLiving, int metadata) {
+	public void onBlockPlacedBy(Direction front, LivingEntity entityLiving, int metadata) {
 	
 	}
 */
     fun onBlockAdded() {
-        /*if (!worldObj.isRemote){
+        /*if (!level.isRemote){
 			if (getNode() == null) {
-				worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+				level.setBlockToAir(xCoord, yCoord, zCoord);
 			}
 		}*/
     }
 
     fun onBreakBlock() {
-        if (!worldObj.isRemote) {
+        if (!level.isRemote) {
             if (node == null) return
             node!!.onBreakBlock()
         }
@@ -63,7 +64,7 @@ abstract class SimpleNodeEntity(override val nodeUuid: String) : TileEntity(), I
 
     override fun onChunkUnload() {
         super.onChunkUnload()
-        if (worldObj.isRemote) {
+        if (level.isRemote) {
             destructor()
         }
     }
@@ -71,14 +72,14 @@ abstract class SimpleNodeEntity(override val nodeUuid: String) : TileEntity(), I
     // client only
     fun destructor() {}
     override fun invalidate() {
-        if (worldObj.isRemote) {
+        if (level.isRemote) {
             destructor()
         }
         super.invalidate()
     }
 
-    fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
-        if (!worldObj.isRemote) {
+    fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
+        if (!level.isRemote) {
             if (node == null) return false
             node!!.onBlockActivated(entityPlayer!!, side!!, vx, vy, vz)
             return true
@@ -87,7 +88,7 @@ abstract class SimpleNodeEntity(override val nodeUuid: String) : TileEntity(), I
     }
 
     fun onNeighborBlockChange() {
-        if (!worldObj.isRemote) {
+        if (!level.isRemote) {
             if (node == null) return
             node!!.onNeighborBlockChange()
         }
@@ -105,7 +106,7 @@ abstract class SimpleNodeEntity(override val nodeUuid: String) : TileEntity(), I
     override fun serverPublishUnserialize(stream: DataInputStream) {
         try {
             if (front !== fromInt(stream.readByte().toInt()).also { front = it }) {
-                worldObj.markBlockForUpdate(xCoord, yCoord, zCoord)
+                level.markBlockForUpdate(xCoord, yCoord, zCoord)
             }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -130,12 +131,12 @@ abstract class SimpleNodeEntity(override val nodeUuid: String) : TileEntity(), I
     }
 
     //*********************** GUI ***************************
-    override fun newContainer(side: Direction, player: EntityPlayer): Container? {
+    override fun newContainer(side: Direction, player: Player): AbstractContainerMenu? {
         return null
     }
 
     @SideOnly(Side.CLIENT)
-    override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen? {
+    override fun newGuiDraw(side: Direction, player: Player): Screen? {
         return null
     }
 }

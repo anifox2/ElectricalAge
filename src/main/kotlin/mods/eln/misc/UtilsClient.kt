@@ -1,7 +1,6 @@
 @file:Suppress("NAME_SHADOWING")
 package mods.eln.misc
 
-import cpw.mods.fml.common.network.internal.FMLProxyPacket
 import mods.eln.Eln
 import mods.eln.GuiHandler
 import mods.eln.i18n.I18N.tr
@@ -9,23 +8,23 @@ import mods.eln.misc.Obj3D.Obj3DPart
 import mods.eln.node.six.SixNodeEntity
 import mods.eln.node.transparent.TransparentNodeEntity
 import net.minecraft.client.Minecraft
-import net.minecraft.client.entity.EntityClientPlayerMP
+import net.minecraft.client.entity.EntityClientServerPlayer
 import net.minecraft.client.gui.FontRenderer
-import net.minecraft.client.gui.GuiScreen
+import net.minecraft.client.gui.Screen
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.entity.Render
 import net.minecraft.client.renderer.entity.RenderItem
 import net.minecraft.client.renderer.entity.RenderManager
 import net.minecraft.entity.Entity
-import net.minecraft.entity.item.EntityItem
-import net.minecraft.item.ItemStack
+import net.minecraft.world.entity.item.ItemEntity
+import net.minecraft.world.item.ItemStack
 import net.minecraft.network.play.client.C17PacketCustomPayload
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.MathHelper
 import net.minecraft.util.ResourceLocation
 import net.minecraft.world.EnumSkyBlock
-import net.minecraft.world.World
+import net.minecraft.world.level.Level
 import net.minecraftforge.client.IItemRenderer.ItemRenderType
 import org.lwjgl.input.Keyboard
 import org.lwjgl.opengl.GL11
@@ -36,7 +35,7 @@ import kotlin.math.sqrt
 
 object UtilsClient {
     @JvmField
-    var guiLastOpen: GuiScreen? = null
+    var guiLastOpen: Screen? = null
     var lightmapTexUnitTextureEnable = false
     internal var itemRenderer: RenderItem? = null
     @JvmStatic
@@ -55,10 +54,10 @@ object UtilsClient {
 
     @JvmStatic
     fun distanceFromClientPlayer(tileEntity: SixNodeEntity): Float {
-        return distanceFromClientPlayer(tileEntity.worldObj, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord)
+        return distanceFromClientPlayer(tileEntity.level, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord)
     }
 
-    val clientPlayer: EntityClientPlayerMP
+    val clientPlayer: EntityClientServerPlayer
         get() = Minecraft.getMinecraft().thePlayer
 
     fun drawHaloNoLightSetup(halo: Obj3DPart?, r: Float, g: Float, b: Float, w: World, x: Int, y: Int, z: Int, bilinear: Boolean) {
@@ -74,10 +73,10 @@ object UtilsClient {
     }
 
     @JvmStatic
-    fun clientOpenGui(gui: GuiScreen?) {
+    fun clientOpenGui(gui: Screen?) {
         guiLastOpen = gui
         val clientPlayer = clientPlayer
-        clientPlayer.openGui(Eln.instance, GuiHandler.genericOpen, clientPlayer.worldObj, 0, 0, 0)
+        clientPlayer.openGui(Eln.instance, GuiHandler.genericOpen, clientPlayer.level, 0, 0, 0)
     }
 
     @JvmStatic
@@ -91,12 +90,12 @@ object UtilsClient {
 
     @JvmStatic
     fun drawHaloNoLightSetup(halo: Obj3DPart?, r: Float, g: Float, b: Float, e: TileEntity, bilinear: Boolean) {
-        drawHaloNoLightSetup(halo, r, g, b, e.worldObj, e.xCoord, e.yCoord, e.zCoord, bilinear)
+        drawHaloNoLightSetup(halo, r, g, b, e.level, e.xCoord, e.yCoord, e.zCoord, bilinear)
     }
 
     @JvmStatic
     fun drawHalo(halo: Obj3DPart?, r: Float, g: Float, b: Float, e: TileEntity, bilinear: Boolean) {
-        drawHalo(halo, r, g, b, e.worldObj, e.xCoord, e.yCoord, e.zCoord, bilinear)
+        drawHalo(halo, r, g, b, e.level, e.xCoord, e.yCoord, e.zCoord, bilinear)
     }
 
     @JvmStatic
@@ -120,9 +119,9 @@ object UtilsClient {
     fun drawHaloNoLightSetup(halo: Obj3DPart?, r: Float, g: Float, b: Float, e: Entity, bilinear: Boolean) {
         if (halo == null) return
         if (bilinear) enableBilinear()
-        val light = getLight(e.worldObj, MathHelper.floor_double(e.posX), MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ))
+        val light = getLight(e.level, MathHelper.floor_double(e.posX), MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ))
         // light =
-        // e.worldObj.getLightBrightnessForSkyBlocks(MathHelper.floor_double(e.posX),
+        // e.level.getLightBrightnessForSkyBlocks(MathHelper.floor_double(e.posX),
         // MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ),0);
         // Utils.println(light);
         GL11.glColor4f(r, g, b, 1f - light / 15f)
@@ -341,7 +340,7 @@ object UtilsClient {
     }
 
     @JvmStatic
-    fun drawGuiBackground(ressource: ResourceLocation?, guiScreen: GuiScreen, xSize: Int, ySize: Int) {
+    fun drawGuiBackground(ressource: ResourceLocation?, guiScreen: Screen, xSize: Int, ySize: Int) {
         bindTexture(ressource)
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f)
         val x = (guiScreen.width - xSize) / 2
@@ -364,7 +363,7 @@ object UtilsClient {
     }
 
     @JvmStatic
-    fun drawEntityItem(entityItem: EntityItem?, x: Double, y: Double, z: Double, roty: Float, scale: Float) {
+    fun drawEntityItem(entityItem: ItemEntity?, x: Double, y: Double, z: Double, roty: Float, scale: Float) {
         if (entityItem == null) return
         entityItem.hoverStart = 0.0f
         entityItem.rotationYaw = 0.0f
@@ -486,12 +485,12 @@ object UtilsClient {
             RenderHelper.disableStandardItemLighting()
             GL11.glDisable(32826)
         }
-        if (par1ItemStack!!.stackSize > 1) {
+        if (par1ItemStack!!.count > 1) {
             disableDepthTest()
             // GL11.glPushMatrix();
             // GL
             // GL11.glScalef(0.5f, 0.5f, 0.5f);
-            Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("" + par1ItemStack.stackSize, x + 10, y + 9, -0x1)
+            Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("" + par1ItemStack.count, x + 10, y + 9, -0x1)
             // GL11.glPopMatrix();
             enableDepthTest()
         }
@@ -608,4 +607,24 @@ object UtilsClient {
         if (world.isThundering) return 1.0
         return if (world.isRaining) 0.5 else 0.0
     }
+
+    @JvmStatic
+    fun setGlColorFromDye(dyeColor: Int) {
+        val color = net.minecraft.world.item.DyeColor.byId(dyeColor).textureDiffuseColors
+        GL11.glColor3f(color[0], color[1], color[2])
+    }
+
+    @JvmStatic
+    fun setGlColorFromDye(dyeColor: Int, alpha: Float) {
+        val color = net.minecraft.world.item.DyeColor.byId(dyeColor).textureDiffuseColors
+        GL11.glColor4f(color[0], color[1], color[2], alpha)
+    }
+
+    @JvmStatic
+    fun setGlColorFromDye(dyeColor: Int, brightness: Float, alpha: Float) {
+        val color = net.minecraft.world.item.DyeColor.byId(dyeColor).textureDiffuseColors
+        GL11.glColor4f(color[0] * brightness, color[1] * brightness, color[2] * brightness, alpha)
+    }
+
+
 }

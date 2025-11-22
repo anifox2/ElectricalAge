@@ -1,24 +1,22 @@
 @file:Suppress("NAME_SHADOWING")
 package mods.eln.ghost
 
-import cpw.mods.fml.relauncher.Side
-import cpw.mods.fml.relauncher.SideOnly
 import mods.eln.Eln
 import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction.Companion.fromIntMinecraftSide
 import mods.eln.node.transparent.TransparentNodeEntity
-import net.minecraft.block.Block
+import net.minecraft.world.level.block.Block
 import net.minecraft.block.material.Material
 import net.minecraft.entity.Entity
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
 import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.util.AxisAlignedBB
+import net.minecraft.world.item.ItemStack
+import net.minecraft.util.AABB
 import net.minecraft.util.MovingObjectPosition
 import net.minecraft.util.Vec3
 import net.minecraft.world.IBlockAccess
-import net.minecraft.world.World
+import net.minecraft.world.level.Level
 import java.util.*
 
 class GhostBlock : Block(Material.iron) {
@@ -27,13 +25,13 @@ class GhostBlock : Block(Material.iron) {
         return null
     }
 
-    override fun addCollisionBoxesToList(world: World, x: Int, y: Int, z: Int, par5AxisAlignedBB: AxisAlignedBB, list: MutableList<*>, entity: Entity?) {
-        @Suppress("UNCHECKED_CAST") var list = list as MutableList<AxisAlignedBB?>
+    override fun addCollisionBoxesToList(world: World, x: Int, y: Int, z: Int, par5AABB: AABB, list: MutableList<*>, entity: Entity?) {
+        @Suppress("UNCHECKED_CAST") var list = list as MutableList<AABB?>
         val meta = world.getBlockMetadata(x, y, z)
         when (meta) {
             tFloor -> {
-                val axisalignedbb1 = AxisAlignedBB.getBoundingBox(x.toDouble(), y.toDouble(), z.toDouble(), x.toDouble() + 1, y.toDouble() + 0.0625, z.toDouble() + 1)
-                if (axisalignedbb1 != null && par5AxisAlignedBB.intersectsWith(axisalignedbb1)) {
+                val axisalignedbb1 = AABB.getBoundingBox(x.toDouble(), y.toDouble(), z.toDouble(), x.toDouble() + 1, y.toDouble() + 0.0625, z.toDouble() + 1)
+                if (axisalignedbb1 != null && par5AABB.intersectsWith(axisalignedbb1)) {
                     list.add(axisalignedbb1)
                 }
             }
@@ -44,20 +42,20 @@ class GhostBlock : Block(Material.iron) {
                 val coord = if (element == null) null else element.observatorCoordonate
                 val te = coord?.tileEntity
                 if (te != null && te is TransparentNodeEntity) {
-                    te.addCollisionBoxesToList(par5AxisAlignedBB, list, element!!.elementCoordinate)
+                    te.addCollisionBoxesToList(par5AABB, list, element!!.elementCoordinate)
                 } else {
-                    super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity)
+                    super.addCollisionBoxesToList(world, x, y, z, par5AABB, list, entity)
                 }
             }
         }
     }
 
     @SideOnly(Side.CLIENT)
-    override fun getSelectedBoundingBoxFromPool(w: World, x: Int, y: Int, z: Int): AxisAlignedBB {
+    override fun getSelectedBoundingBoxFromPool(w: World, x: Int, y: Int, z: Int): AABB {
         val meta = w.getBlockMetadata(x, y, z)
         return when (meta) {
-            tFloor -> AxisAlignedBB.getBoundingBox(x.toDouble(), y.toDouble(), z.toDouble(), x.toDouble() + 1, y.toDouble() + 0.0625, z.toDouble() + 1)
-            tLadder -> AxisAlignedBB.getBoundingBox(x.toDouble(), y.toDouble(), z.toDouble(), x.toDouble() + 0, y.toDouble() + 0.0, z.toDouble() + 0)
+            tFloor -> AABB.getBoundingBox(x.toDouble(), y.toDouble(), z.toDouble(), x.toDouble() + 1, y.toDouble() + 0.0625, z.toDouble() + 1)
+            tLadder -> AABB.getBoundingBox(x.toDouble(), y.toDouble(), z.toDouble(), x.toDouble() + 0, y.toDouble() + 0.0, z.toDouble() + 0)
             else -> super.getSelectedBoundingBoxFromPool(w, x, y, z)
         }
     }
@@ -88,7 +86,7 @@ class GhostBlock : Block(Material.iron) {
         return m
     }
 
-    override fun isLadder(world: IBlockAccess, x: Int, y: Int, z: Int, entity: EntityLivingBase): Boolean {
+    override fun isLadder(world: IBlockAccess, x: Int, y: Int, z: Int, entity: LivingEntity): Boolean {
         return world.getBlockMetadata(x, y, z) == tLadder
     }
 
@@ -111,7 +109,7 @@ class GhostBlock : Block(Material.iron) {
         return -1
     }
 
-    override fun getPickBlock(target: MovingObjectPosition, world: World, x: Int, y: Int, z: Int, player: EntityPlayer): ItemStack? {
+    override fun getPickBlock(target: MovingObjectPosition, world: World, x: Int, y: Int, z: Int, player: Player): ItemStack? {
         return null
     }
 
@@ -127,7 +125,7 @@ class GhostBlock : Block(Material.iron) {
         super.breakBlock(world, x, y, z, par5, par6)
     }
 
-    override fun onBlockActivated(world: World, x: Int, y: Int, z: Int, player: EntityPlayer, side: Int, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(world: World, x: Int, y: Int, z: Int, player: Player, side: Int, vx: Float, vy: Float, vz: Float): Boolean {
         if (world.isRemote == false) {
             val element = getElement(world, x, y, z)
             if (element != null) return element.onBlockActivated(player, fromIntMinecraftSide(side), vx, vy, vz)

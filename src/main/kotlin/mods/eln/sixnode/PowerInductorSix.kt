@@ -8,7 +8,7 @@ import mods.eln.gui.GuiHelperContainer
 import mods.eln.gui.IGuiObject
 import mods.eln.gui.ISlotSkin
 import mods.eln.i18n.I18N.tr
-import mods.eln.item.CopperCableDescriptor
+import mods.eln.cable.CopperCableDescriptor
 import mods.eln.item.FerromagneticCoreDescriptor
 import mods.eln.item.IConfigurable
 import mods.eln.item.ItemMovingHelper
@@ -26,18 +26,22 @@ import mods.eln.sim.mna.component.Inductor
 import mods.eln.sim.mna.misc.MnaConst
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.wiki.Data
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.Container
-import net.minecraft.inventory.IInventory
-import net.minecraft.inventory.Slot
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.Container
+import net.minecraft.world.inventory.Slot
+// import net.minecraft.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.client.gui.GuiGraphics
 import org.lwjgl.opengl.GL11
 import java.util.HashMap
 import kotlin.math.abs
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.IOException
 
 class PowerInductorSixDescriptor(name: String,
                                  obj: Obj3D,
@@ -50,22 +54,25 @@ class PowerInductorSixDescriptor(name: String,
         return if (cableCount == 0) 0.0 else serie.getValue((cableCount - 1).toDouble())
     }
 
-    fun getlValue(inventory: IInventory): Double {
-        val core = inventory.getStackInSlot(PowerInductorSixContainer.cableId)
-        return if (core == null) getlValue(0) else getlValue(core.stackSize)
+    fun getlValue(inventory: Container): Double {
+        val core = inventory.getItem(PowerInductorSixContainer.cableId)
+        return if (core == null || core.isEmpty) getlValue(0) else getlValue(core.count)
     }
 
-    fun getRsValue(inventory: IInventory): Double {
-        val core = inventory.getStackInSlot(PowerInductorSixContainer.coreId) ?: return MnaConst.highImpedance
+    fun getRsValue(inventory: Container): Double {
+        val core = inventory.getItem(PowerInductorSixContainer.coreId)
+        if (core == null || core.isEmpty) return MnaConst.highImpedance
         val coreDescriptor = GenericItemUsingDamageDescriptor.getDescriptor(core) as FerromagneticCoreDescriptor
         val coreFactor = coreDescriptor.cableMultiplicator
-        return Eln.instance.lowVoltageCableDescriptor.electricalRs * coreFactor
+        return Eln.lowVoltageCableDescriptor!!.electricalRs * coreFactor
     }
 
+    /*
     override fun setParent(item: Item, damage: Int) {
         super.setParent(item, damage)
         Data.addEnergy(newItemStack())
     }
+    */
 
     fun draw() {
         if (null != Base) Base!!.draw()
@@ -74,43 +81,21 @@ class PowerInductorSixDescriptor(name: String,
         if (null != InductorCore) InductorCore!!.draw()
     }
 
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper): Boolean {
-        return type != IItemRenderer.ItemRenderType.INVENTORY
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
+        list.add(Component.literal(tr("Provides inductance. Use with iron cores and bare copper cables")))
     }
 
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType): Boolean {
-        return true
-    }
-
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
-        if (type != IItemRenderer.ItemRenderType.INVENTORY) {
-            GL11.glTranslatef(0.0f, 0.0f, -0.2f)
-            GL11.glScalef(1.25f, 1.25f, 1.25f)
-            GL11.glRotatef(-90f, 0f, 1f, 0f)
-            draw()
-        } else {
-            super.renderItem(type, item, *data)
-        }
-    }
-
-    override fun addInformation(
-        itemStack: ItemStack?,
-        entityPlayer: EntityPlayer?,
-        list: MutableList<String>?,
-        par4: Boolean
-    ) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        list?.add(tr("Provides inductance. Use with iron cores and bare copper cables"))
-    }
-
+    /*
     override fun addRealismContext(list: MutableList<String>?): RealisticEnum {
         super.addRealismContext(list)
         list?.add(tr("It doesn't really behave well for DC"))
         list?.add(tr("* Missing an inductive voltage spike on field collapse"))
         return RealisticEnum.UNREALISTIC
     }
+    */
 
-    override fun getFrontFromPlace(side: Direction, player: EntityPlayer): LRDU {
+    override fun getFrontFromPlace(side: Direction, player: Player): LRDU {
         return super.getFrontFromPlace(side, player)!!.left()
     }
 
@@ -186,7 +171,7 @@ class PowerInductorSixElement(SixNode: SixNode, side: Direction, descriptor: Six
         }
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         fromNbt = true
     }
@@ -195,29 +180,29 @@ class PowerInductorSixElement(SixNode: SixNode, side: Direction, descriptor: Six
         return true
     }
 
-    override fun newContainer(side: Direction, player: EntityPlayer): Container {
+    override fun newContainer(side: Direction, player: Player): AbstractContainerMenu {
         return PowerInductorSixContainer(player, inventory)
     }
 
-    override fun readConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
-        if (compound.hasKey("indCableAmt")) {
-            val desired = compound.getInteger("indCableAmt")
+    override fun readConfigTool(compound: CompoundTag, invoker: Player) {
+        if (compound.contains("indCableAmt")) {
+            val desired = compound.getInt("indCableAmt")
             object : ItemMovingHelper() {
                 override fun acceptsStack(stack: ItemStack): Boolean {
-                    return Eln.instance.copperCableDescriptor.checkSameItemStack(stack)
+                    return Eln.copperCableDescriptor!!.checkSameItemStack(stack)
                 }
 
                 override fun newStackOfSize(items: Int): ItemStack {
-                    return Eln.instance.copperCableDescriptor.newItemStack(items)
+                    return Eln.copperCableDescriptor!!.newItemStack(items)
                 }
             }.move(invoker.inventory, inventory, PowerInductorSixContainer.cableId, desired)
             reconnect()
         }
-        if (compound.hasKey("indCore")) {
+        if (compound.contains("indCore")) {
             val descName = compound.getString("indCore")
             if (descName === GenericItemUsingDamageDescriptor.INVALID_NAME) {
-                val stack = inventory.getStackInSlot(PowerInductorSixContainer.coreId)
-                val desc = GenericItemUsingDamageDescriptor.getDescriptor(stack)
+                val stack = inventory.getItem(PowerInductorSixContainer.coreId)
+                val desc = if (stack == null) null else GenericItemUsingDamageDescriptor.getDescriptor(stack)
                 if (desc != null) {
                     object : ItemMovingHelper() {
                         override fun acceptsStack(stack: ItemStack): Boolean {
@@ -245,19 +230,19 @@ class PowerInductorSixElement(SixNode: SixNode, side: Direction, descriptor: Six
         }
     }
 
-    override fun writeConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
-        var stack = inventory.getStackInSlot(PowerInductorSixContainer.cableId)
-        if (stack == null) {
-            compound.setInteger("indCableAmt", 0)
+    override fun writeConfigTool(compound: CompoundTag, invoker: Player) {
+        var stack = inventory.getItem(PowerInductorSixContainer.cableId)
+        if (stack == null || stack.isEmpty) {
+            compound.putInt("indCableAmt", 0)
         } else {
-            compound.setInteger("indCableAmt", stack.stackSize)
+            compound.putInt("indCableAmt", stack.count)
         }
-        stack = inventory.getStackInSlot(PowerInductorSixContainer.coreId)
-        val desc = GenericItemUsingDamageDescriptor.getDescriptor(stack)
+        stack = inventory.getItem(PowerInductorSixContainer.coreId)
+        val desc = if (stack == null) null else GenericItemUsingDamageDescriptor.getDescriptor(stack)
         if (desc == null) {
-            compound.setString("indCore", GenericItemUsingDamageDescriptor.INVALID_NAME)
+            compound.putString("indCore", GenericItemUsingDamageDescriptor.INVALID_NAME)
         } else {
-            compound.setString("indCore", desc.name)
+            compound.putString("indCore", desc.name)
         }
     }
 
@@ -281,22 +266,27 @@ class PowerInductorSixRender(tileEntity: SixNodeEntity, side: Direction, descrip
         descriptor.draw()
     }
 
-    override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen {
+    override fun newGuiDraw(side: Direction, player: Player): Screen {
         return PowerInductorSixGui(player, inventory, this)
     }
 
 }
 
 
-class PowerInductorSixGui(player: EntityPlayer, inventory: IInventory, var render: PowerInductorSixRender) : GuiContainerEln(PowerInductorSixContainer(player, inventory)) {
-    override fun guiObjectEvent(`object`: IGuiObject) {
-        super.guiObjectEvent(`object`)
+class PowerInductorSixGui(player: Player, inventory: Container, var render: PowerInductorSixRender) : GuiContainerEln<PowerInductorSixContainer>(PowerInductorSixContainer(player, inventory), player.inventory, Component.literal("Power Inductor")) {
+    override fun guiObjectEvent(eventId: Int) {
+        super.guiObjectEvent(eventId)
     }
 
-    override fun postDraw(f: Float, x: Int, y: Int) {
-        helper.drawString(8, 12, -0x1000000, tr("Inductance: %1\$H", Utils.plotValue(render.descriptor.getlValue(render.inventory))))
-        super.postDraw(f, x, y)
+    override fun renderBg(guiGraphics: GuiGraphics, f: Float, x: Int, y: Int) {
+        helper!!.drawBackground(guiGraphics, x, y)
     }
+
+    override fun renderLabels(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int) {
+        super.renderLabels(guiGraphics, mouseX, mouseY)
+        helper!!.drawString(guiGraphics, 8, 12, tr("Inductance: %1\$H", Utils.plotValue(render.descriptor.getlValue(render.inventory))), -0x1000000)
+    }
+
 
     override fun newHelper(): GuiHelperContainer {
         return GuiHelperContainer(this, 176, 166 - 54, 8, 84 - 54)
@@ -304,10 +294,10 @@ class PowerInductorSixGui(player: EntityPlayer, inventory: IInventory, var rende
 }
 
 
-class PowerInductorSixContainer(player: EntityPlayer, inventory: IInventory) : BasicContainer(player, inventory, arrayOf<Slot>(
-    GenericItemUsingDamageSlot(inventory, cableId, 132, 8, 19, CopperCableDescriptor::class.java,
+class PowerInductorSixContainer(player: Player, inventory: Container) : BasicContainer(player, inventory, arrayOf<Slot>(
+    GenericItemUsingDamageSlot(inventory, cableId, 132, 8, 19, arrayOf(CopperCableDescriptor::class.java),
         ISlotSkin.SlotSkin.medium, arrayOf(tr("Copper cable slot"), tr("(Increases inductance)"))),
-    GenericItemUsingDamageSlot(inventory, coreId, 132 + 20, 8, 1, FerromagneticCoreDescriptor::class.java,
+    GenericItemUsingDamageSlot(inventory, coreId, 132 + 20, 8, 1, arrayOf(FerromagneticCoreDescriptor::class.java),
         ISlotSkin.SlotSkin.medium, arrayOf(tr("Ferromagnetic core slot")))
 )) {
     companion object {

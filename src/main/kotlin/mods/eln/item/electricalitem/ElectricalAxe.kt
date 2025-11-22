@@ -4,14 +4,14 @@ import mods.eln.i18n.I18N.tr
 import mods.eln.misc.Utils
 import mods.eln.sim.IProcess
 import mods.eln.wiki.Data
-import net.minecraft.block.Block
+import net.minecraft.world.level.block.Block
 import net.minecraft.block.material.Material
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
 import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
+import net.minecraft.world.item.ItemStack
 import net.minecraft.util.ChunkCoordinates
-import net.minecraft.world.World
+import net.minecraft.world.level.Level
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -25,8 +25,8 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
         Data.addPortable(newItemStack())
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
         list.add(tr("Cuts down trees. Right-click to make it act like a regular axe."))
     }
 
@@ -37,7 +37,7 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
         }
     }
 
-    override fun onItemRightClick(s: ItemStack, w: World, p: EntityPlayer): ItemStack {
+    override fun onItemRightClick(s: ItemStack, w: World, p: Player): ItemStack {
         if (!w.isRemote) {
             setCapitation(p, s, !getCapitation(s))
         }
@@ -52,15 +52,15 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
         return nbt.getBoolean("capitation")
     }
 
-    private fun setCapitation(p: EntityPlayer?, stack: ItemStack, capitation: Boolean) {
+    private fun setCapitation(p: Player?, stack: ItemStack, capitation: Boolean) {
         getNbt(stack).setBoolean("capitation", capitation)
         if (p != null) {
             Utils.addChatMessage(p, "Set treecapitation to $capitation")
         }
     }
 
-    override fun onBlockDestroyed(stack: ItemStack, w: World, block: Block, x: Int, y: Int, z: Int, entity: EntityLivingBase): Boolean {
-        return if (entity is EntityPlayer && getCapitation(stack)) {
+    override fun onBlockDestroyed(stack: ItemStack, w: World, block: Block, x: Int, y: Int, z: Int, entity: LivingEntity): Boolean {
+        return if (entity is Player && getCapitation(stack)) {
             TreeCapitation.addBlockSwapper(
                 world = w,
                 player = entity,
@@ -139,7 +139,7 @@ object TreeCapitation : IProcess {
      * documentation).
      * @return The created block swapper.
      */
-    fun addBlockSwapper(world: World, player: EntityPlayer, tool: ElectricalTool, origCoords: ChunkCoordinates, leaves: Boolean, stack: ItemStack) {
+    fun addBlockSwapper(world: World, player: Player, tool: ElectricalTool, origCoords: ChunkCoordinates, leaves: Boolean, stack: ItemStack) {
         val swapper = BlockSwapper(world, player, tool, origCoords, BLOCK_RANGE, leaves, stack)
 
         // Block swapper registration should only occur on the server
@@ -184,7 +184,7 @@ object TreeCapitation : IProcess {
         /**
          * The player the swapper is swapping for.
          */
-        private val player: EntityPlayer,
+        private val player: Player,
         /**
          * The Terra Truncator which created this swapper.
          */
@@ -362,7 +362,7 @@ object TreeCapitation : IProcess {
     /**
      * The bits below, however, are from ToolCommons.java. Mostly. Maybe about half, by now.
      */
-    fun removeBlockWithDrops(player: EntityPlayer, tool: ElectricalTool, stack: ItemStack, world: World, x: Int, y: Int, z: Int) {
+    fun removeBlockWithDrops(player: Player, tool: ElectricalTool, stack: ItemStack, world: World, x: Int, y: Int, z: Int) {
         if (world.isRemote || !world.blockExists(x, y, z))
             return
 

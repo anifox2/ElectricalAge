@@ -2,18 +2,18 @@ package mods.eln.sim;
 
 import mods.eln.Eln;
 
-public class ThermalLoadInitializerByPowerDrop {
+public class ThermalLoadInitializerByPowerDrop extends ThermalLoadInitializer {
 
-    public double maximumTemperature, minimumTemperature;
-    double heatingTao;
+    // public double maximumTemperature, minimumTemperature; // Inherited
+    // double heatingTao; // Inherited
     double TConductivityDrop;
 
-    public double Rs;
-    public double Rp;
+    // public double Rs; // Inherited
+    // public double Rp; // Inherited
     /**
      * Thermal capacitance.
      */
-    public double C;
+    // public double C; // Inherited
 
     /**
      * @param maximumTemperature Intended maximum temperature in celsius.
@@ -22,12 +22,11 @@ public class ThermalLoadInitializerByPowerDrop {
      * @param TConductivityDrop
      */
     public ThermalLoadInitializerByPowerDrop(double maximumTemperature, double minimumTemperature, double heatingTao, double TConductivityDrop) {
+        super(maximumTemperature, minimumTemperature, heatingTao, 0.0);
         this.TConductivityDrop = TConductivityDrop;
-        this.minimumTemperature = minimumTemperature;
-        this.heatingTao = heatingTao;
-        this.maximumTemperature = maximumTemperature;
     }
 
+    @Override
     public void setMaximalPower(double power) {
         C = power * heatingTao / maximumTemperature;
         Rp = maximumTemperature / power;
@@ -40,6 +39,7 @@ public class ThermalLoadInitializerByPowerDrop {
         load.set(Rs, Rp, C);
     }
 
+    @Override
     public ThermalLoadInitializerByPowerDrop copy() {
         ThermalLoadInitializerByPowerDrop thermalLoad = new ThermalLoadInitializerByPowerDrop(maximumTemperature, minimumTemperature, heatingTao, TConductivityDrop);
         thermalLoad.Rp = Rp;

@@ -11,7 +11,7 @@ import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.IOException
 
-class ChristmasTreeDescriptor(val name: String, val obj: Obj3D): TransparentNodeDescriptor(name, FestiveElement::class.java, ChristmasTreeRender::class.java) {
+class ChristmasTreeDescriptor(name: String, val obj: Obj3D) : TransparentNodeDescriptor(name, FestiveElement::class.java, ChristmasTreeRender::class.java) {
     private var star: Obj3D.Obj3DPart? = null
     private var string1: Obj3D.Obj3DPart? = null
     private var string2: Obj3D.Obj3DPart? = null

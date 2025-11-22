@@ -12,18 +12,21 @@ import mods.eln.node.six.SixNodeDescriptor
 import mods.eln.sim.ElectricalConnection
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.nbt.NbtElectricalLoad
-import net.minecraft.util.EnumChatFormatting
+import net.minecraft.ChatFormatting
 import java.util.*
 
-class ElectricalSignalBusCableElement(sixNode: SixNode?, side: Direction?, descriptor: SixNodeDescriptor?) : ElectricalCableElement(sixNode, side, descriptor) {
+// ...existing code...
+class ElectricalSignalBusCableElement(_sixNode: SixNode?, side: Direction?, _descriptor: SixNodeDescriptor) : ElectricalCableElement(_sixNode, side, _descriptor) {
     var coloredElectricalLoads: Array<NbtElectricalLoad>
+// ...existing code...
+
     override fun initialize() {
         for (load in coloredElectricalLoads) {
-            descriptor.applyTo(load)
+            this.descriptor.applyTo(load)
         }
     }
 
-    override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad {
+    override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad? {
         val color = mask shr NodeBase.maskColorShift and 0xF
         val load: ElectricalLoad = coloredElectricalLoads[color]
         println("ESBCE.gEL: mask $mask, color $color, load $load")
@@ -82,27 +85,27 @@ class ElectricalSignalBusCableElement(sixNode: SixNode?, side: Direction?, descr
 
     companion object {
         var wool_to_chat = arrayOf(
-            EnumChatFormatting.WHITE,
-            EnumChatFormatting.GOLD,
-            EnumChatFormatting.LIGHT_PURPLE,
-            EnumChatFormatting.BLUE,
-            EnumChatFormatting.YELLOW,
-            EnumChatFormatting.GREEN,
-            EnumChatFormatting.RED,
-            EnumChatFormatting.DARK_GRAY,
-            EnumChatFormatting.GRAY,
-            EnumChatFormatting.DARK_AQUA,
-            EnumChatFormatting.DARK_PURPLE,
-            EnumChatFormatting.DARK_BLUE,
-            EnumChatFormatting.AQUA,  // FIXME: supposed to be brown
-            EnumChatFormatting.DARK_GREEN,
-            EnumChatFormatting.DARK_RED,
-            EnumChatFormatting.BLACK)
+            ChatFormatting.WHITE,
+            ChatFormatting.GOLD,
+            ChatFormatting.LIGHT_PURPLE,
+            ChatFormatting.BLUE,
+            ChatFormatting.YELLOW,
+            ChatFormatting.GREEN,
+            ChatFormatting.RED,
+            ChatFormatting.DARK_GRAY,
+            ChatFormatting.GRAY,
+            ChatFormatting.DARK_AQUA,
+            ChatFormatting.DARK_PURPLE,
+            ChatFormatting.DARK_BLUE,
+            ChatFormatting.AQUA,  // FIXME: supposed to be brown
+            ChatFormatting.DARK_GREEN,
+            ChatFormatting.DARK_RED,
+            ChatFormatting.BLACK)
     }
 
     init {
         colorCare = 0
-        electricalLoadList.remove(electricalLoad)
+        electricalLoadList.remove(electricalLoad!!)
         electricalLoad = null
 
         coloredElectricalLoads = (0 .. 15).mapIndexed {

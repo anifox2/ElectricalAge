@@ -21,11 +21,11 @@ import mods.eln.sim.process.destruct.DelayedDestruction
 import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sound.LoopedSound
 import mods.eln.sound.SoundCommand
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.IInventory
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.client.gui.Screen
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.Container
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -36,7 +36,7 @@ class ClutchPlateItem(
     val maxDTF: Float, val minDTF: Float,
     val wearSpeed: Float, public val explodes: Boolean
 ) : GenericItemUsingDamageDescriptor(name) {
-    override fun getDefaultNBT() = NBTTagCompound()
+    override fun getDefaultNBT() = CompoundTag()
 
     fun setWear(stack: ItemStack, wear: Double) {
         if (!stack.hasTagCompound()) {
@@ -57,8 +57,8 @@ class ClutchPlateItem(
     fun slipWearF(@Suppress("UNUSED_PARAMETER") stack: ItemStack): IFunction =
         LinearFunction(0f, 0f, 1000f, wearSpeed)
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
         if(itemStack != null) {
             val wear = getWear(itemStack)
             if(wear < 0.2) {
@@ -163,7 +163,7 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
 
     val inv = TransparentNodeElementInventory(2, 1, this)
     override val inventory = inv
-    override fun newContainer(side: Direction, player: EntityPlayer) = ClutchContainer(player, inv)
+    override fun newContainer(side: Direction, player: Player) = ClutchContainer(player, inv)
     override fun hasGui() = true
 
     val inputGate = NbtElectricalGateInput("clutchIn")
@@ -173,7 +173,7 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
 
     val clutchPlateStack: ItemStack?
         get() {
-            return inv.getStackInSlot(0)
+            return inv.getItem(0)
         }
     @Suppress("UNCHECKED_CAST")
     val clutchPlateDescriptor: ClutchPlateItem?
@@ -183,7 +183,7 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
         }
     val clutchPinStack: ItemStack?
         get() {
-            return inv.getStackInSlot(1)
+            return inv.getItem(1)
         }
 
     val LEFT = 0
@@ -359,16 +359,16 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
     }
 
     /*
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
         connectedNetworks.forEach {
-            var shaftTag = NBTTagCompound()
+            var shaftTag = CompoundTag()
             it.value.writeToNBT(shaftTag, "shaft")
             nbt.setTag("side" + it.key.toSideValue().toString(), shaftTag)
         }
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         connectedNetworks.clear()
         nbt.func_150296_c().forEach {
@@ -387,7 +387,7 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
     }
     */
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
         connectedSides.writeToNBT(nbt, "sides")
         leftShaft.writeToNBT(nbt, "leftShaft")
@@ -395,7 +395,7 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
         nbt.setBoolean("slipping", slipping)
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         connectedSides.readFromNBT(nbt, "sides")
         leftShaft.readFromNBT(nbt, "leftShaft")
@@ -440,7 +440,7 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
 
     override fun getThermalLoad(side: Direction, lrdu: LRDU): ThermalLoad? = null
     override fun thermoMeterString(side: Direction): String = ""
-    override fun onBlockActivated(player: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean = false
+    override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean = false
 }
 
 class ClutchRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
@@ -535,16 +535,16 @@ class ClutchRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescript
         //Utils.println(String.format("CR.nU: l=%f,r=%f c=%f s=%s ls=%s", lRads, rRads, clutching, slipping, lastSlipping))
     }
 
-    override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen = ClutchGui(player, inv, this)
+    override fun newGuiDraw(side: Direction, player: Player): Screen = ClutchGui(player, inv, this)
 }
 
-class ClutchContainer(player: EntityPlayer, inv: IInventory) : BasicContainer(
+class ClutchContainer(player: Player, inv: Container) : BasicContainer(
     player, inv, arrayOf(
         GenericItemUsingDamageSlot(inv, 0, 176 / 2 - 16 / 2 - 17 + 4, 42 - 16 / 2, 1, ClutchPlateItem::class.java, ISlotSkin.SlotSkin.medium, arrayOf(tr("Clutch Plate"))),
         GenericItemUsingDamageSlot(inv, 1, 176 / 2 - 16 / 2 + 17 + 4, 42 - 16 / 2, 1, ClutchPinItem::class.java, ISlotSkin.SlotSkin.medium, arrayOf(tr("Clutch Pin")))
     )
 )
 
-class ClutchGui(player: EntityPlayer, inv: IInventory, val render: ClutchRender) : GuiContainerEln(ClutchContainer(player, inv)) {
+class ClutchGui(player: Player, inv: Container, val render: ClutchRender) : GuiContainerEln(ClutchContainer(player, inv)) {
     override fun newHelper() = HelperStdContainer(this)
 }

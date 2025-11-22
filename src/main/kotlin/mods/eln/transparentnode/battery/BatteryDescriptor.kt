@@ -11,18 +11,19 @@ import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.Simulator
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.Resistor
-import mods.eln.wiki.Data
-import net.minecraft.entity.item.EntityItem
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
+//import mods.eln.wiki.Data
+import net.minecraft.world.entity.item.ItemEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+//import net.minecraftforge.client.IItemRenderer.ItemRenderType
+//import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
 
 class BatteryDescriptor(
     name: String,
-    modelName: String,
+    obj: Obj3D,
     var startCharge: Double,
     var isRechargable: Boolean,
     var lifeEnable: Boolean,
@@ -51,7 +52,6 @@ class BatteryDescriptor(
     var thermalPMax: Double
     var lifeNominalCurrent: Double
     var lifeNominalLost: Double
-    var modelName: String? = null
     var modelPart: Obj3DPart? = null
     @JvmField
     var IMax: Double
@@ -81,10 +81,12 @@ class BatteryDescriptor(
         }
     }
 
+    /*
     override fun setParent(item: Item, damage: Int) {
         super.setParent(item, damage)
         Data.addEnergy(newItemStack())
     }
+    */
 
     fun applyTo(resistor: Resistor) {
         resistor.resistance = electricalRp
@@ -117,24 +119,25 @@ class BatteryDescriptor(
         process.lifeNominalLost = lifeNominalLost
     }
 
-    override fun getDefaultNBT(): NBTTagCompound {
-        val nbt = NBTTagCompound()
-        nbt.setDouble("charge", startCharge)
-        nbt.setDouble("life", 1.0)
+    fun createDefaultNBT(): CompoundTag {
+        val nbt = CompoundTag()
+        nbt.putDouble("charge", startCharge)
+        nbt.putDouble("life", 1.0)
         return nbt
     }
 
-    override fun addInformation(itemStack: ItemStack, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        list.add(Utils.plotVolt(tr("Nominal voltage: "), electricalU))
-        list.add(Utils.plotPower(tr("Nominal power: "), electricalStdP))
-        list.add(Utils.plotEnergy(tr("Energy capacity: "), electricalStdDischargeTime * electricalStdP))
-        list.add(Utils.plotOhm(tr("Internal resistance: "), electricalRs * 2))
-        list.add("")
-        list.add(Utils.plotPercent(tr("Actual charge: "), getChargeInTag(itemStack)))
-        if (lifeEnable) list.add(Utils.plotPercent(tr("Life: "), getLifeInTag(itemStack)))
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
+        list.add(Component.literal(Utils.plotVolt(tr("Nominal voltage: "), electricalU)))
+        list.add(Component.literal(Utils.plotPower(tr("Nominal power: "), electricalStdP)))
+        list.add(Component.literal(Utils.plotEnergy(tr("Energy capacity: "), electricalStdDischargeTime * electricalStdP)))
+        list.add(Component.literal(Utils.plotOhm(tr("Internal resistance: "), electricalRs * 2)))
+        list.add(Component.literal(""))
+        list.add(Component.literal(Utils.plotPercent(tr("Actual charge: "), getChargeInTag(itemStack))))
+        if (lifeEnable) list.add(Component.literal(Utils.plotPercent(tr("Life: "), getLifeInTag(itemStack))))
     }
 
+    /*
     override fun addRealismContext(list: MutableList<String>?): RealisticEnum {
         list?.add(tr("Battery could be realistic in the future"))
         list?.add(tr("  * Batteries have internal resistance"))
@@ -145,19 +148,22 @@ class BatteryDescriptor(
         list?.add(tr("  * Voltage oriented uses two smaller batteries in series to increase voltage"))
         return RealisticEnum.IDEAL
     }
+    */
 
+    /*
     override fun getName(stack: ItemStack): String {
         return super.getName(stack) + Utils.plotPercent(tr(" charged at "), getChargeInTag(stack))
     }
+    */
 
     fun getChargeInTag(stack: ItemStack): Double {
-        if (!stack.hasTagCompound()) stack.tagCompound = defaultNBT
-        return stack.tagCompound.getDouble("charge")
+        if (!stack.hasTag()) stack.tag = createDefaultNBT()
+        return stack.tag!!.getDouble("charge")
     }
 
     fun getLifeInTag(stack: ItemStack): Double {
-        if (!stack.hasTagCompound()) stack.tagCompound = defaultNBT
-        return stack.tagCompound.getDouble("life")
+        if (!stack.hasTag()) stack.tag = createDefaultNBT()
+        return stack.tag!!.getDouble("life")
     }
 
     fun getEnergy(charge: Double, life: Double): Double {
@@ -174,6 +180,7 @@ class BatteryDescriptor(
         return energy
     }
 
+/*
     override fun handleRenderType(item: ItemStack, type: ItemRenderType): Boolean {
         return true
     }
@@ -189,12 +196,13 @@ class BatteryDescriptor(
             draw(true, true)
         }
     }
+*/
 
-    override fun onEntityItemUpdate(entityItem: EntityItem): Boolean {
-        if (entityItem.isBurning) {
-            entityItem.worldObj.createExplosion(entityItem, entityItem.posX, entityItem.posY, entityItem.posZ, 2f, true)
-            entityItem.extinguish()
-            entityItem.setDead()
+    override fun onEntityItemUpdate(stack: ItemStack, entityItem: ItemEntity): Boolean {
+        if (entityItem.isOnFire) {
+            entityItem.level().explode(entityItem, entityItem.x, entityItem.y, entityItem.z, 2f, net.minecraft.world.level.Level.ExplosionInteraction.TNT)
+            entityItem.clearFire()
+            entityItem.discard()
         }
         return false
     }
@@ -233,14 +241,12 @@ class BatteryDescriptor(
         thermalC = Math.pow(electricalPMax / electricalU, 2.0) * electricalRs * thermalHeatTime / thermalWarmLimit
         thermalRp = thermalWarmLimit / thermalPMax
         IMax = electricalStdI * 3
-        obj = Eln.obj.getObj(modelName)
-        if (obj != null) {
-            if (obj!!.getString("type") == "A") renderType = 0
-            if (obj!!.getString("type") == "B") renderType = 1
-            when (renderType) {
-                0 -> modelPart = obj!!.getPart("Battery")
-                1 -> {
-                }
+        this.obj = obj
+        if (obj.getString("type") == "A") renderType = 0
+        if (obj.getString("type") == "B") renderType = 1
+        when (renderType) {
+            0 -> modelPart = obj.getPart("Battery")
+            1 -> {
             }
         }
         voltageLevelColor = VoltageLevelColor.fromVoltage(electricalU)

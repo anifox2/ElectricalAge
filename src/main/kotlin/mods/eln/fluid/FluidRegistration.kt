@@ -1,11 +1,10 @@
 package mods.eln.fluid
 
-import cpw.mods.fml.common.registry.GameRegistry
 import mods.eln.Eln.*
-import net.minecraft.block.Block
+import net.minecraft.world.level.block.Block
 import net.minecraft.init.Items
 import net.minecraft.item.ItemBucket
-import net.minecraft.item.ItemStack
+import net.minecraft.world.item.ItemStack
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fluids.Fluid
 import net.minecraftforge.fluids.FluidContainerRegistry

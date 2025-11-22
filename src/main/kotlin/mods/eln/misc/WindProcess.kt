@@ -1,7 +1,7 @@
 package mods.eln.misc
 
 import mods.eln.sim.IProcess
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundTag
 import kotlin.math.pow
 
 class WindProcess : IProcess, INBTTReady {
@@ -40,7 +40,7 @@ class WindProcess : IProcess, INBTTReady {
         return y.toDouble().coerceIn(windHit * y / 100.0, 100.0)
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound, str: String) {
+    override fun readFromNBT(nbt: CompoundTag, str: String) {
         windHit = nbt.getDouble(str + "windHit")
         windTarget = nbt.getDouble(str + "windTarget")
         windVariation = nbt.getDouble(str + "windVariation")
@@ -52,7 +52,7 @@ class WindProcess : IProcess, INBTTReady {
         }
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound, str: String) {
+    override fun writeToNBT(nbt: CompoundTag, str: String) {
         nbt.setDouble(str + "windHit", windHit)
         nbt.setDouble(str + "windTarget", windTarget)
         nbt.setDouble(str + "windVariation", windVariation)

@@ -1,9 +1,5 @@
 package mods.eln.misc
 
-import cpw.mods.fml.common.FMLCommonHandler
-import cpw.mods.fml.common.eventhandler.SubscribeEvent
-import cpw.mods.fml.common.gameevent.TickEvent
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent
 import net.minecraft.tileentity.TileEntity
 import java.util.*
 
@@ -21,8 +17,8 @@ class TileEntityDestructor {
     fun tick(event: ServerTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
         for (t in destroyList) {
-            if (t.worldObj != null && t.worldObj.getTileEntity(t.xCoord, t.yCoord, t.zCoord) === t) {
-                t.worldObj.setBlockToAir(t.xCoord, t.yCoord, t.zCoord)
+            if (t.level != null && t.level.getTileEntity(t.xCoord, t.yCoord, t.zCoord) === t) {
+                t.level.setBlockToAir(t.xCoord, t.yCoord, t.zCoord)
                 Utils.println("destroy light at " + t.xCoord + " " + t.yCoord + " " + t.zCoord)
             }
         }

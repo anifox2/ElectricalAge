@@ -1,4 +1,4 @@
-package mods.eln.transparentnode.themralheatexchanger
+package mods.eln.transparentnode
 
 import mods.eln.Eln
 import mods.eln.fluid.ElementSidedFluidHandler
@@ -22,16 +22,17 @@ import mods.eln.sim.nbt.NbtElectricalGateInput
 import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
-import net.minecraftforge.common.util.ForgeDirection
-import net.minecraftforge.fluids.Fluid
-import net.minecraftforge.fluids.FluidRegistry
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.level.material.Fluid
+import net.minecraft.world.level.material.Fluids
+import net.minecraftforge.registries.ForgeRegistries
 import net.minecraftforge.fluids.FluidStack
-import net.minecraftforge.fluids.FluidTank
-import net.minecraftforge.fluids.IFluidHandler
+import net.minecraftforge.fluids.capability.templates.FluidTank
+import net.minecraftforge.fluids.capability.IFluidHandler
 import org.lwjgl.opengl.GL11
 import java.lang.Math.ceil
 import java.lang.Math.min
@@ -58,16 +59,18 @@ class ThermalHeatExchangerDescriptor(
         main.draw()
     }
 
+    /*
     override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) = true //type != IItemRenderer.ItemRenderType.INVENTORY
     override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) =
         draw()//if (type == IItemRenderer.ItemRenderType.INVENTORY) super.renderItem(type, item, *data) else draw()
+    */
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        list.add(tr("Generates heat when supplied with ic2:hotcoolant"))
-        list.add(tr("Ejects out ic2:coolant"))
-        list.add(Utils.plotCelsius(tr("  Max. temperature: "), thermal.maximumTemperature))
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
+        list.add(Component.literal(tr("Generates heat when supplied with ic2:hotcoolant")))
+        list.add(Component.literal(tr("Ejects out ic2:coolant")))
+        list.add(Component.literal(Utils.plotCelsius(tr("  Max. temperature: "), thermal.maximumTemperature)))
     }
 
     override fun mustHaveFloor() = false
@@ -84,15 +87,15 @@ class ThermalHeatExchangerElement(
 ): TransparentNodeElement(transparentNode, descriptor) {
 
     companion object {
-        val ic2hotcoolant: Fluid? = FluidRegistry.getFluid("ic2hotcoolant")
-        val ic2coolant: Fluid? = FluidRegistry.getFluid("ic2coolant")
-        val hotwater: Fluid? = FluidRegistry.getFluid("hot_water")
-        val coldwater: Fluid? = FluidRegistry.getFluid("cold_water")
-        val ic2hotwater: Fluid? = FluidRegistry.getFluid("ic2hotwater")
+        val ic2hotcoolant: Fluid? = ForgeRegistries.FLUIDS.getValue(ResourceLocation("ic2hotcoolant"))
+        val ic2coolant: Fluid? = ForgeRegistries.FLUIDS.getValue(ResourceLocation("ic2coolant"))
+        val hotwater: Fluid? = ForgeRegistries.FLUIDS.getValue(ResourceLocation("hot_water"))
+        val coldwater: Fluid? = ForgeRegistries.FLUIDS.getValue(ResourceLocation("cold_water"))
+        val ic2hotwater: Fluid? = ForgeRegistries.FLUIDS.getValue(ResourceLocation("ic2hotwater"))
         // Use 'steam' but fall back on 'ic2steam'. Or, just die.
-        val steam: Fluid? = FluidRegistry.getFluid("steam")?: FluidRegistry.getFluid("ic2steam")
-        val INPUT_SIDE = ForgeDirection.DOWN
-        val OUTPUT_SIDE = ForgeDirection.UP
+        val steam: Fluid? = ForgeRegistries.FLUIDS.getValue(ResourceLocation("steam")) ?: ForgeRegistries.FLUIDS.getValue(ResourceLocation("ic2steam"))
+        val INPUT_SIDE = Direction.YN
+        val OUTPUT_SIDE = Direction.YP
 
     }
 
@@ -112,8 +115,8 @@ class ThermalHeatExchangerElement(
         var joulesPerMb = 0.0
         if (thermalPairs.isNotEmpty() && tank.getFluidAmount(INPUT_SIDE) > 0 && inputFluid != null) {
 
-            thermalPairs.filter { it.input.id == inputFluid.id || (it.reversible && it.output.id == inputFluid.id) }.forEach {
-                if (it.input.id == inputFluid.id) {
+            thermalPairs.filter { it.input == inputFluid || (it.reversible && it.output == inputFluid) }.forEach {
+                if (it.input == inputFluid) {
                     // Normal Forwards conversion
                     inputMbPerTick = moveFluidProcess(it.output, it.maxMbInputPerTick, it.ratio, it.minTemp, it.maxTemp)
                     outputMbPerTick = (inputMbPerTick * it.ratio).toInt()
@@ -187,7 +190,7 @@ class ThermalHeatExchangerElement(
         }
 
         if (ic2hotwater != null) {
-            thermalPairs.add(ThermalPairing(ic2hotwater,FluidRegistry.WATER,
+            thermalPairs.add(ThermalPairing(ic2hotwater,Fluids.WATER,
                 1 / 0.45 / 2, //Joules per mB
                 36, //max mB input rate
                 1.0, //ratio
@@ -198,7 +201,7 @@ class ThermalHeatExchangerElement(
 
         if (steam != null) {
             //println("Steam Enabled in Thermal Heat Exchanger")
-            thermalPairs.add(ThermalPairing(FluidRegistry.WATER, steam, -1/0.45, 36,10.0, false, minTemp = 100.0))
+            thermalPairs.add(ThermalPairing(Fluids.WATER, steam, -1/0.45, 36,10.0, false, minTemp = 100.0))
         }
 
         thermalPairs.forEach {
@@ -217,13 +220,13 @@ class ThermalHeatExchangerElement(
     }
 
     override fun getThermalLoad(side: Direction, lrdu: LRDU) = when {
-        side == front.inverse && lrdu == LRDU.Down -> thermalLoad
+        side == front.inverse() && lrdu == LRDU.Down -> thermalLoad
         else -> null
     }
 
     override fun getConnectionMask(side: Direction, lrdu: LRDU) = when (lrdu) {
         LRDU.Down -> when (side) {
-            front.inverse -> NodeBase.maskThermal
+            front.inverse() -> NodeBase.maskThermal
             front -> NodeBase.maskElectricalGate
             else -> 0
         }
@@ -244,12 +247,12 @@ class ThermalHeatExchangerElement(
         Pair(tr("thermal power"), Utils.plotPower(joulesPerTick * 20))
     )
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
         tank.writeToNBT(nbt, "tank")
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         tank.readFromNBT(nbt, "tank")
     }
@@ -259,9 +262,9 @@ class ThermalHeatExchangerElement(
         connect()
     }
 
-    override fun onBlockActivated(player: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float) = false
+    override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float) = false
 
-    override fun getFluidHandler(): IFluidHandler {
+    override fun getFluidHandler(): net.minecraftforge.fluids.capability.IFluidHandler {
         return tank
     }
 }

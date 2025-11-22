@@ -4,20 +4,18 @@ import mods.eln.Eln
 import mods.eln.item.IConfigurable
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
-import mods.eln.misc.Utils.mustDropItem
-import mods.eln.misc.Utils.newNbtTagCompund
 import mods.eln.misc.Utils.println
 import mods.eln.node.Node
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.player.EntityPlayerMP
-import net.minecraft.inventory.Container
-import net.minecraft.inventory.IInventory
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.fluids.IFluidHandler
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.Container
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
+import net.minecraftforge.fluids.capability.IFluidHandler
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
@@ -29,7 +27,7 @@ class TransparentNode : Node() {
     @JvmField
     var elementId = 0
     @JvmField
-    var removedByPlayer: EntityPlayerMP? = null
+    var removedByPlayer: ServerPlayer? = null
     override fun nodeAutoSave(): Boolean {
         return false
     }
@@ -39,8 +37,8 @@ class TransparentNode : Node() {
         element!!.onNeighborBlockChange()
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
-        super.readFromNBT(nbt.getCompoundTag("node"))
+    override fun readFromNBT(nbt: CompoundTag) {
+        super.readFromNBT(nbt.getCompound("node"))
         elementId = nbt.getShort("eid").toInt()
         try {
             val descriptor = Eln.transparentNodeItem.getDescriptor(elementId)
@@ -58,13 +56,19 @@ class TransparentNode : Node() {
         } catch (e: SecurityException) {
             e.printStackTrace()
         }
-        element!!.readFromNBT(nbt.getCompoundTag("element"))
+        element!!.readFromNBT(nbt.getCompound("element"))
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
-        super.writeToNBT(newNbtTagCompund(nbt, "node"))
-        nbt.setShort("eid", elementId.toShort())
-        element!!.writeToNBT(newNbtTagCompund(nbt, "element"))
+    override fun writeToNBT(nbt: CompoundTag) {
+        val nodeTag = CompoundTag()
+        nbt.put("node", nodeTag)
+        super.writeToNBT(nodeTag)
+        
+        nbt.putShort("eid", elementId.toShort())
+        
+        val elementTag = CompoundTag()
+        nbt.put("element", elementTag)
+        element!!.writeToNBT(elementTag)
     }
 
     override fun onBreakBlock() {
@@ -92,23 +96,23 @@ class TransparentNode : Node() {
         return element!!.thermoMeterString(side)
     }
 
-    override fun readConfigTool(side: Direction?, tag: NBTTagCompound?, invoker: EntityPlayer?): Boolean {
-        if (element is IConfigurable) {
+    override fun readConfigTool(side: Direction?, tag: CompoundTag?, invoker: Player?): Boolean {
+        if (element is IConfigurable && tag != null && invoker != null) {
             (element as IConfigurable).readConfigTool(tag, invoker)
             return true
         }
         return false
     }
 
-    override fun writeConfigTool(side: Direction?, tag: NBTTagCompound?, invoker: EntityPlayer?): Boolean {
-        if (element is IConfigurable) {
+    override fun writeConfigTool(side: Direction?, tag: CompoundTag?, invoker: Player?): Boolean {
+        if (element is IConfigurable && tag != null && invoker != null) {
             (element as IConfigurable).writeConfigTool(tag, invoker)
             return true
         }
         return false
     }
 
-    val fluidHandler: IFluidHandler?
+    val fluidHandler: net.minecraftforge.fluids.capability.IFluidHandler?
         get() = element!!.getFluidHandler()
 
     override fun publishSerialize(stream: DataOutputStream) {
@@ -125,13 +129,13 @@ class TransparentNode : Node() {
         BlockSide, PlayerView, PlayerViewHorizontal, BlockSideInv
     }
 
-    override fun initializeFromThat(front: Direction, entityLiving: EntityLivingBase?, itemStack: ItemStack?) {
+    override fun initializeFromThat(front: Direction, entityLiving: LivingEntity?, itemStack: ItemStack?) {
         try {
             val descriptor = Eln.transparentNodeItem.getDescriptor(itemStack)
-            val metadata = itemStack!!.itemDamage
+            val metadata = itemStack!!.getOrCreateTag().getInt("elementId")
             elementId = metadata
             element = descriptor!!.ElementClass.getConstructor(TransparentNode::class.java, TransparentNodeDescriptor::class.java).newInstance(this, descriptor) as TransparentNodeElement
-            element!!.initializeFromThat(front, entityLiving, itemStack.tagCompound)
+            element!!.initializeFromThat(front, entityLiving, itemStack.tag)
         } catch (e: InstantiationException) {
             e.printStackTrace()
         } catch (e: IllegalAccessException) {
@@ -152,7 +156,7 @@ class TransparentNode : Node() {
         element!!.initialize()
     }
 
-    override fun onBlockActivated(entityPlayer: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(entityPlayer: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         return if (element!!.onBlockActivated(entityPlayer, side, vx, vy, vz)) true else super.onBlockActivated(entityPlayer, side, vx, vy, vz)
     }
 
@@ -160,11 +164,11 @@ class TransparentNode : Node() {
         return if (element == null) false else element!!.hasGui()
     }
 
-    fun getInventory(@Suppress("UNUSED_PARAMETER") side: Direction?): IInventory? {
+    fun getInventory(@Suppress("UNUSED_PARAMETER") side: Direction?): Container? {
         return if (element == null) null else element!!.inventory
     }
 
-    fun newContainer(side: Direction, player: EntityPlayer): Container? {
+    fun newContainer(side: Direction, player: Player): AbstractContainerMenu? {
         return if (element == null) null else element!!.newContainer(side, player)
     }
 
@@ -176,7 +180,7 @@ class TransparentNode : Node() {
             return element!!.transparentNodeDescriptor.tileEntityMetaTag.meta
         }
 
-    override fun networkUnserialize(stream: DataInputStream, player: EntityPlayerMP?) {
+    override fun networkUnserialize(stream: DataInputStream, player: ServerPlayer?) {
         super.networkUnserialize(stream, player)
         try {
             if (elementId == stream.readShort().toInt()) {
@@ -204,12 +208,16 @@ class TransparentNode : Node() {
         element!!.checkCanStay(onCreate)
     }
 
-    fun dropElement(entityPlayer: EntityPlayerMP?) {
-        if (element != null) if (mustDropItem(entityPlayer)) dropItem(element!!.dropItemStack)
+    fun dropElement(entityPlayer: ServerPlayer?) {
+        if (element != null) {
+            if (entityPlayer == null || !entityPlayer.isCreative()) {
+                dropItem(element!!.dropItemStack)
+            }
+        }
     }
 
     override val nodeUuid: String
-        get() = Eln.transparentNodeBlock.nodeUuid
+        get() = "t"
 
     override fun unload() {
         super.unload()

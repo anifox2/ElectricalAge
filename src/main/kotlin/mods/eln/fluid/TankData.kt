@@ -2,7 +2,7 @@ package mods.eln.fluid
 
 import mods.eln.misc.INBTTReady
 import mods.eln.misc.Utils
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundTag
 import net.minecraftforge.fluids.Fluid
 import net.minecraftforge.fluids.FluidRegistry
 import net.minecraftforge.fluids.FluidTank
@@ -11,7 +11,7 @@ import java.lang.Exception
 data class TankData(val tank: FluidTank, val fluidWhitelist: MutableList<Fluid> = mutableListOf(), var fractionalDemandMb: Double = 0.0):
     INBTTReady {
 
-    override fun readFromNBT(nbt: NBTTagCompound, str: String) {
+    override fun readFromNBT(nbt: CompoundTag, str: String) {
         tank.readFromNBT(nbt.getCompoundTag("${str}tank"))
         val fluidWhitelistNames = nbt.getString("${str}whitelist")?.split("|")!!
         fluidWhitelist.clear()
@@ -26,8 +26,8 @@ data class TankData(val tank: FluidTank, val fluidWhitelist: MutableList<Fluid> 
         tank.capacity = nbt.getInteger("${str}capacity")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound, str: String) {
-        val tag = NBTTagCompound()
+    override fun writeToNBT(nbt: CompoundTag, str: String) {
+        val tag = CompoundTag()
         tank.writeToNBT(tag)
         nbt.setTag("${str}tank", tag)
         nbt.setString("${str}whitelist", fluidWhitelist.joinToString("|") { it.name })

@@ -1,17 +1,16 @@
 package mods.eln.server.console
 
 import mods.eln.misc.FC
-import net.minecraft.command.ICommand
-import net.minecraft.command.ICommandSender
-import net.minecraft.event.ClickEvent
+import net.minecraft.commands.CommandSourceStack
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
-import net.minecraft.util.ChatComponentText
 import java.lang.Exception
 import java.util.*
 
 val ElnConsoleCommandList = mutableListOf<IConsoleCommand>()
 
-class ElnConsoleCommands: ICommand {
+class ElnConsoleCommands {
 
     init {
         ElnConsoleCommandList.addAll(listOf(
@@ -36,16 +35,17 @@ class ElnConsoleCommands: ICommand {
     }
 
     companion object {
-        fun cprint(ics: ICommandSender, text: String, indent: Int = 0) {
+        fun cprint(ics: CommandSourceStack, text: String, indent: Int = 0) {
             printIndented(text, indent).forEach {
-                ics.addChatMessage(ChatComponentText(it))
+                ics.sendSystemMessage(Component.literal(it))
             }
         }
 
-        fun cprint(ics: ICommandSender, text: String, url: String) {
-            val msg = ChatComponentText(FC.BRIGHT_GREY + text)
-            msg.chatStyle.chatClickEvent = ClickEvent(ClickEvent.Action.OPEN_URL, url)
-            ics.addChatMessage(msg)
+        fun cprint(ics: CommandSourceStack, text: String, url: String) {
+            val msg = Component.literal(FC.BRIGHT_GREY + text).withStyle { 
+                it.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, url))
+            }
+            ics.sendSystemMessage(msg)
         }
 
         fun printIndented(text: String, indent: Int): List<String> {
@@ -75,7 +75,7 @@ class ElnConsoleCommands: ICommand {
             return list2.map{"$whitespace$it"}
         }
 
-        fun getArgBool(ics: ICommandSender, arg: String): Boolean? {
+        fun getArgBool(ics: CommandSourceStack, arg: String): Boolean? {
             val lowerArg = arg.lowercase()
             return if (lowerArg.isEmpty()) {
                 cprint(ics, "Error: Empty argument.", indent = 1)
@@ -95,26 +95,7 @@ class ElnConsoleCommands: ICommand {
         }
     }
 
-    // What the heck was Mojang thinking here?
-    override fun compareTo(other: Any?): Int {
-        val isString = other !is String
-        if (isString) {
-            println("CompareTo is not String: ${other?.javaClass?.name}")
-        }
-        if (other is String) {
-            return "eln2".compareTo(other)
-        } else {
-            return "eln2".compareTo(other.toString())
-        }
-    }
-
-    override fun getCommandName() = "eln"
-    override fun getCommandUsage(p_71518_1_: ICommandSender) =
-        "${FC.DARK_CYAN}Electrical Age Console, run /eln ls for commands${FC.BRIGHT_GREY }"
-
-    override fun getCommandAliases() = mutableListOf<String>()
-
-    override fun processCommand(ics: ICommandSender, args: Array<out String>) {
+    fun processCommand(ics: CommandSourceStack, args: Array<out String>) {
         if (args.isEmpty()) {
             cprint(ics,"${FC.DARK_CYAN}Electrical Age Console, run /eln ls for commands${FC.BRIGHT_GREY }")
             return
@@ -125,7 +106,7 @@ class ElnConsoleCommands: ICommand {
             cprint(ics,"${FC.DARK_CYAN}Command not found, run /eln ls for commands${FC.BRIGHT_GREY }")
             return
         }
-        cprint(ics, "${FC.DARK_CYAN}${ics.commandSenderName} $${FC.DARK_YELLOW} /eln ${args.joinToString(" ")}")
+        cprint(ics, "${FC.DARK_CYAN}${ics.textName} $${FC.DARK_YELLOW} /eln ${args.joinToString(" ")}")
         val canRun = permissions.any { command[0].requiredPermission().contains(it) }
         if (canRun) {
             command[0].runCommand(ics, args.toList().drop(1))
@@ -135,16 +116,16 @@ class ElnConsoleCommands: ICommand {
         }
     }
 
-    fun determinePermissionsList(ics: ICommandSender): List<UserPermission> {
+    fun determinePermissionsList(ics: CommandSourceStack): List<UserPermission> {
         var creative = false
         var singlePlayer = false
         var isOperator = false
-        val player = ics.entityWorld.getPlayerEntityByName(ics.commandSenderName)
+        val player = ics.player
         val console = player == null
         if (!console) {
-            creative = player.capabilities.isCreativeMode
-            singlePlayer = MinecraftServer.getServer().isSinglePlayer
-            isOperator = MinecraftServer.getServer().configurationManager.func_152603_m().func_152700_a(player.displayName) != null
+            creative = player!!.isCreative
+            singlePlayer = ics.server.isSingleplayer
+            isOperator = ics.server.playerList.isOp(player.gameProfile)
         }
         val playerPerms = mutableListOf<UserPermission>()
         if (creative)
@@ -158,23 +139,5 @@ class ElnConsoleCommands: ICommand {
         if (singlePlayer)
             playerPerms.add(UserPermission.IS_OPERATOR)
         return playerPerms.toList()
-    }
-
-    // We don't actually use this because we do it on command execution for more control
-    override fun canCommandSenderUseCommand(ics: ICommandSender) = true
-
-    override fun addTabCompletionOptions(ics: ICommandSender, args: Array<out String>): MutableList<String> {
-        if (args.toList().isEmpty() || args[0] == "") {
-            return ElnConsoleCommandList.map {it.name}.toMutableList()
-        }
-        val command = ElnConsoleCommandList.filter { it.name.equals(args[0], ignoreCase = true) }
-        if (command.isEmpty()) {
-            return ElnConsoleCommandList.filter {it.name.startsWith(args[0], ignoreCase = true)}.map{it.name}.toMutableList()
-        }
-        return command.first().getTabCompletion(args.drop(1)).toMutableList()
-    }
-
-    override fun isUsernameIndex(args: Array<out String>, index: Int): Boolean {
-        return false
     }
 }

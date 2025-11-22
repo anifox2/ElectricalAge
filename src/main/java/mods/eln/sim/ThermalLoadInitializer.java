@@ -1,7 +1,7 @@
 package mods.eln.sim;
 
 import mods.eln.Eln;
-import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
+// import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 
 public class ThermalLoadInitializer {
 
@@ -30,9 +30,11 @@ public class ThermalLoadInitializer {
         load.set(Rs, Rp, C);
     }
 
+    /*
     public void applyTo(ThermalLoadWatchDog doggy) {
         doggy.setThermalLoad(this);
     }
+    */
 
     public ThermalLoadInitializer copy() {
         ThermalLoadInitializer thermalLoad = new ThermalLoadInitializer(maximumTemperature, minimumTemperature, heatingTao, conductionTao);

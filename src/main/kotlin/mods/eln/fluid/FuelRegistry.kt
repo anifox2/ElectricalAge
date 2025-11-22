@@ -1,8 +1,8 @@
 package mods.eln.fluid
 
 import mods.eln.Eln
-import net.minecraftforge.fluids.Fluid
-import net.minecraftforge.fluids.FluidRegistry
+import net.minecraft.world.level.material.Fluid
+import net.minecraftforge.registries.ForgeRegistries
 
 object FuelRegistry {
     /**
@@ -76,8 +76,10 @@ object FuelRegistry {
     private val allFuels = dieselFuels + gasolineFuels + gasFuels + steam
 
     fun fluidListToFluids(fluidNames: Array<String>) =
-        fluidNames.map { FluidRegistry.getFluid(it) }.filterNotNull().toTypedArray()
+        fluidNames.mapNotNull { name ->
+            ForgeRegistries.FLUIDS.entries.find { it.key.path == name }?.value
+        }.toTypedArray()
 
     fun heatEnergyPerMilliBucket(fuelName: String): Double = Eln.fuelHeatValueFactor * (allFuels[fuelName] ?: 0.0)
-    fun heatEnergyPerMilliBucket(fluid: Fluid?): Double = heatEnergyPerMilliBucket(fluid?.name ?: "")
+    fun heatEnergyPerMilliBucket(fluid: Fluid?): Double = heatEnergyPerMilliBucket(ForgeRegistries.FLUIDS.getKey(fluid)?.path ?: "")
 }

@@ -37,11 +37,13 @@ class SignalInductorElement(sixNode: SixNode?, side: Direction?, descriptor: Six
         return null
     }
 
+    // ...existing code...
     override fun getConnectionMask(lrdu: LRDU): Int {
-        if (front == lrdu) return descriptor.cable.nodeMask
-        if (front.inverse() == lrdu) return descriptor.cable.nodeMask
+        if (front == lrdu) return descriptor.cable.getNodeMask()
+        if (front.inverse() == lrdu) return descriptor.cable.getNodeMask()
         return 0
     }
+// ...existing code...
 
     override fun multiMeterString(): String {
         return plotAmpere("I", inductor.current)

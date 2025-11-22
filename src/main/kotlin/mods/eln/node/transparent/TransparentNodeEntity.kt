@@ -5,25 +5,84 @@ import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 import mods.eln.misc.FakeSideInventory.Companion.instance
+import mods.eln.misc.FakeFluidHandler
 import mods.eln.misc.LRDU
 import mods.eln.node.NodeBlockEntity
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.init.Blocks
-import net.minecraft.inventory.Container
-import net.minecraft.inventory.ISidedInventory
-import net.minecraft.item.ItemStack
-import net.minecraft.util.AxisAlignedBB
-import net.minecraft.world.World
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.WorldlyContainer
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.level.Level
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
+import net.minecraft.world.level.block.entity.BlockEntityType
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraftforge.fluids.FluidStack
+import net.minecraftforge.fluids.capability.IFluidHandler
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
+import net.minecraftforge.common.capabilities.Capability
+import net.minecraftforge.common.capabilities.ForgeCapabilities
+import net.minecraftforge.common.util.LazyOptional
 
-open class TransparentNodeEntity : NodeBlockEntity(), ISidedInventory {
+open class TransparentNodeEntity(type: BlockEntityType<*>, pos: BlockPos, state: BlockState) : NodeBlockEntity(type, pos, state), WorldlyContainer, IFluidHandler {
     var elementRender: TransparentNodeElementRender? = null
     var elementRenderId: Short = 0
+
+    private val fluidHandler: IFluidHandler
+        get() {
+            if (level != null && !level!!.isClientSide) {
+                val node = node
+                if (node != null && node is TransparentNode) {
+                    val i = node.fluidHandler
+                    if (i != null) {
+                        return i
+                    }
+                }
+            }
+            return FakeFluidHandler.INSTANCE
+        }
+
+    override fun <T> getCapability(cap: Capability<T>, side: net.minecraft.core.Direction?): LazyOptional<T> {
+        if (cap == ForgeCapabilities.FLUID_HANDLER) {
+             return LazyOptional.of { this }.cast()
+        }
+        return super.getCapability(cap, side)
+    }
+
+    override fun getTanks(): Int {
+        return fluidHandler.tanks
+    }
+
+    override fun getFluidInTank(tank: Int): FluidStack {
+        return fluidHandler.getFluidInTank(tank)
+    }
+
+    override fun getTankCapacity(tank: Int): Int {
+        return fluidHandler.getTankCapacity(tank)
+    }
+
+    override fun isFluidValid(tank: Int, stack: FluidStack): Boolean {
+        return fluidHandler.isFluidValid(tank, stack)
+    }
+
+    override fun fill(resource: FluidStack, action: FluidAction): Int {
+        return fluidHandler.fill(resource, action)
+    }
+
+    override fun drain(resource: FluidStack, action: FluidAction): FluidStack {
+        return fluidHandler.drain(resource, action)
+    }
+
+    override fun drain(maxDrain: Int, action: FluidAction): FluidStack {
+        return fluidHandler.drain(maxDrain, action)
+    }
 
     override fun getCableRender(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
         return if (elementRender == null) null else elementRender!!.getCableRenderSide(side, lrdu)
@@ -61,12 +120,12 @@ open class TransparentNodeEntity : NodeBlockEntity(), ISidedInventory {
         }
     }
 
-    override fun newContainer(side: Direction, player: EntityPlayer): Container? {
+    override fun newContainer(side: Direction, player: Player): AbstractContainerMenu? {
         val n = node as TransparentNode? ?: return null
         return n.newContainer(side, player)
     }
 
-    override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen? {
+    override fun newGuiDraw(side: Direction, player: Player): Screen? {
         return elementRender!!.newGuiDraw(side, player)
     }
 
@@ -87,8 +146,8 @@ open class TransparentNodeEntity : NodeBlockEntity(), ISidedInventory {
         return if (elementRender == null) super.cameraDrawOptimisation() else elementRender!!.cameraDrawOptimisation()
     }
 
-    @Suppress("UNUSED_PARAMETER") fun getDamageValue(world: World, x: Int, y: Int, z: Int): Int {
-        return if (world.isRemote) {
+    @Suppress("UNUSED_PARAMETER") fun getDamageValue(world: Level, x: Int, y: Int, z: Int): Int {
+        return if (world.isClientSide) {
             elementRenderId.toInt()
         } else 0
     }
@@ -97,32 +156,11 @@ open class TransparentNodeEntity : NodeBlockEntity(), ISidedInventory {
         if (elementRender != null) elementRender!!.notifyNeighborSpawn()
     }
 
-    fun addCollisionBoxesToList(par5AxisAlignedBB: AxisAlignedBB, list: MutableList<AxisAlignedBB?>, blockCoord: Coordinate?) {
-        val desc = if (worldObj.isRemote) {
-            if (elementRender == null) null else elementRender!!.transparentNodedescriptor
-        } else {
-            val node = node as TransparentNode?
-            if (node == null) null else node.element!!.transparentNodeDescriptor
-        }
-        val x: Int
-        val y: Int
-        val z: Int
-        if (blockCoord != null) {
-            x = blockCoord.x
-            y = blockCoord.y
-            z = blockCoord.z
-        } else {
-            x = xCoord
-            y = yCoord
-            z = zCoord
-        }
-        if (desc == null) {
-            val bb = Blocks.stone.getCollisionBoundingBoxFromPool(worldObj, x, y, z)
-            if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb)
-        } else {
-            desc.addCollisionBoxesToList(par5AxisAlignedBB, list, worldObj, x, y, z)
-        }
+    /*
+    fun addCollisionBoxesToList(par5AABB: AABB, list: MutableList<AABB?>, blockCoord: Coordinate?) {
+        // Legacy collision code
     }
+    */
 
     override fun serverPacketUnserialize(stream: DataInputStream) {
         super.serverPacketUnserialize(stream)
@@ -130,7 +168,7 @@ open class TransparentNodeEntity : NodeBlockEntity(), ISidedInventory {
     }
 
     override val nodeUuid: String
-        get() = Eln.transparentNodeBlock.nodeUuid
+        get() = "t"
 
     override fun destructor() {
         if (elementRender != null) elementRender!!.destructor()
@@ -147,19 +185,19 @@ open class TransparentNodeEntity : NodeBlockEntity(), ISidedInventory {
         return 0
     }
 
-    open val sidedInventory: ISidedInventory
+    open val sidedInventory: WorldlyContainer
         get() {
-            if (worldObj.isRemote) {
+            if (level.isRemote) {
                 if (elementRender == null) return instance
                 val i = elementRender!!.inventory
-                if (i != null && i is ISidedInventory) {
+                if (i != null && i is WorldlyContainer) {
                     return i
                 }
             } else {
                 val node = node
                 if (node != null && node is TransparentNode) {
                     val i = node.getInventory(null)
-                    if (i != null && i is ISidedInventory) {
+                    if (i != null && i is WorldlyContainer) {
                         return i
                     }
                 }
@@ -167,63 +205,63 @@ open class TransparentNodeEntity : NodeBlockEntity(), ISidedInventory {
             return instance
         }
 
-    override fun getSizeInventory(): Int {
-        return sidedInventory.sizeInventory
+    override fun getContainerSize(): Int {
+        return sidedInventory.containerSize
     }
 
-    override fun getStackInSlot(var1: Int): ItemStack? {
-        return sidedInventory.getStackInSlot(var1)
+    override fun getItem(var1: Int): ItemStack {
+        return sidedInventory.getItem(var1)
     }
 
-    override fun decrStackSize(var1: Int, var2: Int): ItemStack? {
-        return sidedInventory.decrStackSize(var1, var2)
+    override fun removeItem(var1: Int, var2: Int): ItemStack {
+        return sidedInventory.removeItem(var1, var2)
     }
 
-    override fun getStackInSlotOnClosing(var1: Int): ItemStack? {
-        return sidedInventory.getStackInSlotOnClosing(var1)
+    override fun removeItemNoUpdate(var1: Int): ItemStack {
+        return sidedInventory.removeItemNoUpdate(var1)
     }
 
-    override fun setInventorySlotContents(var1: Int, var2: ItemStack?) {
-        sidedInventory.setInventorySlotContents(var1, var2)
+    override fun setItem(var1: Int, var2: ItemStack) {
+        sidedInventory.setItem(var1, var2)
     }
 
-    override fun getInventoryName(): String {
-        return sidedInventory.inventoryName
+    override fun getMaxStackSize(): Int {
+        return sidedInventory.maxStackSize
     }
 
-    override fun hasCustomInventoryName(): Boolean {
-        return sidedInventory.hasCustomInventoryName()
+    override fun stillValid(var1: Player): Boolean {
+        return sidedInventory.stillValid(var1)
     }
 
-    override fun getInventoryStackLimit(): Int {
-        return sidedInventory.inventoryStackLimit
+    override fun startOpen(player: Player) {
+        sidedInventory.startOpen(player)
     }
 
-    override fun isUseableByPlayer(var1: EntityPlayer): Boolean {
-        return sidedInventory.isUseableByPlayer(var1)
+    override fun stopOpen(player: Player) {
+        sidedInventory.stopOpen(player)
     }
 
-    override fun openInventory() {
-        sidedInventory.openInventory()
+    override fun canPlaceItem(var1: Int, var2: ItemStack): Boolean {
+        return sidedInventory.canPlaceItem(var1, var2)
     }
 
-    override fun closeInventory() {
-        sidedInventory.closeInventory()
+    override fun getSlotsForFace(side: net.minecraft.core.Direction): IntArray {
+        return sidedInventory.getSlotsForFace(side)
     }
 
-    override fun isItemValidForSlot(var1: Int, var2: ItemStack): Boolean {
-        return sidedInventory.isItemValidForSlot(var1, var2)
+    override fun canPlaceItemThroughFace(index: Int, itemStack: ItemStack, direction: net.minecraft.core.Direction?): Boolean {
+        return sidedInventory.canPlaceItemThroughFace(index, itemStack, direction)
     }
 
-    override fun getAccessibleSlotsFromSide(var1: Int): IntArray {
-        return sidedInventory.getAccessibleSlotsFromSide(var1)
+    override fun canTakeItemThroughFace(index: Int, itemStack: ItemStack, direction: net.minecraft.core.Direction): Boolean {
+        return sidedInventory.canTakeItemThroughFace(index, itemStack, direction)
     }
 
-    override fun canInsertItem(var1: Int, var2: ItemStack, var3: Int): Boolean {
-        return sidedInventory.canInsertItem(var1, var2, var3)
+    override fun clearContent() {
+        sidedInventory.clearContent()
     }
 
-    override fun canExtractItem(var1: Int, var2: ItemStack, var3: Int): Boolean {
-        return sidedInventory.canExtractItem(var1, var2, var3)
+    override fun isEmpty(): Boolean {
+        return sidedInventory.isEmpty
     }
 }

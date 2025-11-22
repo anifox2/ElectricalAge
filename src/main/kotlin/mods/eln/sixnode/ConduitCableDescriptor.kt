@@ -7,8 +7,8 @@ import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.six.*
 import net.minecraft.client.Minecraft
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
 import org.lwjgl.opengl.GL11
 
 class ConduitCableDescriptor(
@@ -16,18 +16,22 @@ class ConduitCableDescriptor(
     val render: CableRenderDescriptor
 ): SixNodeDescriptor(name, ConduitCableElement::class.java, ConduitCableRender::class.java) {
 
-    override fun addInformation(itemStack: ItemStack, entityPlayer: EntityPlayer, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        list.add(tr("A conduit to run your cables through"))
+    // ...existing code...
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
+        list.add(net.minecraft.network.chat.Component.literal(tr("A conduit to run your cables through")))
     }
 
+    /*
     override fun addRealismContext(list: MutableList<String>): RealisticEnum {
         list.add(tr("Has some caveats:"))
         list.add(tr("  * Thermal Sim is disabled in the conduit"))
         return RealisticEnum.REALISTIC
     }
+    */
 
     fun getNodeMask(): Int {
+// ...existing code...
         return NodeBase.maskConduit
     }
 
@@ -83,14 +87,16 @@ class ConduitCableRender(
         CableRender.drawNode(descriptor.render, connectedSide, CableRender.connectionType(this, side))
     }
 
+    // ...existing code...
     override fun draw() {
-        Minecraft.getMinecraft().mcProfiler.startSection("ECable")
+        Minecraft.getInstance().profiler.push("ECable")
         GL11.glColor3f(1f, 1f, 1f)
         UtilsClient.bindTexture(descriptor.render.cableTexture)
         glListCall()
         GL11.glColor3f(1f, 1f, 1f)
-        Minecraft.getMinecraft().mcProfiler.endSection()
+        Minecraft.getInstance().profiler.pop()
     }
+// ...existing code...
 
     override fun drawCableAuto() = false
 }

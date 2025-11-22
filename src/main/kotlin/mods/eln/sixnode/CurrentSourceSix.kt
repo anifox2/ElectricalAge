@@ -3,7 +3,7 @@ package mods.eln.sixnode
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.GuiHelper
-import mods.eln.gui.GuiScreenEln
+import mods.eln.gui.ScreenEln
 import mods.eln.gui.GuiTextFieldEln
 import mods.eln.i18n.I18N
 import mods.eln.i18n.I18N.tr
@@ -15,11 +15,12 @@ import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.CurrentSource
 import mods.eln.sim.nbt.NbtElectricalLoad
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.world.item.TooltipFlag
 import org.lwjgl.opengl.GL11
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
@@ -33,40 +34,24 @@ class CurrentSourceDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name
         main.draw()
     }
 
-    override fun addInformation(itemStack: ItemStack, entityPlayer: EntityPlayer, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        Collections.addAll<String>(list, *tr("Provides an ideal current source\nwithout energy or power limitation.").split("\n").toTypedArray())
-        list.add("")
-        list.add(tr("Internal resistance: %1$\u2126", Utils.plotValue(Eln.instance.lowVoltageCableDescriptor.electricalRs)))
-        list.add("")
-        list.add(tr("Creative block."))
+    override fun appendHoverText(itemStack: ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<Component>, flag: TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
+        tr("Provides an ideal current source\nwithout energy or power limitation.").split("\n").forEach { list.add(Component.literal(it)) }
+        list.add(Component.literal(""))
+        list.add(Component.literal(tr("Internal resistance: %1$\u2126", Utils.plotValue(Eln.lowVoltageCableDescriptor?.electricalRs ?: 0.0))))
+        list.add(Component.literal(""))
+        list.add(Component.literal(tr("Creative block.")))
     }
 
+    /*
     override fun addRealismContext(list: MutableList<String?>): RealisticEnum {
         super.addRealismContext(list)
         list.add(tr("Acts as an ideal current source, with a small inline resistance"))
         return RealisticEnum.IDEAL
     }
+    */
 
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType): Boolean {
-        return true
-    }
-
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
-        when (type) {
-            IItemRenderer.ItemRenderType.ENTITY -> draw()
-            IItemRenderer.ItemRenderType.EQUIPPED, IItemRenderer.ItemRenderType.EQUIPPED_FIRST_PERSON -> {
-                GL11.glPushMatrix()
-                GL11.glTranslatef(0.8f, 0.3f, 0.2f)
-                GL11.glRotatef(150f, 0f, 0f, 1f)
-                draw()
-                GL11.glPopMatrix()
-            }
-            IItemRenderer.ItemRenderType.INVENTORY, IItemRenderer.ItemRenderType.FIRST_PERSON_MAP -> super.renderItem(type, item, *data)
-        }
-    }
-
-    override fun canBePlacedOnSide(player: EntityPlayer?, side: Direction) = true
+    override fun canBePlacedOnSide(player: Player?, side: Direction) = true
 
     init {
         voltageLevelColor = VoltageLevelColor.Neutral
@@ -74,18 +59,18 @@ class CurrentSourceDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name
 }
 
 
-class CurrentSourceElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor) : SixNodeElement(sixNode, side, descriptor), IConfigurable {
+class CurrentSourceElement(_sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor) : SixNodeElement(_sixNode, side, descriptor), IConfigurable {
     var electricalLoad = NbtElectricalLoad("electricalLoad")
     var currentSource = CurrentSource("currSrc", electricalLoad, null)
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         currentSource.current = nbt.getDouble("current")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
-        nbt.setDouble("current", currentSource.current)
+        nbt.putDouble("current", currentSource.current)
     }
 
     override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad {
@@ -141,7 +126,7 @@ class CurrentSourceElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         Eln.applySmallRs(electricalLoad)
     }
 
-    override fun onBlockActivated(entityPlayer: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(entityPlayer: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         return onBlockActivatedRotate(entityPlayer)
     }
 
@@ -149,15 +134,15 @@ class CurrentSourceElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         return true
     }
 
-    override fun readConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
-        if (compound.hasKey("current")) {
+    override fun readConfigTool(compound: CompoundTag, invoker: Player) {
+        if (compound.contains("current")) {
             currentSource.current = compound.getDouble("current")
             needPublish()
         }
     }
 
-    override fun writeConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
-        compound.setDouble("current", currentSource.current)
+    override fun writeConfigTool(compound: CompoundTag, invoker: Player) {
+        compound.putDouble("current", currentSource.current)
     }
 
     init {
@@ -168,7 +153,7 @@ class CurrentSourceElement(sixNode: SixNode, side: Direction, descriptor: SixNod
     val setVoltageId: Byte = 1
 }
 
-class CurrentSourceGui(var render: CurrentSourceRender) : GuiScreenEln() {
+class CurrentSourceGui(var render: CurrentSourceRender) : ScreenEln() {
     var current: GuiTextFieldEln? = null
     override fun newHelper(): GuiHelper {
         return GuiHelper(this, 50 + 12, 12 + 12)
@@ -177,14 +162,14 @@ class CurrentSourceGui(var render: CurrentSourceRender) : GuiScreenEln() {
     override fun initGui() {
         super.initGui()
         current = newGuiTextField(6, 6, 50)
-        current!!.setText(render.current.toFloat())
+        current!!.value = render.current.toString()
         current!!.setObserver(this)
-        current!!.setComment(arrayOf(tr("Current sourced")))
+        current!!.setComment(listOf(tr("Current sourced")))
     }
 
     override fun textFieldNewValue(textField: GuiTextFieldEln, value: String) {
 
-        val newCurrent = current!!.text.toDoubleOrNull()?: 0.0
+        val newCurrent = current!!.value.toDoubleOrNull()?: 0.0
 
         try {
             val bos = ByteArrayOutputStream()
@@ -219,11 +204,11 @@ class CurrentSourceRender(tileEntity: SixNodeEntity, side: Direction, descriptor
         }
     }
 
-    override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen {
+    override fun newGuiDraw(side: Direction, player: Player): Screen {
         return CurrentSourceGui(this)
     }
 
-    override fun getCableRender(lrdu: LRDU): CableRenderDescriptor {
-        return Eln.instance.veryHighVoltageCableDescriptor.render
+    override fun getCableRender(lrdu: LRDU): CableRenderDescriptor? {
+        return Eln.veryHighVoltageCableDescriptor?.render
     }
 }

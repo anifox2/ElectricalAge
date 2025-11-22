@@ -11,10 +11,12 @@ class SignalInductorRender(tileEntity: SixNodeEntity?, side: Direction?, descrip
     SixNodeElementRender(
         tileEntity!!, side!!, descriptor!!
     ) {
+    // ...existing code...
     override fun draw() {
-        val i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3]
+        val i = Minecraft.getInstance().player?.inventory?.armor?.get(3)
 
         GL11.glDisable(GL11.GL_TEXTURE_2D)
+// ...existing code...
 
         GL11.glLineWidth(10f)
         GL11.glBegin(GL11.GL_LINES)

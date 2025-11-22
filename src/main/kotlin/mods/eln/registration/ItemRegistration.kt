@@ -1,8 +1,6 @@
 package mods.eln.registration
 
-import cpw.mods.fml.common.registry.GameRegistry
 import mods.eln.Eln
-import mods.eln.Eln.instance
 import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.generic.GenericItemUsingDamageDescriptorWithComment
 import mods.eln.generic.genericArmorItem
@@ -21,14 +19,28 @@ import mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor
 import mods.eln.sixnode.lampsocket.LampSocketType
 import mods.eln.sixnode.wirelesssignal.WirelessSignalAnalyserItemDescriptor
 import mods.eln.wiki.Data
-import net.minecraft.entity.monster.IMob
-import net.minecraft.entity.passive.EntityAnimal
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.*
-import net.minecraft.item.Item.ToolMaterial
-import net.minecraft.item.ItemArmor.ArmorMaterial
-import net.minecraftforge.common.util.EnumHelper
-import net.minecraftforge.oredict.OreDictionary
+import net.minecraft.world.entity.monster.Enemy as IMob
+import net.minecraft.world.entity.animal.Animal as EntityAnimal
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.*
+import net.minecraft.world.item.Tiers
+import net.minecraft.world.item.ArmorMaterials
+import net.minecraft.world.item.ArmorMaterial
+import net.minecraft.world.item.SwordItem
+import net.minecraft.world.item.HoeItem
+import net.minecraft.world.item.ShovelItem
+import net.minecraft.world.item.PickaxeItem
+import net.minecraft.world.item.AxeItem
+import mods.eln.misc.EnumHelper
+import mods.eln.misc.OreDictionary
+import mods.eln.misc.GameRegistry
+import mods.eln.cable.CopperCableDescriptor
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.Blocks
+
+fun Item.setUnlocalizedName(name: String): Item = this
+fun Item.setTextureName(name: String): Item = this
+fun Item.setCreativeTab(tab: net.minecraft.world.item.CreativeModeTab?): Item = this
 
 object ItemRegistration {
     fun registerItem() {
@@ -91,7 +103,7 @@ object ItemRegistration {
                 Eln.LVU,
                 150.0,
                 190.0,
-                instance.lowVoltageCableDescriptor
+                Eln.instance.lowVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -103,7 +115,7 @@ object ItemRegistration {
                 Eln.LVU,
                 250.0,
                 320.0,
-                instance.lowVoltageCableDescriptor
+                Eln.instance.lowVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -115,7 +127,7 @@ object ItemRegistration {
                 Eln.MVU,
                 400.0,
                 500.0,
-                instance.meduimVoltageCableDescriptor
+                Eln.instance.meduimVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -127,7 +139,7 @@ object ItemRegistration {
                 Eln.MVU,
                 600.0,
                 750.0,
-                instance.highVoltageCableDescriptor
+                Eln.instance.highVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -139,7 +151,7 @@ object ItemRegistration {
                 Eln.LVU,
                 180.0,
                 225.0,
-                instance.lowVoltageCableDescriptor
+                Eln.instance.lowVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -151,7 +163,7 @@ object ItemRegistration {
                 Eln.LVU,
                 375.0,
                 480.0,
-                instance.lowVoltageCableDescriptor
+                Eln.instance.lowVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -163,7 +175,7 @@ object ItemRegistration {
                 Eln.MVU,
                 600.0,
                 750.0,
-                instance.meduimVoltageCableDescriptor
+                Eln.instance.meduimVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -175,7 +187,7 @@ object ItemRegistration {
                 Eln.MVU,
                 900.0,
                 1050.0,
-                instance.highVoltageCableDescriptor
+                Eln.instance.highVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -187,7 +199,7 @@ object ItemRegistration {
                 Eln.LVU,
                 240.0,
                 300.0,
-                instance.lowVoltageCableDescriptor
+                Eln.instance.lowVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -199,7 +211,7 @@ object ItemRegistration {
                 Eln.LVU,
                 500.0,
                 640.0,
-                instance.lowVoltageCableDescriptor
+                Eln.instance.lowVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -211,7 +223,7 @@ object ItemRegistration {
                 Eln.MVU,
                 800.0,
                 1000.0,
-                instance.meduimVoltageCableDescriptor
+                Eln.instance.meduimVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -223,7 +235,7 @@ object ItemRegistration {
                 Eln.MVU,
                 1200.0,
                 1500.0,
-                instance.highVoltageCableDescriptor
+                Eln.instance.highVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -235,7 +247,7 @@ object ItemRegistration {
                 Eln.HVU,
                 3600.0,
                 4800.0,
-                instance.veryHighVoltageCableDescriptor
+                Eln.instance.veryHighVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -247,7 +259,7 @@ object ItemRegistration {
                 Eln.HVU,
                 4812.0,
                 6015.0,
-                instance.veryHighVoltageCableDescriptor
+                Eln.instance.veryHighVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -259,7 +271,7 @@ object ItemRegistration {
                 Eln.VVU,
                 4000.0,
                 6000.0,
-                instance.veryHighVoltageCableDescriptor
+                Eln.instance.veryHighVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -271,7 +283,7 @@ object ItemRegistration {
                 Eln.VVU,
                 12000.0,
                 15000.0,
-                instance.veryHighVoltageCableDescriptor
+                Eln.instance.veryHighVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -337,7 +349,7 @@ object ItemRegistration {
                 Eln.LVU,
                 lightPower[12],
                 lightLevel[12],
-                instance.incandescentLampLife,
+                Eln.incandescentLampLife,
                 standardGrowRate
             )
             Eln.sharedItem.addElement(completId, element)
@@ -353,7 +365,7 @@ object ItemRegistration {
                 Eln.LVU,
                 lightPower[14],
                 lightLevel[14],
-                instance.incandescentLampLife,
+                Eln.incandescentLampLife,
                 standardGrowRate
             )
             Eln.sharedItem.addElement(completId, element)
@@ -369,7 +381,7 @@ object ItemRegistration {
                 Eln.MVU,
                 lightPower[14],
                 lightLevel[14],
-                instance.incandescentLampLife,
+                Eln.incandescentLampLife,
                 standardGrowRate
             )
             Eln.sharedItem.addElement(completId, element)
@@ -385,7 +397,7 @@ object ItemRegistration {
                 Eln.LVU,
                 lightPower[11],
                 lightLevel[11],
-                instance.carbonLampLife,
+                Eln.carbonLampLife,
                 standardGrowRate
             )
             Eln.sharedItem.addElement(completId, element)
@@ -401,7 +413,7 @@ object ItemRegistration {
                 Eln.LVU,
                 lightPower[13],
                 lightLevel[13],
-                instance.carbonLampLife,
+                Eln.carbonLampLife,
                 standardGrowRate
             )
             Eln.sharedItem.addElement(completId, element)
@@ -417,7 +429,7 @@ object ItemRegistration {
                 Eln.LVU,
                 lightPower[12] * economicPowerFactor,
                 lightLevel[12],
-                instance.economicLampLife,
+                Eln.economicLampLife,
                 standardGrowRate
             )
             Eln.sharedItem.addElement(completId, element)
@@ -428,7 +440,7 @@ object ItemRegistration {
             element = LampDescriptor(
                 I18N.TR_NAME(I18N.Type.NONE, "50V Economic Light Bulb"), "fluorescentlamp",
                 LampDescriptor.Type.ECO, LampSocketType.Douille, Eln.LVU, lightPower[14] * economicPowerFactor,
-                lightLevel[14], instance.economicLampLife, standardGrowRate
+                lightLevel[14], Eln.economicLampLife, standardGrowRate
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -438,7 +450,7 @@ object ItemRegistration {
             element = LampDescriptor(
                 I18N.TR_NAME(I18N.Type.NONE, "200V Economic Light Bulb"), "fluorescentlamp",
                 LampDescriptor.Type.ECO, LampSocketType.Douille, Eln.MVU, lightPower[14] * economicPowerFactor,
-                lightLevel[14], instance.economicLampLife, standardGrowRate
+                lightLevel[14], Eln.economicLampLife, standardGrowRate
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -453,7 +465,7 @@ object ItemRegistration {
                 Eln.LVU,
                 120.0,
                 lightLevel[15],
-                instance.incandescentLampLife,
+                Eln.incandescentLampLife,
                 0.50
             )
             Eln.sharedItem.addElement(completId, element)
@@ -469,7 +481,7 @@ object ItemRegistration {
                 Eln.MVU,
                 120.0,
                 lightLevel[15],
-                instance.incandescentLampLife,
+                Eln.incandescentLampLife,
                 0.50
             )
             Eln.sharedItem.addElement(completId, element)
@@ -485,7 +497,7 @@ object ItemRegistration {
                 Eln.LVU,
                 lightPower[14] / 2,
                 lightLevel[14],
-                instance.ledLampLife,
+                Eln.ledLampLife,
                 standardGrowRate
             )
             Eln.sharedItem.addElement(completId, element)
@@ -501,7 +513,7 @@ object ItemRegistration {
                 Eln.MVU,
                 lightPower[14] / 2,
                 lightLevel[14],
-                instance.ledLampLife,
+                Eln.ledLampLife,
                 standardGrowRate
             )
             Eln.sharedItem.addElement(completId, element)
@@ -604,7 +616,7 @@ object ItemRegistration {
         var id = id
         var subId: Int
         var completId: Int
-        var name: String?
+        var name: String = ""
         var element: GenericItemUsingDamageDescriptorWithComment
 
         run {
@@ -662,7 +674,7 @@ object ItemRegistration {
             element = GenericItemUsingDamageDescriptorWithComment(name, arrayOf())
             Eln.sharedItem.addElement(id, element)
             Data.addResource(element.newItemStack())
-            addToOre(Eln.dictTungstenDust, element.newItemStack())
+            if (Eln.dictTungstenDust) addToOre("dustTungsten", element.newItemStack())
         }
 
         run {
@@ -704,7 +716,7 @@ object ItemRegistration {
     private fun registerIngot(id: Int) {
         var subId: Int
         var completId: Int
-        var name: String?
+        var name: String = ""
 
         var element: GenericItemUsingDamageDescriptorWithComment
 
@@ -714,7 +726,7 @@ object ItemRegistration {
             name = I18N.TR_NAME(I18N.Type.NONE, "Copper Ingot")
             element = GenericItemUsingDamageDescriptorWithComment(name, arrayOf())
             Eln.sharedItem.addElement(completId, element)
-            instance.copperIngot = element
+            Eln.copperIngot = element
             Data.addResource(element.newItemStack())
             addToOre("ingotCopper", element.newItemStack())
         }
@@ -725,7 +737,7 @@ object ItemRegistration {
             name = I18N.TR_NAME(I18N.Type.NONE, "Lead Ingot")
             element = GenericItemUsingDamageDescriptorWithComment(name, arrayOf())
             Eln.sharedItem.addElement(completId, element)
-            instance.plumbIngot = element
+            Eln.plumbIngot = element
             Data.addResource(element.newItemStack())
             addToOre("ingotLead", element.newItemStack())
         }
@@ -736,9 +748,9 @@ object ItemRegistration {
             name = I18N.TR_NAME(I18N.Type.NONE, "Tungsten Ingot")
             element = GenericItemUsingDamageDescriptorWithComment(name, arrayOf())
             Eln.sharedItem.addElement(completId, element)
-            instance.tungstenIngot = element
+            Eln.tungstenIngot = element
             Data.addResource(element.newItemStack())
-            addToOre(Eln.dictTungstenIngot, element.newItemStack())
+            if (Eln.dictTungstenIngot) addToOre("ingotTungsten", element.newItemStack())
         }
 
         run {
@@ -783,43 +795,43 @@ object ItemRegistration {
             subId = 0
             name = I18N.TR_NAME(I18N.Type.NONE, "Silicon Wafer")
             Eln.siliconWafer = SiliconWafer(name)
-            Eln.sharedItem.addElement(subId + (id shl 6), Eln.siliconWafer)
-            OreDictionary.registerOre(Eln.dictSiliconWafer, Eln.siliconWafer.newItemStack())
+            Eln.sharedItem.addElement(subId + (id shl 6), Eln.siliconWafer!!)
+            if (Eln.dictSiliconWafer) OreDictionary.registerOre("waferSilicon", Eln.siliconWafer!!.newItemStack())
         }
         run {
             subId = 1
             name = I18N.TR_NAME(I18N.Type.NONE, "Transistor")
             Eln.transistor = Transistor(name)
-            Eln.sharedItem.addElement(subId + (id shl 6), Eln.transistor)
-            OreDictionary.registerOre(Eln.dictTransistor, Eln.transistor.newItemStack())
+            Eln.sharedItem.addElement(subId + (id shl 6), Eln.transistor!!)
+            if (Eln.dictTransistor) OreDictionary.registerOre("componentTransistor", Eln.transistor!!.newItemStack())
         }
         run {
             subId = 2
             name = I18N.TR_NAME(I18N.Type.NONE, "NTC Thermistor")
             Eln.thermistor = Thermistor(name)
-            Eln.sharedItem.addElement(subId + (id shl 6), Eln.thermistor)
-            OreDictionary.registerOre(Eln.dictThermistor, Eln.thermistor.newItemStack())
+            Eln.sharedItem.addElement(subId + (id shl 6), Eln.thermistor!!)
+            if (Eln.dictThermistor) OreDictionary.registerOre("componentThermistor", Eln.thermistor!!.newItemStack())
         }
         run {
             subId = 3
             name = I18N.TR_NAME(I18N.Type.NONE, "Nibble Memory Chip")
             Eln.nibbleMemory = NibbleMemory(name)
-            Eln.sharedItem.addElement(subId + (id shl 6), Eln.nibbleMemory)
-            OreDictionary.registerOre(Eln.dictNibbleMemory, Eln.nibbleMemory.newItemStack())
+            Eln.sharedItem.addElement(subId + (id shl 6), Eln.nibbleMemory!!)
+            if (Eln.dictNibbleMemory) OreDictionary.registerOre("componentNibbleMemory", Eln.nibbleMemory!!.newItemStack())
         }
         run {
             subId = 4
             name = I18N.TR_NAME(I18N.Type.NONE, "Arithmetic Logic Unit")
             Eln.alu = ArithmeticLogicUnit(name)
-            Eln.sharedItem.addElement(subId + (id shl 6), Eln.alu)
-            OreDictionary.registerOre(Eln.dictALU, Eln.alu.newItemStack())
+            Eln.sharedItem.addElement(subId + (id shl 6), Eln.alu!!)
+            if (Eln.dictALU) OreDictionary.registerOre("componentALU", Eln.alu!!.newItemStack())
         }
     }
 
     private fun registerElectricalMotor(id: Int) {
         var subId: Int
         var completId: Int
-        var name: String?
+        var name: String = ""
         var element: GenericItemUsingDamageDescriptorWithComment
 
         run {
@@ -936,7 +948,7 @@ object ItemRegistration {
     private fun registerElectricalDrill(id: Int) {
         var subId: Int
         var completId: Int
-        var name: String?
+        var name: String = ""
 
         var descriptor: ElectricalDrillDescriptor
         run {
@@ -980,7 +992,7 @@ object ItemRegistration {
     private fun registerOreScanner(id: Int) {
         var subId: Int
         var completId: Int
-        var name: String?
+        var name: String = ""
 
         var descriptor: OreScanner
         run {
@@ -995,7 +1007,7 @@ object ItemRegistration {
     private fun registerMiningPipe(id: Int) {
         var subId: Int
         var completId: Int
-        var name: String?
+        var name: String = ""
 
         var descriptor: MiningPipeDescriptor
         run {
@@ -1018,9 +1030,9 @@ object ItemRegistration {
             subId = 0
             completId = subId + (id shl 6)
             name = I18N.TR_NAME(I18N.Type.NONE, "Copper Cable")
-            instance.copperCableDescriptor = CopperCableDescriptor(name)
-            Eln.sharedItem.addElement(completId, instance.copperCableDescriptor)
-            Data.addResource(instance.copperCableDescriptor.newItemStack())
+            Eln.copperCableDescriptor = CopperCableDescriptor(name)
+            Eln.sharedItem.addElement(completId, Eln.copperCableDescriptor!!)
+            Data.addResource(Eln.copperCableDescriptor!!.newItemStack())
         }
         run {
             subId = 1
@@ -1225,7 +1237,7 @@ object ItemRegistration {
             name = I18N.TR_NAME(I18N.Type.NONE, "X-Ray Scanner")
             val desc = PortableOreScannerItem(
                 name, Eln.obj.getObj("XRayScanner"), 100000.0, 400.0,
-                300.0, instance.xRayScannerRange, (Math.PI / 2).toFloat(), 32, 20
+                300.0, Eln.xRayScannerRange.toFloat(), (Math.PI / 2).toFloat(), 32, 20
             )
             Eln.sharedItemStackOne.addElement(subId + (id shl 6), desc)
         }
@@ -1235,7 +1247,7 @@ object ItemRegistration {
         Eln.sharedItemStackOne.addElement(
             0 + (id shl 6), FuelBurnerDescriptor(
                 I18N.TR_NAME(I18N.Type.NONE, "Small Fuel Burner"),
-                5000 * instance.fuelHeatFurnacePowerFactor, 2, 1.6f
+                5000 * Eln.fuelHeatFurnacePowerFactor, 2, 1.6f
             )
         )
         Eln.sharedItemStackOne.addElement(
@@ -1243,20 +1255,20 @@ object ItemRegistration {
                 I18N.TR_NAME(
                     I18N.Type.NONE,
                     "Medium Fuel Burner"
-                ), 10000 * instance.fuelHeatFurnacePowerFactor, 1, 1.4f
+                ), 10000 * Eln.fuelHeatFurnacePowerFactor, 1, 1.4f
             )
         )
         Eln.sharedItemStackOne.addElement(
             2 + (id shl 6), FuelBurnerDescriptor(
                 I18N.TR_NAME(I18N.Type.NONE, "Big Fuel Burner"),
-                25000 * instance.fuelHeatFurnacePowerFactor, 0, 1f
+                25000 * Eln.fuelHeatFurnacePowerFactor, 0, 1f
             )
         )
     }
 
     private fun registerMiscItem(id: Int) {
         var subId: Int
-        var name: String?
+        var name: String = ""
         run {
             subId = 0
             name = I18N.TR_NAME(I18N.Type.NONE, "Cheap Chip")
@@ -1266,7 +1278,7 @@ object ItemRegistration {
             )
             Eln.sharedItem.addElement(subId + (id shl 6), desc)
             Data.addResource(desc.newItemStack())
-            OreDictionary.registerOre(Eln.dictCheapChip, desc.newItemStack())
+            if (Eln.dictCheapChip) OreDictionary.registerOre("chipCheap", desc.newItemStack())
         }
         run {
             subId = 1
@@ -1277,7 +1289,7 @@ object ItemRegistration {
             )
             Eln.sharedItem.addElement(subId + (id shl 6), desc)
             Data.addResource(desc.newItemStack())
-            OreDictionary.registerOre(Eln.dictAdvancedChip, desc.newItemStack())
+            if (Eln.dictAdvancedChip) OreDictionary.registerOre("chipAdvanced", desc.newItemStack())
         }
         run {
             subId = 2
@@ -1455,7 +1467,7 @@ object ItemRegistration {
             subId = 32
             name = I18N.TR_NAME(I18N.Type.NONE, "Data Logger Print")
             val desc = DataLogsPrintDescriptor(name)
-            instance.dataLogsPrintDescriptor = desc
+            Eln.dataLogsPrintDescriptor = desc
             desc.setDefaultIcon("empty-texture")
             Eln.sharedItem.addWithoutRegistry(subId + (id shl 6), desc)
         }
@@ -1475,7 +1487,7 @@ object ItemRegistration {
             subId = 40
             name = I18N.TR_NAME(I18N.Type.NONE, "Player Filter")
             val desc =
-                EntitySensorFilterDescriptor(name, EntityPlayer::class.java, 0f, 1f, 0f)
+                EntitySensorFilterDescriptor(name, Player::class.java, 0f, 1f, 0f)
             Eln.sharedItem.addElement(subId + (id shl 6), desc)
         }
         run {
@@ -1589,13 +1601,14 @@ object ItemRegistration {
             val desc = BrushDescriptor(name)
             Eln.sharedItem.addElement(subId + (id shl 6), desc)
             Eln.whiteDesc = desc
-            Eln.brushSubNames = subNames.toList()
+            Eln.brushSubNames = subNames
         }
     }
 
     public fun registerOre() {
+        Eln.oreItem = mods.eln.item.OreItem("Ore")
         var id: Int
-        var name: String?
+        var name: String = ""
 
         run {
             id = 1
@@ -1603,7 +1616,7 @@ object ItemRegistration {
             val desc =
                 OreDescriptor(name, id, 30 * (if (Eln.genCopper) 1 else 0), 6, 10, 0, 80)
             Eln.oreCopper = desc
-            Eln.oreItem.addDescriptor(id, desc)
+            Eln.oreItem!!.addDescriptor(id, desc)
             addToOre("oreCopper", desc.newItemStack())
         }
 
@@ -1612,7 +1625,7 @@ object ItemRegistration {
             name = I18N.TR_NAME(I18N.Type.NONE, "Lead Ore")
             val desc =
                 OreDescriptor(name, id, 8 * (if (Eln.genLead) 1 else 0), 3, 9, 0, 24)
-            Eln.oreItem.addDescriptor(id, desc)
+            Eln.oreItem!!.addDescriptor(id, desc)
             addToOre("oreLead", desc.newItemStack())
         }
         run {
@@ -1620,15 +1633,15 @@ object ItemRegistration {
             name = I18N.TR_NAME(I18N.Type.NONE, "Tungsten Ore")
             val desc =
                 OreDescriptor(name, id, 6 * (if (Eln.genTungsten) 1 else 0), 3, 9, 0, 32)
-            Eln.oreItem.addDescriptor(id, desc)
-            addToOre(Eln.dictTungstenOre, desc.newItemStack())
+            Eln.oreItem!!.addDescriptor(id, desc)
+            if (Eln.dictTungstenOre) addToOre("oreTungsten", desc.newItemStack())
         }
         run {
             id = 6
             name = I18N.TR_NAME(I18N.Type.NONE, "Cinnabar Ore")
             val desc =
                 OreDescriptor(name, id, 3 * (if (Eln.genCinnabar) 1 else 0), 3, 9, 0, 32)
-            Eln.oreItem.addDescriptor(id, desc)
+            Eln.oreItem!!.addDescriptor(id, desc)
             addToOre("oreCinnabar", desc.newItemStack())
         }
     }
@@ -1639,40 +1652,40 @@ object ItemRegistration {
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Helmet")
             Eln.helmetCopper = genericArmorItem(
-                ArmorMaterial.IRON, 2, ArmourType.Helmet, "eln:textures" +
+                ArmorMaterials.IRON, 2, ArmourType.Helmet, "eln:textures" +
                         "/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"
-            ).setUnlocalizedName(name).setTextureName("eln:copper_helmet").setCreativeTab(Eln.creativeTab) as ItemArmor
-            GameRegistry.registerItem(Eln.helmetCopper, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.helmetCopper))
+            ).setUnlocalizedName(name).setTextureName("eln:copper_helmet").setCreativeTab(Eln.creativeTab) as genericArmorItem
+            GameRegistry.registerItem(Eln.helmetCopper!!, "Eln.$name")
+            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.helmetCopper!!))
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Chestplate")
             Eln.chestplateCopper = genericArmorItem(
-                ArmorMaterial.IRON, 2, ArmourType.Chestplate, "eln" +
+                ArmorMaterials.IRON, 2, ArmourType.Chestplate, "eln" +
                         ":textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"
             ).setUnlocalizedName(name).setTextureName("eln:copper_chestplate")
-                .setCreativeTab(Eln.creativeTab) as ItemArmor
-            GameRegistry.registerItem(Eln.chestplateCopper, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.chestplateCopper))
+                .setCreativeTab(Eln.creativeTab) as genericArmorItem
+            GameRegistry.registerItem(Eln.chestplateCopper!!, "Eln.$name")
+            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.chestplateCopper!!))
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Leggings")
             Eln.legsCopper = genericArmorItem(
-                ArmorMaterial.IRON, 2, ArmourType.Leggings, "eln:textures" +
+                ArmorMaterials.IRON, 2, ArmourType.Leggings, "eln:textures" +
                         "/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"
             ).setUnlocalizedName(name).setTextureName("eln:copper_leggings")
-                .setCreativeTab(Eln.creativeTab) as ItemArmor
-            GameRegistry.registerItem(Eln.legsCopper, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.legsCopper))
+                .setCreativeTab(Eln.creativeTab) as genericArmorItem
+            GameRegistry.registerItem(Eln.legsCopper!!, "Eln.$name")
+            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.legsCopper!!))
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Boots")
             Eln.bootsCopper = genericArmorItem(
-                ArmorMaterial.IRON, 2, ArmourType.Boots, "eln:textures" +
+                ArmorMaterials.IRON, 2, ArmourType.Boots, "eln:textures" +
                         "/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"
-            ).setUnlocalizedName(name).setTextureName("eln:copper_boots").setCreativeTab(Eln.creativeTab) as ItemArmor
-            GameRegistry.registerItem(Eln.bootsCopper, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.bootsCopper))
+            ).setUnlocalizedName(name).setTextureName("eln:copper_boots").setCreativeTab(Eln.creativeTab) as genericArmorItem
+            GameRegistry.registerItem(Eln.bootsCopper!!, "Eln.$name")
+            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.bootsCopper!!))
         }
         val t1 = "eln:textures/armor/ecoal_layer_1.png"
         val t2 = "eln:textures/armor/ecoal_layer_2.png"
@@ -1691,9 +1704,9 @@ object ItemRegistration {
             ).setUnlocalizedName(name).setTextureName(
                 "eln" +
                         ":ecoal_helmet"
-            ).setCreativeTab(Eln.creativeTab) as ItemArmor
-            GameRegistry.registerItem(Eln.helmetECoal, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.helmetECoal))
+            ).setCreativeTab(Eln.creativeTab) as genericArmorItem
+            GameRegistry.registerItem(Eln.helmetECoal!!, "Eln.$name")
+            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.helmetECoal!!))
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "E-Coal Chestplate")
@@ -1702,9 +1715,9 @@ object ItemRegistration {
                 eCoalMaterial, 2, ArmourType.Chestplate, t1, t2, 8000.0,
                 2000.0, armor / 20.0, armor * energyPerDamage, energyPerDamage
             ).setUnlocalizedName(name).setTextureName("eln:ecoal_chestplate")
-                .setCreativeTab(Eln.creativeTab) as ItemArmor
-            GameRegistry.registerItem(Eln.plateECoal, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.plateECoal))
+                .setCreativeTab(Eln.creativeTab) as genericArmorItem
+            GameRegistry.registerItem(Eln.plateECoal!!, "Eln.$name")
+            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.plateECoal!!))
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "E-Coal Leggings")
@@ -1715,9 +1728,9 @@ object ItemRegistration {
             ).setUnlocalizedName(name).setTextureName(
                 "eln" +
                         ":ecoal_leggings"
-            ).setCreativeTab(Eln.creativeTab) as ItemArmor
-            GameRegistry.registerItem(Eln.legsECoal, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.legsECoal))
+            ).setCreativeTab(Eln.creativeTab) as genericArmorItem
+            GameRegistry.registerItem(Eln.legsECoal!!, "Eln.$name")
+            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.legsECoal!!))
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "E-Coal Boots")
@@ -1728,9 +1741,9 @@ object ItemRegistration {
             ).setUnlocalizedName(name).setTextureName(
                 "eln" +
                         ":ecoal_boots"
-            ).setCreativeTab(Eln.creativeTab) as ItemArmor
-            GameRegistry.registerItem(Eln.bootsECoal, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.bootsECoal))
+            ).setCreativeTab(Eln.creativeTab) as genericArmorItem
+            GameRegistry.registerItem(Eln.bootsECoal!!, "Eln.$name")
+            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.bootsECoal!!))
         }
     }
 
@@ -1738,47 +1751,48 @@ object ItemRegistration {
         var name: String
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Sword")
-            Eln.swordCopper = ItemSword(ToolMaterial.IRON).setUnlocalizedName(name).setTextureName(
+            Eln.swordCopper = SwordItem(Tiers.IRON, 3, -2.4f, Item.Properties()).setUnlocalizedName(name).setTextureName(
                 "eln" +
                         ":copper_sword"
-            ).setCreativeTab(Eln.creativeTab)
-            GameRegistry.registerItem(Eln.swordCopper, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.swordCopper))
+            ).setCreativeTab(Eln.creativeTab) as SwordItem
+            GameRegistry.registerItem(Eln.swordCopper!!, "Eln.$name")
+            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.swordCopper!!))
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Hoe")
             Eln.hoeCopper =
-                ItemHoe(ToolMaterial.IRON).setUnlocalizedName(name).setTextureName("eln:copper_hoe")
-                    .setCreativeTab(Eln.creativeTab)
-            GameRegistry.registerItem(Eln.hoeCopper, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.hoeCopper))
+                HoeItem(Tiers.IRON, -2, -1.0f, Item.Properties()).setUnlocalizedName(name).setTextureName("eln:copper_hoe")
+                    .setCreativeTab(Eln.creativeTab) as HoeItem
+            GameRegistry.registerItem(Eln.hoeCopper!!, "Eln.$name")
+            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.hoeCopper!!))
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Shovel")
-            Eln.shovelCopper = ItemSpade(ToolMaterial.IRON).setUnlocalizedName(name).setTextureName(
+            Eln.shovelCopper = ShovelItem(Tiers.IRON, 1.5f, -3.0f, Item.Properties()).setUnlocalizedName(name).setTextureName(
                 "eln" +
                         ":copper_shovel"
-            ).setCreativeTab(Eln.creativeTab)
-            GameRegistry.registerItem(Eln.shovelCopper, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.shovelCopper))
+            ).setCreativeTab(Eln.creativeTab) as ShovelItem
+            GameRegistry.registerItem(Eln.shovelCopper!!, "Eln.$name")
+            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.shovelCopper!!))
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Pickaxe")
-            Eln.pickaxeCopper = ItemPickaxeEln(ToolMaterial.IRON).setUnlocalizedName(name).setTextureName(
+            Eln.pickaxeCopper = ItemPickaxeEln(Tiers.IRON).setUnlocalizedName(name).setTextureName(
                 "eln" +
                         ":copper_pickaxe"
-            ).setCreativeTab(Eln.creativeTab)
-            GameRegistry.registerItem(Eln.pickaxeCopper, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.pickaxeCopper))
+            ).setCreativeTab(Eln.creativeTab) as ItemPickaxeEln
+            GameRegistry.registerItem(Eln.pickaxeCopper!!, "Eln.$name")
+            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.pickaxeCopper!!))
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Axe")
             Eln.axeCopper =
-                ItemAxeEln(ToolMaterial.IRON).setUnlocalizedName(name).setTextureName("eln:copper_axe")
-                    .setCreativeTab(Eln.creativeTab)
-            GameRegistry.registerItem(Eln.axeCopper, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.axeCopper))
+                ItemAxeEln(Tiers.IRON).setUnlocalizedName(name).setTextureName("eln:copper_axe")
+                    .setCreativeTab(Eln.creativeTab) as ItemAxeEln
+            GameRegistry.registerItem(Eln.axeCopper!!, "Eln.$name")
+            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.axeCopper!!))
         }
     }
 
 }
+   

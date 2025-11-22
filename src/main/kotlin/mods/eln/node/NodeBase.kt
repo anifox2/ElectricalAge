@@ -4,14 +4,14 @@ package mods.eln.node
 import mods.eln.misc.Utils.println
 import mods.eln.misc.Utils.addChatMessage
 import mods.eln.misc.Coordinate
-import net.minecraft.entity.player.EntityPlayerMP
+import net.minecraft.world.entity.player.ServerPlayer
 import mods.eln.misc.LRDUCubeMask
-import net.minecraft.world.World
+import net.minecraft.world.level.Level
 import mods.eln.Eln
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.item.ItemStack
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.entity.player.Player
+import net.minecraft.nbt.CompoundTag
 import mods.eln.sound.SoundCommand
 import mods.eln.GuiHandler
 import mods.eln.misc.LRDU
@@ -23,18 +23,17 @@ import mods.eln.misc.INBTTReady
 import java.io.IOException
 import kotlin.jvm.JvmOverloads
 import net.minecraft.server.MinecraftServer
-import cpw.mods.fml.common.FMLCommonHandler
 import mods.eln.ServerKeyHandler
-import net.minecraft.world.WorldServer
-import net.minecraft.entity.item.EntityItem
-import net.minecraft.inventory.IInventory
-import net.minecraft.init.Blocks
+import net.minecraft.world.level.LevelServer
+import net.minecraft.world.entity.item.ItemEntity
+import net.minecraft.world.Container
+import net.minecraft.world.level.block.Blocks
 import mods.eln.ghost.GhostBlock
 import mods.eln.misc.Direction
 import mods.eln.misc.Utils
 import mods.eln.sim.ElectricalConnection
 import mods.eln.sim.ThermalConnection
-import net.minecraft.block.Block
+import net.minecraft.world.level.block.Block
 import net.minecraft.entity.Entity
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
@@ -61,7 +60,7 @@ abstract class NodeBase {
     open val blockMetadata: Int
         get() = 0
 
-    open fun networkUnserialize(stream: DataInputStream, player: EntityPlayerMP?) {}
+    open fun networkUnserialize(stream: DataInputStream, player: ServerPlayer?) {}
     fun notifyNeighbor() {
         coordinate.world().notifyBlockChange(coordinate.x, coordinate.y, coordinate.z, coordinate.block)
     }
@@ -119,7 +118,7 @@ abstract class NodeBase {
         }
     }
 
-    fun onBlockPlacedBy(coordinate: Coordinate, front: Direction, entityLiving: EntityLivingBase?, itemStack: ItemStack?) {
+    fun onBlockPlacedBy(coordinate: Coordinate, front: Direction, entityLiving: LivingEntity?, itemStack: ItemStack?) {
         this.coordinate = coordinate
         neighborBlockRead()
         NodeManager.instance!!.addNode(this)
@@ -127,7 +126,7 @@ abstract class NodeBase {
         if (itemStack != null) println("Node::constructor( meta = " + itemStack.itemDamage + ")")
     }
 
-    abstract fun initializeFromThat(front: Direction, entityLiving: EntityLivingBase?, itemStack: ItemStack?)
+    abstract fun initializeFromThat(front: Direction, entityLiving: LivingEntity?, itemStack: ItemStack?)
 
     fun getNeighbor(direction: Direction): NodeBase? {
         val position = IntArray(3)
@@ -146,8 +145,8 @@ abstract class NodeBase {
         println("Node::onBreakBlock()")
     }
 
-    open fun onBlockActivated(entityPlayer: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
-        if (!entityPlayer.worldObj.isRemote && entityPlayer.currentEquippedItem != null) {
+    open fun onBlockActivated(entityPlayer: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+        if (!entityPlayer.level.isRemote && entityPlayer.currentEquippedItem != null) {
             val equipped = entityPlayer.currentEquippedItem
             if (Eln.multiMeterElement.checkSameItemStack(equipped)) {
                 val str = multiMeterString(side)
@@ -170,7 +169,7 @@ abstract class NodeBase {
             }
             if (Eln.configCopyToolElement.checkSameItemStack(equipped)) {
                 if (!equipped.hasTagCompound()) {
-                    equipped.tagCompound = NBTTagCompound()
+                    equipped.tagCompound = CompoundTag()
                 }
                 val act: String
                 var snd = beepError
@@ -185,7 +184,7 @@ abstract class NodeBase {
                     entityPlayer.posX,
                     entityPlayer.posY,
                     entityPlayer.posZ,
-                    entityPlayer.worldObj
+                    entityPlayer.level
                 ).play()
                 println(String.format("NB.oBA: act %s data %s", act, equipped.tagCompound.toString()))
                 return true
@@ -295,14 +294,14 @@ abstract class NodeBase {
         return true
     }
 
-    open fun readFromNBT(nbt: NBTTagCompound) {
+    open fun readFromNBT(nbt: CompoundTag) {
         coordinate.readFromNBT(nbt, "c")
         neighborOpaque = nbt.getByte("NBOpaque")
         neighborWrapable = nbt.getByte("NBWrap")
         initialized = true
     }
 
-    open fun writeToNBT(nbt: NBTTagCompound) {
+    open fun writeToNBT(nbt: CompoundTag) {
         coordinate.writeToNBT(nbt, "c")
         nbt.setByte("NBOpaque", neighborOpaque)
         nbt.setByte("NBWrap", neighborWrapable)
@@ -316,11 +315,11 @@ abstract class NodeBase {
         return ""
     }
 
-    open fun readConfigTool(side: Direction?, tag: NBTTagCompound?, invoker: EntityPlayer?): Boolean {
+    open fun readConfigTool(side: Direction?, tag: CompoundTag?, invoker: Player?): Boolean {
         return false
     }
 
-    open fun writeConfigTool(side: Direction?, tag: NBTTagCompound?, invoker: EntityPlayer?): Boolean {
+    open fun writeConfigTool(side: Direction?, tag: CompoundTag?, invoker: Player?): Boolean {
         return false
     }
 
@@ -347,7 +346,7 @@ abstract class NodeBase {
         }
     }
 
-    fun sendPacketToClient(bos: ByteArrayOutputStream?, player: EntityPlayerMP?) {
+    fun sendPacketToClient(bos: ByteArrayOutputStream?, player: ServerPlayer?) {
         Utils.sendPacketToClient(bos!!, player!!)
     }
 
@@ -355,7 +354,7 @@ abstract class NodeBase {
     fun sendPacketToAllClient(bos: ByteArrayOutputStream?, range: Double = 100000.0) {
         val server = FMLCommonHandler.instance().minecraftServerInstance
         for (obj in server.configurationManager.playerEntityList) {
-            val player = obj as EntityPlayerMP?
+            val player = obj as ServerPlayer?
             val worldServer = MinecraftServer.getServer().worldServerForDimension(player!!.dimension) as WorldServer
             val playerManager = worldServer.playerManager
             if (player.dimension != coordinate.dimension) continue
@@ -387,7 +386,7 @@ abstract class NodeBase {
     fun publishToAllPlayer() {
         val server = FMLCommonHandler.instance().minecraftServerInstance
         for (obj in server.configurationManager.playerEntityList) {
-            val player = obj as EntityPlayerMP?
+            val player = obj as ServerPlayer?
             val worldServer = MinecraftServer.getServer().worldServerForDimension(player!!.dimension) as WorldServer
             val playerManager = worldServer.playerManager
             if (player.dimension != coordinate.dimension) continue
@@ -401,7 +400,7 @@ abstract class NodeBase {
         needPublish = false
     }
 
-    fun publishToPlayer(player: EntityPlayerMP?) {
+    fun publishToPlayer(player: ServerPlayer?) {
         Utils.sendPacketToClient(publishPacket!!, player!!)
     }
 
@@ -412,16 +411,16 @@ abstract class NodeBase {
             val var7 = (coordinate.world().rand.nextFloat() * var6).toDouble() + (1.0f - var6).toDouble() * 0.5
             val var9 = (coordinate.world().rand.nextFloat() * var6).toDouble() + (1.0f - var6).toDouble() * 0.5
             val var11 = (coordinate.world().rand.nextFloat() * var6).toDouble() + (1.0f - var6).toDouble() * 0.5
-            val var13 = EntityItem(coordinate.world(), coordinate.x.toDouble() + var7, coordinate.y.toDouble() + var9, coordinate.z.toDouble() + var11, itemStack)
+            val var13 = ItemEntity(coordinate.world(), coordinate.x.toDouble() + var7, coordinate.y.toDouble() + var9, coordinate.z.toDouble() + var11, itemStack)
             var13.delayBeforeCanPickup = 10
             coordinate.world().spawnEntityInWorld(var13)
         }
     }
 
-    fun dropInventory(inventory: IInventory?) {
+    fun dropInventory(inventory: Container?) {
         if (inventory == null) return
         for (idx in 0 until inventory.sizeInventory) {
-            dropItem(inventory.getStackInSlot(idx))
+            dropItem(inventory.getItem(idx))
         }
     }
 

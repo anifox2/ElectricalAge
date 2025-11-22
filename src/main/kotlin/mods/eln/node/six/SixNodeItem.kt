@@ -7,18 +7,18 @@ import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction.Companion.fromIntMinecraftSide
 import mods.eln.misc.LRDU
 import mods.eln.misc.Utils.addChatMessage
-import net.minecraft.block.Block
+import net.minecraft.world.level.block.Block
 import net.minecraft.client.Minecraft
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.init.Blocks
-import net.minecraft.item.ItemStack
-import net.minecraft.world.World
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
 import net.minecraftforge.client.IItemRenderer
 import net.minecraftforge.client.IItemRenderer.ItemRenderType
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
 import org.lwjgl.opengl.GL11
 
-class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor?>(b), IItemRenderer {
+class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor>(b), IItemRenderer {
     override fun getMetadata(damageValue: Int): Int {
         return damageValue
     }
@@ -26,7 +26,7 @@ class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor?>(b
     /**
      * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
-    override fun onItemUse(stack: ItemStack, player: EntityPlayer, world: World, x: Int, y: Int, z: Int, side: Int, hitX: Float, hitY: Float, hitZ: Float): Boolean {
+    override fun onItemUse(stack: ItemStack, player: Player, world: World, x: Int, y: Int, z: Int, side: Int, hitX: Float, hitY: Float, hitZ: Float): Boolean {
         var x = x
         var y = y
         var z = z
@@ -42,14 +42,14 @@ class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor?>(b
             if (side == 4) x--
             if (side == 5) x++
         }
-        if (stack.stackSize == 0) return false
+        if (stack.count == 0) return false
         if (!player.canPlayerEdit(x, y, z, side, stack)) return false
         if (y == 255 && field_150939_a.material.isSolid) return false
         val i1 = getMetadata(stack.itemDamage)
         val metadata = field_150939_a.onBlockPlaced(world, x, y, z, side, hitX, hitY, hitZ, i1)
         if (placeBlockAt(stack, player, world, x, y, z, side, hitX, hitY, hitZ, metadata)) {
             world.playSoundEffect((x + 0.5f).toDouble(), (y + 0.5f).toDouble(), (z + 0.5f).toDouble(), field_150939_a.stepSound.func_150496_b(), (field_150939_a.stepSound.getVolume() + 1.0f) / 2.0f, field_150939_a.stepSound.pitch * 0.8f)
-            stack.stackSize -= 1
+            stack.count -= 1
         }
         return true
     }
@@ -58,16 +58,16 @@ class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor?>(b
      * Returns true if the given ItemBlock can be placed on the given side of the given block position.
      */
     // func_150936_a <= canPlaceItemBlockOnSide
-    override fun func_150936_a(par1World: World, x: Int, y: Int, z: Int, par5: Int, par6EntityPlayer: EntityPlayer, par7ItemStack: ItemStack): Boolean {
+    override fun func_150936_a(par1World: World, x: Int, y: Int, z: Int, par5: Int, par6Player: Player, par7ItemStack: ItemStack): Boolean {
         if (!isStackValidToPlace(par7ItemStack)) return false
         val vect = intArrayOf(x, y, z)
         fromIntMinecraftSide(par5)!!.applyTo(vect, 1)
         val descriptor = getDescriptor(par7ItemStack)
-        if (!descriptor!!.canBePlacedOnSide(par6EntityPlayer, Coordinate(x, y, z, par1World), fromIntMinecraftSide(par5)!!.inverse)) {
+        if (!descriptor!!.canBePlacedOnSide(par6Player, Coordinate(x, y, z, par1World), fromIntMinecraftSide(par5)!!.inverse)) {
             return false
         }
         if (par1World.getBlock(vect[0], vect[1], vect[2]) === Eln.sixNodeBlock) return true
-        return super.func_150936_a(par1World, x, y, z, par5, par6EntityPlayer, par7ItemStack)
+        return super.func_150936_a(par1World, x, y, z, par5, par6Player, par7ItemStack)
     }
 
     fun isStackValidToPlace(stack: ItemStack?): Boolean {
@@ -75,7 +75,7 @@ class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor?>(b
         return descriptor != null
     }
 
-    override fun placeBlockAt(stack: ItemStack, player: EntityPlayer, world: World, x: Int, y: Int, z: Int, side: Int, hitX: Float, hitY: Float, hitZ: Float, metadata: Int): Boolean {
+    override fun placeBlockAt(stack: ItemStack, player: Player, world: World, x: Int, y: Int, z: Int, side: Int, hitX: Float, hitY: Float, hitZ: Float, metadata: Int): Boolean {
         if (world.isRemote) return false
         if (!isStackValidToPlace(stack)) return false
         val direction = fromIntMinecraftSide(side)!!.inverse

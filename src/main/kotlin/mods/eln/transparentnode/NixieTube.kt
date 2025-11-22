@@ -12,15 +12,16 @@ import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateInput
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
+import net.minecraft.network.chat.Component
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
-class NixieTubeDescriptor(val name: String, val obj: Obj3D) : TransparentNodeDescriptor(name, NixieTubeElement::class.java, NixieTubeRender::class.java) {
+class NixieTubeDescriptor(name: String, val obj: Obj3D) : TransparentNodeDescriptor(name, NixieTubeElement::class.java, NixieTubeRender::class.java) {
     val display = obj.getPart("display")
     val base = obj.getPart("base")
     val tube = obj.getPart("tube")
@@ -31,18 +32,22 @@ class NixieTubeDescriptor(val name: String, val obj: Obj3D) : TransparentNodeDes
         voltageLevelColor = VoltageLevelColor.Neutral
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>?, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        list?.add(tr("Displays a single glowing digit."))
+    // ...existing code...
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
+        list?.add(Component.literal(tr("Displays a single glowing digit.")))
     }
 
+    /*
     override fun addRealismContext(list: MutableList<String>?): RealisticEnum {
         list?.add(tr("Signal input doesn't require power, and interfaces are tailored to gameplay"))
         list?.add(tr("Nixie tube has been textured realistically"))
         return RealisticEnum.UNREALISTIC
     }
+    */
 
     fun draw(_digit: Int, blank: Boolean, _dots: Int) {
+// ...existing code...
         var digit = _digit
         if(digit < 0) digit = 0
         if(digit > 9) digit = 9
@@ -73,8 +78,8 @@ class NixieTubeDescriptor(val name: String, val obj: Obj3D) : TransparentNodeDes
         UtilsClient.disableBlend()
     }
 
-    override fun getFrontFromPlace(side: Direction, entityLiving: EntityLivingBase?): Direction {
-        return super.getFrontFromPlace(side, entityLiving)!!.inverse
+    override fun getFrontFromPlace(side: Direction, entityLiving: LivingEntity?): Direction {
+        return super.getFrontFromPlace(side, entityLiving)!!.inverse()
     }
 }
 
@@ -159,7 +164,7 @@ class NixieTubeElement(node: TransparentNode, _descriptor: TransparentNodeDescri
         Utils.plotVolt("N:", digitIn.signalVoltage) + " " +
             Utils.plotVolt("B:", blankIn.signalVoltage) + " " +
             Utils.plotVolt("D:", dotsIn.signalVoltage)
-    override fun onBlockActivated(player: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean = false
+    override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean = false
 
     override fun getWaila(): MutableMap<String, String> {
         var info = HashMap<String, String>()

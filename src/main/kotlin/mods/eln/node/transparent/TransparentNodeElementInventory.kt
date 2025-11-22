@@ -3,12 +3,13 @@ package mods.eln.node.transparent
 import mods.eln.misc.INBTTReady
 import mods.eln.misc.Utils.readFromNBT
 import mods.eln.misc.Utils.writeToNBT
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.ISidedInventory
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.WorldlyContainer
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.core.Direction
 
-open class TransparentNodeElementInventory : ISidedInventory, INBTTReady {
+open class TransparentNodeElementInventory : WorldlyContainer, INBTTReady {
     @JvmField
     protected var transparentNodeRender: TransparentNodeElementRender? = null
     @JvmField
@@ -16,89 +17,94 @@ open class TransparentNodeElementInventory : ISidedInventory, INBTTReady {
     var stackLimit: Int
 
     constructor(size: Int, stackLimit: Int, TransparentnodeRender: TransparentNodeElementRender?) {
-        inv = arrayOfNulls(size)
+        inv = Array(size) { ItemStack.EMPTY }
         this.stackLimit = stackLimit
         transparentNodeRender = TransparentnodeRender
     }
 
     constructor(size: Int, stackLimit: Int, TransparentNodeElement: TransparentNodeElement?) {
-        inv = arrayOfNulls(size)
+        inv = Array(size) { ItemStack.EMPTY }
         this.stackLimit = stackLimit
         transparentNodeElement = TransparentNodeElement
     }
 
-    private var inv: Array<ItemStack?>
-    override fun getSizeInventory(): Int {
+    private var inv: Array<ItemStack>
+
+    override fun getContainerSize(): Int {
         return inv.size
     }
 
-    override fun getStackInSlot(slot: Int): ItemStack? {
-        return inv[slot]
+    override fun isEmpty(): Boolean {
+        for (stack in inv) {
+            if (!stack.isEmpty) return false
+        }
+        return true
     }
 
-    override fun decrStackSize(slot: Int, amt: Int): ItemStack? {
-        var stack = getStackInSlot(slot)
-        if (stack != null) {
-            if (stack.stackSize <= amt) {
-                setInventorySlotContents(slot, null)
+    override fun getItem(slot: Int): ItemStack {
+        return if (slot >= 0 && slot < inv.size) inv[slot] else ItemStack.EMPTY
+    }
+
+    override fun removeItem(slot: Int, amt: Int): ItemStack {
+        var stack = getItem(slot)
+        if (!stack.isEmpty) {
+            if (stack.count <= amt) {
+                setItem(slot, ItemStack.EMPTY)
             } else {
-                stack = stack.splitStack(amt)
-                if (stack.stackSize == 0) {
-                    setInventorySlotContents(slot, null)
+                stack = stack.split(amt)
+                if (stack.count == 0) {
+                    setItem(slot, ItemStack.EMPTY)
                 }
             }
         }
         return stack
     }
 
-    override fun getStackInSlotOnClosing(slot: Int): ItemStack? {
-        val stack = getStackInSlot(slot)
-        if (stack != null) {
-            setInventorySlotContents(slot, null)
+    override fun removeItemNoUpdate(slot: Int): ItemStack {
+        val stack = getItem(slot)
+        if (!stack.isEmpty) {
+            setItem(slot, ItemStack.EMPTY)
         }
         return stack
     }
 
-    override fun setInventorySlotContents(slot: Int, stack: ItemStack?) {
+    override fun setItem(slot: Int, stack: ItemStack) {
         inv[slot] = stack
-        if (stack != null && stack.stackSize > inventoryStackLimit) {
-            stack.stackSize = inventoryStackLimit
+        if (!stack.isEmpty && stack.count > maxStackSize) {
+            stack.count = maxStackSize
         }
     }
 
-    override fun getInventoryName(): String {
-        return "tco.TransparentNodeInventory"
-    }
-
-    override fun getInventoryStackLimit(): Int {
+    override fun getMaxStackSize(): Int {
         return stackLimit
     }
 
-    override fun isUseableByPlayer(player: EntityPlayer): Boolean {
+    override fun stillValid(player: Player): Boolean {
         return true
     }
 
-    override fun openInventory() {}
-    override fun closeInventory() {}
-    override fun markDirty() {
+    override fun startOpen(player: Player) {}
+    override fun stopOpen(player: Player) {}
+    
+    override fun setChanged() {
         if (transparentNodeElement != null && !transparentNodeElement!!.node!!.isDestructing) {
             transparentNodeElement!!.inventoryChange(this)
         }
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound, str: String) {
+    override fun readFromNBT(nbt: CompoundTag, str: String) {
         readFromNBT(nbt, str, this)
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound, str: String) {
+    override fun writeToNBT(nbt: CompoundTag, str: String) {
         writeToNBT(nbt, str, this)
     }
 
-    override fun isItemValidForSlot(i: Int, itemstack: ItemStack): Boolean {
-        for (idx in 0..5) {
-            val lol = getAccessibleSlotsFromSide(idx)
+    override fun canPlaceItem(slot: Int, itemstack: ItemStack): Boolean {
+        for (idx in Direction.values()) {
+            val lol = getSlotsForFace(idx)
             for (hohoho in lol) {
-                if (hohoho == i && canInsertItem(i, itemstack, idx)) {
+                if (hohoho == slot && canPlaceItemThroughFace(slot, itemstack, idx)) {
                     return true
                 }
             }
@@ -106,19 +112,21 @@ open class TransparentNodeElementInventory : ISidedInventory, INBTTReady {
         return false
     }
 
-    override fun hasCustomInventoryName(): Boolean {
-        return false
+    override fun clearContent() {
+        for (i in inv.indices) {
+            inv[i] = ItemStack.EMPTY
+        }
     }
 
-    override fun getAccessibleSlotsFromSide(side: Int): IntArray {
+    override fun getSlotsForFace(side: Direction): IntArray {
         return intArrayOf()
     }
 
-    override fun canInsertItem(slot: Int, stack: ItemStack?, side: Int): Boolean {
+    override fun canPlaceItemThroughFace(slot: Int, stack: ItemStack, side: Direction?): Boolean {
         return false
     }
 
-    override fun canExtractItem(slot: Int, stack: ItemStack?, side: Int): Boolean {
+    override fun canTakeItemThroughFace(slot: Int, stack: ItemStack, side: Direction): Boolean {
         return false
     }
 }

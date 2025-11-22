@@ -5,13 +5,13 @@ import mods.eln.item.electricalinterface.IItemEnergyBattery
 import mods.eln.misc.Utils
 import mods.eln.misc.UtilsClient
 import mods.eln.wiki.Data
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.player.EntityPlayerMP
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.entity.player.ServerPlayer
 import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.ResourceLocation
-import net.minecraft.world.World
+import net.minecraft.world.level.Level
 import net.minecraftforge.client.IItemRenderer.ItemRenderType
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
 
@@ -52,8 +52,8 @@ class ElectricalLampItem(name: String, var lightMin: Int, var rangeMin: Int, dis
         }
     }
 
-    override fun getDefaultNBT(): NBTTagCompound? {
-        val nbt = NBTTagCompound()
+    override fun getDefaultNBT(): CompoundTag? {
+        val nbt = CompoundTag()
         nbt.setDouble("energy", 0.0)
         nbt.setBoolean("powerOn", false)
         nbt.setInteger("rand", (Math.random() * 0xFFFFFFF).toInt())
@@ -72,14 +72,14 @@ class ElectricalLampItem(name: String, var lightMin: Int, var rangeMin: Int, dis
         return if (getLightState(stack) == 1) lightMin else lightMax
     }
 
-    override fun onItemRightClick(s: ItemStack, w: World, p: EntityPlayer): ItemStack {
+    override fun onItemRightClick(s: ItemStack, w: World, p: Player): ItemStack {
         if (!w.isRemote && getEnergy(s) > 0) {
             var lightState = getLightState(s) + 1
             if (lightState > 2) lightState = 0
             when (lightState) {
-                0 -> Utils.addChatMessage(p as EntityPlayerMP, "Flashlight OFF")
-                1 -> Utils.addChatMessage(p as EntityPlayerMP, "Flashlight ON")
-                2 -> Utils.addChatMessage(p as EntityPlayerMP, "Flashlight BOOSTED")
+                0 -> Utils.addChatMessage(p as ServerPlayer, "Flashlight OFF")
+                1 -> Utils.addChatMessage(p as ServerPlayer, "Flashlight ON")
+                2 -> Utils.addChatMessage(p as ServerPlayer, "Flashlight BOOSTED")
                 else -> {
                 }
             }
@@ -88,8 +88,8 @@ class ElectricalLampItem(name: String, var lightMin: Int, var rangeMin: Int, dis
         return s
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
         list.add(tr("Discharge power: %1\$W", Utils.plotValue(dischargeMin)))
         if (itemStack != null) {
             list.add(tr("Stored Energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),

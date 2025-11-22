@@ -13,11 +13,12 @@ import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.Resistor
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.wiki.Data
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.world.item.TooltipFlag
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -34,33 +35,19 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
         voltageLevelColor = VoltageLevelColor.Neutral
     }
 
-    override fun setParent(item: Item?, damage: Int) {
+    /*
+    override fun setParent(item: Item, damage: Int) {
         super.setParent(item, damage)
         Data.addWiring(newItemStack())
     }
-
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
-
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack,
-                                       helper: IItemRenderer.ItemRendererHelper) =
-        type != IItemRenderer.ItemRenderType.INVENTORY
-
-    override fun shouldUseRenderHelperEln(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
-                                          helper: IItemRenderer.ItemRendererHelper?) =
-        type != IItemRenderer.ItemRenderType.INVENTORY
-
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
-        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, *data)
-        } else {
-            draw(null)
-        }
-    }
+    */
 
     fun draw(installedFuse: ElectricalFuseDescriptor?) {
         case?.draw()
         if (installedFuse != null) {
-            VoltageLevelColor.fromCable(installedFuse.cableDescriptor).setGLColor()
+            if (installedFuse.cableDescriptor != null) {
+                VoltageLevelColor.fromCable(installedFuse.cableDescriptor as ElectricalCableDescriptor).setGLColor()
+            }
             fuseType?.draw()
             GL11.glColor3f(1f, 1f, 1f)
             if (installedFuse.cableDescriptor != null) {
@@ -70,14 +57,12 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
         }
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>?, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        if (list != null) {
-            tr("Protects electrical components.\nFuse melts if current exceeds the\nfuse limit").split("\n").forEach { list.add(it) }
-        }
+    override fun appendHoverText(itemStack: ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<Component>, flag: TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
+        tr("Protects electrical components.\nFuse melts if current exceeds the\nfuse limit").split("\n").forEach { list.add(Component.literal(it)) }
     }
 
-    override fun getFrontFromPlace(side: Direction, player: EntityPlayer) =
+    override fun getFrontFromPlace(side: Direction, player: Player) =
         super.getFrontFromPlace(side, player)!!.inverse()
 }
 
@@ -107,7 +92,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
 
             T += P / cable.thermalC * time
         }
-        if (T > cable?.thermalWarmLimit ?: 0.0 * 0.8) {
+        if (T > (cable?.thermalWarmLimit ?: 0.0) * 0.8) {
             installedFuse = ElectricalFuseDescriptor.BlownFuse
         }
     }
@@ -121,14 +106,14 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
         electricalProcessList.add(fuseProcess)
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         front = LRDU.readFromNBT(nbt, "front")
 
-        val fuseCompound = nbt.getTag("fuse") as? NBTTagCompound
+        val fuseCompound = nbt.get("fuse") as? CompoundTag
         if (fuseCompound != null) {
-            val fuseStack = ItemStack.loadItemStackFromNBT(fuseCompound)
-            if (fuseStack != null) {
+            val fuseStack = ItemStack.of(fuseCompound)
+            if (!fuseStack.isEmpty) {
                 installedFuse = GenericItemUsingDamageDescriptor.getDescriptor(fuseStack) as? ElectricalFuseDescriptor
             }
         }
@@ -136,17 +121,17 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
         T = nbt.getDouble("T")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
         front.writeToNBT(nbt, "front")
 
         if (installedFuse != null) {
-            val fuseCompaound = NBTTagCompound()
-            installedFuse!!.newItemStack().writeToNBT(fuseCompaound)
-            nbt.setTag("fuse", fuseCompaound)
+            val fuseCompaound = CompoundTag()
+            installedFuse!!.newItemStack().save(fuseCompaound)
+            nbt.put("fuse", fuseCompaound)
         }
 
-        nbt.setDouble("T", T)
+        nbt.putDouble("T", T)
     }
 
     override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad? = when (lrdu) {
@@ -187,21 +172,21 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
     }
 
     fun computeElectricalLoad() {
-        Eln.instance.veryHighVoltageCableDescriptor.applyTo(aLoad)
-        Eln.instance.veryHighVoltageCableDescriptor.applyTo(bLoad)
+        Eln.veryHighVoltageCableDescriptor?.applyTo(aLoad)
+        Eln.veryHighVoltageCableDescriptor?.applyTo(bLoad)
         refreshSwitchResistor()
     }
 
-    override fun onBlockActivated(entityPlayer: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(entityPlayer: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         if (onBlockActivatedRotate(entityPlayer)) return true
 
         var takenOutFuse: ElectricalFuseDescriptor? = null
-        val itemStack = entityPlayer.currentEquippedItem
-        val fuseDescriptor = itemStack?.let { GenericItemUsingDamageDescriptor.getDescriptor(it) } as? ElectricalFuseDescriptor
-        if (itemStack != null) {
-            if (fuseDescriptor != null && itemStack.stackSize > 0) {
+        val itemStack = entityPlayer.mainHandItem
+        val fuseDescriptor = if (!itemStack.isEmpty) GenericItemUsingDamageDescriptor.getDescriptor(itemStack) as? ElectricalFuseDescriptor else null
+        if (!itemStack.isEmpty) {
+            if (fuseDescriptor != null && itemStack.count > 0) {
                 // The player puts in a new lead fuse.
-                itemStack.stackSize--
+                itemStack.count--
                 takenOutFuse = installedFuse
                 installedFuse = fuseDescriptor
             }
@@ -213,7 +198,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
 
         // What do we do with the fuse just taken out?
         takenOutFuse?.let {
-            sixNode!!.dropItem(it.newItemStack())
+            this.sixNode!!.dropItem(it.newItemStack())
         }
 
         return takenOutFuse != null || fuseDescriptor != null

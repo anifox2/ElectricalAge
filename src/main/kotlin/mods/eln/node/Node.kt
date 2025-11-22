@@ -2,7 +2,7 @@
 package mods.eln.node
 
 import mods.eln.misc.Direction
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.EnumSkyBlock
 import java.io.DataOutputStream
 import java.io.IOException
@@ -22,12 +22,12 @@ abstract class Node : NodeBase() {
             }
         }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         lastLight = nbt.getByte("lastLight").toInt()
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
         nbt.setByte("lastLight", lastLight.toByte())
     }

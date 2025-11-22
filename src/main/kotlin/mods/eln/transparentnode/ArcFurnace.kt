@@ -15,16 +15,15 @@ import mods.eln.sim.mna.component.Resistor
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.process.destruct.VoltageStateWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.Container
-import net.minecraft.inventory.IInventory
-import net.minecraft.inventory.Slot
-import net.minecraft.item.ItemStack
-import net.minecraftforge.client.IItemRenderer
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.Container
+import net.minecraft.world.inventory.Slot
+import net.minecraft.world.item.ItemStack
 import org.lwjgl.opengl.GL11
 
-class ArcFurnaceDescriptor(val name: String, val obj: Obj3D): TransparentNodeDescriptor(name, ArcFurnaceElement::class.java, ArcFurnaceRender::class.java) {
+class ArcFurnaceDescriptor(name: String, val obj: Obj3D): TransparentNodeDescriptor(name, ArcFurnaceElement::class.java, ArcFurnaceRender::class.java) {
     private var main: Obj3DPart? = null
 
     init {
@@ -42,16 +41,8 @@ class ArcFurnaceDescriptor(val name: String, val obj: Obj3D): TransparentNodeDes
             GL11.glTranslatef(-1.5f, -0.5f, 2.5f);
             GL11.glScalef(0.5f, 0.5f, 0.5f);
             main?.draw()
-            //UtilsClient.drawEntityItem(inEntity, -0.35, 0.04, 0.3, 1, 1f)
+            //UtilsClient.drawItemEntity(inEntity, -0.35, 0.04, 0.3, 1, 1f)
         }
-    }
-
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper): Boolean {
-        return false
-    }
-
-    override fun shouldUseRenderHelperEln(type: IItemRenderer.ItemRenderType?, item: ItemStack?, helper: IItemRenderer.ItemRendererHelper?): Boolean {
-        return false
     }
 }
 
@@ -67,8 +58,8 @@ class ArcFurnaceElement(node: TransparentNode, descriptor: TransparentNodeDescri
     //private val connectionType: CableRenderType? = null
     //private val eConn = LRDUMask()
 
-    //private val inEntity: EntityItem? = null
-    //private val outEntity: EntityItem? = null
+    //private val inEntity: ItemEntity? = null
+    //private val outEntity: ItemEntity? = null
     //var powerFactor = 0f
     //var processState = 0f
     //private val processStatePerSecond = 0f
@@ -109,7 +100,7 @@ class ArcFurnaceElement(node: TransparentNode, descriptor: TransparentNodeDescri
         return true
     }
 
-    override fun newContainer(side: Direction, player: EntityPlayer): Container {
+    override fun newContainer(side: Direction, player: Player): AbstractContainerMenu {
         return ArcFurnaceContainer(node, player, inventory)
     }
 }
@@ -128,42 +119,46 @@ class ArcFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Transparen
         adesc?.draw(front!!)
     }
 
-    override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen {
+    override fun newGuiDraw(side: Direction, player: Player): Screen {
         return ArcFurnaceGui(player, inventory, this)
     }
 }
 
-class ArcFurnaceContainer(val node: NodeBase?, player: EntityPlayer, inventory: IInventory): BasicContainer(
+class ArcFurnaceContainer(val node: NodeBase?, player: Player, inventory: Container): BasicContainer(
     player, inventory, arrayOf<Slot>(
         GenericItemUsingDamageSlot(
             inventory, 0, 0, 0, 1,
-            GraphiteDescriptor::class.java,
+            arrayOf(GraphiteDescriptor::class.java),
             SlotSkin.medium, arrayOf("Graphite Slot")
         ),
         GenericItemUsingDamageSlot(
             inventory, 1, 30, 0, 1,
-            GraphiteDescriptor::class.java,
+            arrayOf(GraphiteDescriptor::class.java),
             SlotSkin.medium, arrayOf("Graphite Slot")
         ),
         GenericItemUsingDamageSlot(
             inventory, 2, 15, 15, 1,
-            GraphiteDescriptor::class.java,
+            arrayOf(GraphiteDescriptor::class.java),
             SlotSkin.medium, arrayOf("Graphite Slot")
         ),
         GenericItemUsingDamageSlot(
             inventory, 3, 15, 30, 64,
-            GraphiteDescriptor::class.java,
+            arrayOf(GraphiteDescriptor::class.java),
             SlotSkin.medium, arrayOf("Input Slot")
         ),
         GenericItemUsingDamageSlot(
             inventory, 4, 15, 45, 64,
-            GraphiteDescriptor::class.java,
+            arrayOf(GraphiteDescriptor::class.java),
             SlotSkin.medium, arrayOf("Output Slot")
         )
     ))
 
-class ArcFurnaceGui(player: EntityPlayer, inventory: IInventory, @Suppress("UNUSED_PARAMETER") render: ArcFurnaceRender): GuiContainerEln(ArcFurnaceContainer(null, player, inventory)) {
+class ArcFurnaceGui(player: Player, inventory: Container, @Suppress("UNUSED_PARAMETER") render: ArcFurnaceRender): GuiContainerEln<ArcFurnaceContainer>(ArcFurnaceContainer(null, player, inventory), player.inventory, net.minecraft.network.chat.Component.literal("Arc Furnace")) {
     override fun newHelper(): GuiHelperContainer {
             return GuiHelperContainer(this, 176, 166, 50, 84)
+    }
+
+    override fun renderBg(guiGraphics: net.minecraft.client.gui.GuiGraphics, partialTick: Float, mouseX: Int, mouseY: Int) {
+        helper?.draw(guiGraphics, mouseX, mouseY, partialTick)
     }
 }

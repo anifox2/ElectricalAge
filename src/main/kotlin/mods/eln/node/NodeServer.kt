@@ -1,10 +1,6 @@
 package mods.eln.node
 
-import cpw.mods.fml.common.FMLCommonHandler
-import cpw.mods.fml.common.eventhandler.SubscribeEvent
-import cpw.mods.fml.common.gameevent.TickEvent
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent
-import net.minecraft.entity.player.EntityPlayerMP
+import net.minecraft.world.entity.player.ServerPlayer
 
 class NodeServer {
     fun init() {
@@ -27,7 +23,7 @@ class NodeServer {
                 }
             }
             for (obj in server.configurationManager.playerEntityList) {
-                val player = obj as EntityPlayerMP?
+                val player = obj as ServerPlayer?
                 var openContainerNode: NodeBase? = null
                 var container: INodeContainer? = null
                 if (player!!.openContainer != null && player.openContainer is INodeContainer) {

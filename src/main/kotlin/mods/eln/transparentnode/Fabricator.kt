@@ -15,19 +15,20 @@ import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.Resistor
 import mods.eln.sim.mna.misc.MnaConst
 import mods.eln.sim.nbt.NbtElectricalLoad
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.client.renderer.RenderHelper
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.Container
-import net.minecraft.inventory.IInventory
-import net.minecraft.inventory.Slot
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.Container
+import net.minecraft.world.inventory.Slot
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
+import net.minecraft.world.item.Item
 
 class FabricatorDescriptor(
     name: String
@@ -47,20 +48,10 @@ class FabricatorDescriptor(
         etcherZ.draw()
     }
 
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) = true
-
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType): Boolean {
-        return true
-    }
-
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
-        draw()
-    }
-
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>?, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        list?.addAll(tr("The Fabricator creates chips\nfrom silicon and copper plates").split("\n"))
-        list?.add(tr("Nominal Ohms: %1$",Utils.plotOhm(40.0)))
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
+        list?.addAll(tr("The Fabricator creates chips\nfrom silicon and copper plates").split("\n").map { net.minecraft.network.chat.Component.literal(it) })
+        list?.add(net.minecraft.network.chat.Component.literal(tr("Nominal Ohms: %1$",Utils.plotOhm(40.0))))
     }
 }
 
@@ -90,7 +81,7 @@ class FabricatorElement(node: TransparentNode, descriptor: TransparentNodeDescri
     override fun thermoMeterString(side: Direction): String = ""
 
     override fun getWaila(): Map<String, String> {
-        return mapOf(Pair(tr("Operation"), operation?.outputItem?.displayName ?: "None"))
+        return mapOf(Pair(tr("Operation"), operation?.outputItem?.descriptionId ?: "None"))
     }
 
     override fun initialize() {
@@ -102,13 +93,13 @@ class FabricatorElement(node: TransparentNode, descriptor: TransparentNodeDescri
         connect()
     }
 
-    override fun onBlockActivated(player: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         return false
     }
 
     override fun hasGui() = true
 
-    override fun newContainer(side: Direction, player: EntityPlayer): Container {
+    override fun newContainer(side: Direction, player: Player): AbstractContainerMenu {
         return FabricatorContainer(this.node, player, inventory, descriptor as FabricatorDescriptor)
     }
 
@@ -140,18 +131,18 @@ class FabricatorElement(node: TransparentNode, descriptor: TransparentNodeDescri
         return unserializeNulldId
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
-        val id = nbt.getInteger("operation")
+        val id = nbt.getInt("operation")
         operation = FabricatorOperation.values().firstOrNull { it.nid == id }
         craftingProcess.powerConsumed = nbt.getDouble("powerConsumed")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
         if (operation != null)
-            nbt.setInteger("operation", operation?.nid?: 0)
-        nbt.setDouble("powerConsumed", craftingProcess.powerConsumed)
+            nbt.putInt("operation", operation?.nid?: 0)
+        nbt.putDouble("powerConsumed", craftingProcess.powerConsumed)
     }
 }
 
@@ -161,10 +152,10 @@ enum class FabricatorNetwork(val id: Byte) {
 
 enum class FabricatorOperation(val nid: Int, val opName: String, val outputItem: ItemStack, val perSheet: Int, val yieldPercentage: Double) {
     // Digital Chips
-    TRANSISTOR(0, "Transistor", Eln.transistor.newItemStack(1), 16, 1.0),
+    TRANSISTOR(0, "Transistor", ItemStack(Eln.transistor!!, 1), 16, 1.0),
     D_FLIP_FLOP(1, "D Flip Flop", Eln.findItemStack("D Flip Flop Chip", 1), 4, 1.0),
     JK_FLIP_FLOP(2, "JK Flip Flop", Eln.findItemStack("JK Flip Flop Chip", 1), 4, 1.0),
-    ALU(3, "8 Bit ALU", Eln.alu.newItemStack(1), 2, 0.5),
+    ALU(3, "8 Bit ALU", ItemStack(Eln.alu!!, 1), 2, 0.5),
     PAL_CHIP(4, "PAL Chip", Eln.findItemStack("PAL Chip", 1), 4, 1.0),
     OSCILLATOR_CHIP(5, "Oscillator Chip", Eln.findItemStack("Oscillator Chip", 1), 4, 1.0),
 
@@ -188,17 +179,17 @@ class FabricatorProcess(val element: FabricatorElement): IProcess {
     override fun process(time: Double) {
         val operation = element.operation
 
-        val outputSlot = element.inventory.getStackInSlot(FabricatorSlots.OUTPUT.slotId)
-        val siliconWaferSlot = element.inventory.getStackInSlot(FabricatorSlots.SILICON_WAFER.slotId)
-        val plateCopperSlot = element.inventory.getStackInSlot(FabricatorSlots.COPPER_PLATE.slotId)
+        val outputSlot = element.inventory.getItem(FabricatorSlots.OUTPUT.slotId)
+        val siliconWaferSlot = element.inventory.getItem(FabricatorSlots.SILICON_WAFER.slotId)
+        val plateCopperSlot = element.inventory.getItem(FabricatorSlots.COPPER_PLATE.slotId)
 
         val siliconWaferName = "Silicon_Wafer"
         val copperPlateName = "Copper_Plate"
 
         val canOutput = if (outputSlot != null) {
-            val stack = element.inventory.getStackInSlot(FabricatorSlots.OUTPUT.slotId)
+            val stack = element.inventory.getItem(FabricatorSlots.OUTPUT.slotId)
             if (operation != null)
-                stack!!.item == operation.outputItem.item && stack.stackSize + operation.perSheet < stack.maxStackSize
+                stack!!.item == operation.outputItem.item && stack.count + operation.perSheet < stack.maxStackSize
             else
                 true
         } else {
@@ -208,8 +199,8 @@ class FabricatorProcess(val element: FabricatorElement): IProcess {
         val hasInputs = (
             siliconWaferSlot != null &&
             plateCopperSlot != null &&
-            siliconWaferSlot.unlocalizedName == siliconWaferName &&
-            plateCopperSlot.unlocalizedName == copperPlateName
+            siliconWaferSlot.item === Eln.siliconWafer &&
+            plateCopperSlot.item === Eln.plateCopper
         )
 
         if (canOutput && hasInputs && operation != null) {
@@ -227,21 +218,21 @@ class FabricatorProcess(val element: FabricatorElement): IProcess {
         if (operation?.outputItem != null && powerRequired <= powerConsumed) {
             // Operation completed. Results!
 
-            element.inventory.decrStackSize(FabricatorSlots.COPPER_PLATE.slotId, 1)
-            element.inventory.decrStackSize(FabricatorSlots.SILICON_WAFER.slotId, 1)
+            element.inventory.removeItem(FabricatorSlots.COPPER_PLATE.slotId, 1)
+            element.inventory.removeItem(FabricatorSlots.SILICON_WAFER.slotId, 1)
             if (Math.random() <= operation.yieldPercentage) {
-                if (element.inventory.getStackInSlot(FabricatorSlots.OUTPUT.slotId) == null) {
+                if (element.inventory.getItem(FabricatorSlots.OUTPUT.slotId) == null) {
                     val newStack = operation.outputItem.copy()
-                    newStack.stackSize = operation.perSheet
-                    element.inventory.setInventorySlotContents(FabricatorSlots.OUTPUT.slotId, newStack)
+                    newStack.count = operation.perSheet
+                    element.inventory.setItem(FabricatorSlots.OUTPUT.slotId, newStack)
                     powerConsumed -= powerRequired
                     element.needPublish()
                 } else {
-                    val stackSize = element.inventory.getStackInSlot(FabricatorSlots.OUTPUT.slotId)!!.stackSize
+                    val stackSize = element.inventory.getItem(FabricatorSlots.OUTPUT.slotId)!!.count
                     if (stackSize in 0..63) {
                         val newStack = operation.outputItem.copy()
-                        newStack.stackSize = stackSize + operation.perSheet
-                        element.inventory.setInventorySlotContents(FabricatorSlots.OUTPUT.slotId, newStack)
+                        newStack.count = stackSize + operation.perSheet
+                        element.inventory.setItem(FabricatorSlots.OUTPUT.slotId, newStack)
                         powerConsumed -= powerRequired
                         element.needPublish()
                     }
@@ -266,7 +257,7 @@ class FabricatorRender(entity: TransparentNodeEntity, descriptor: TransparentNod
         (this.transparentNodedescriptor as FabricatorDescriptor).draw(isRunning)
     }
 
-    override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen {
+    override fun newGuiDraw(side: Direction, player: Player): Screen {
         return FabricatorGui(player, inventory, this)
     }
 
@@ -280,45 +271,17 @@ class FabricatorRender(entity: TransparentNodeEntity, descriptor: TransparentNod
 const val slotSize = 16
 const val buttonWidth = 20
 
-class FabricatorGui(player: EntityPlayer, inventory: IInventory, val render: FabricatorRender): GuiContainerEln(FabricatorContainer(null, player, inventory, render.transparentNodedescriptor as FabricatorDescriptor)) {
+class FabricatorGui(player: Player, inventory: Container, val render: FabricatorRender): GuiContainerEln<FabricatorContainer>(FabricatorContainer(null, player, inventory, render.transparentNodedescriptor as FabricatorDescriptor), player.inventory, net.minecraft.network.chat.Component.literal("Fabricator")) {
+    
+    val slotSize = 18
 
-    private val buttonsArray = mutableListOf<GuiButtonEln>()
-
-    override fun newHelper() = GuiHelperContainer(this, 176, 164, 8, 80)
-
-    override fun initGui() {
-        super.initGui()
-        FabricatorOperation.values().forEachIndexed { idx, _ ->
-            val column: Int = idx / 3
-            val row: Int = idx % 3
-
-            buttonsArray.add(newGuiButton(6 + slotSize * 3 + 4 + (22 * column), 6 + (22 * row), buttonWidth, ""))
-        }
-        buttonsArray[render.operationId].displayString = "[  ]"
+    override fun newHelper(): GuiHelperContainer {
+        return GuiHelperContainer(this, 176, 166, 8, 84)
     }
 
-    override fun postDraw(f: Float, x: Int, y: Int) {
-        super.postDraw(f, x, y)
-        FabricatorOperation.values().forEachIndexed { idx, operation ->
-            RenderHelper.enableStandardItemLighting()
-            RenderHelper.enableGUIStandardItemLighting()
-
-            val column: Int = idx / 3
-            val row: Int = idx % 3
-
-            UtilsClient.drawItemStack(operation.outputItem, 6 + slotSize * 3 + 4 + this.guiLeft + 2 + (22 * column), 6 + this.guiTop + 2 + (22 * row), null, true)
-            RenderHelper.disableStandardItemLighting()
-        }
-
-        buttonsArray.forEach { it.displayString = "" }
-        buttonsArray[render.operationId].displayString = "[  ]"
-    }
-
-    override fun guiObjectEvent(obj: IGuiObject?) {
-        super.guiObjectEvent(obj)
-        buttonsArray.mapIndexed { idx, it -> Pair(idx, it)}.filter { it.second == obj }.forEach {
-            render.clientSendInt(FabricatorNetwork.BUTTON_CLICK.id, it.first)
-        }
+    override fun renderBg(guiGraphics: GuiGraphics, partialTick: Float, mouseX: Int, mouseY: Int) {
+        helper?.draw(guiGraphics, mouseX, mouseY, partialTick)
+        (render.transparentNodedescriptor as FabricatorDescriptor).draw()
     }
 }
 
@@ -330,19 +293,19 @@ enum class FabricatorSlots(val slotId: Int) {
 
 class FabricatorContainer(
     override val node: NodeBase?,
-    player: EntityPlayer,
-    inventory: IInventory,
+    player: Player,
+    inventory: Container,
     descriptor: FabricatorDescriptor
 ): BasicContainer(player, inventory, getSlot(inventory, descriptor)), INodeContainer {
 
     override val refreshRateDivider = 1
 
     companion object {
-        private fun getSlot(inventory: IInventory, @Suppress("UNUSED_PARAMETER") descriptor: FabricatorDescriptor): Array<Slot> {
+        private fun getSlot(inventory: Container, @Suppress("UNUSED_PARAMETER") descriptor: FabricatorDescriptor): Array<Slot> {
             return FabricatorSlots.values().mapIndexed { index, _ ->
                 when (index) {
                     FabricatorSlots.OUTPUT.slotId -> {
-                        SlotWithSkin(inventory, index, 6 + slotSize, 6 + slotSize * 2, SlotSkin.big)
+                        SlotWithSkin(inventory, index, 6 + slotSize, 6 + slotSize * 2, SlotSkin.large)
                     }
                     FabricatorSlots.COPPER_PLATE.slotId -> {
                         SlotWithSkin(inventory, index, 6, 6, SlotSkin.medium)
@@ -367,19 +330,19 @@ class FabricatorInventory: TransparentNodeElementInventory {
 
     constructor(size: Int, stackLimit: Int, render: TransparentNodeElementRender): super(size, stackLimit, render)
 
-    override fun getAccessibleSlotsFromSide(side: Int): IntArray {
+    override fun getSlotsForFace(side: net.minecraft.core.Direction): IntArray {
         return FabricatorSlots.values().map{it.slotId}.toIntArray()
     }
 
-    override fun canInsertItem(slot: Int, stack: ItemStack?, side: Int): Boolean {
-        if (stack == null) return false
+    override fun canPlaceItemThroughFace(slot: Int, stack: ItemStack, side: net.minecraft.core.Direction?): Boolean {
+        if (stack.isEmpty) return false
         val itemDescriptor = GenericItemUsingDamageDescriptor.getDescriptor(stack) ?: return false
-        if (itemDescriptor === Eln.siliconWafer && slot == FabricatorSlots.SILICON_WAFER.slotId) return true
-        if (itemDescriptor === Eln.plateCopper && slot == FabricatorSlots.COPPER_PLATE.slotId) return true
+        // if (itemDescriptor === Eln.siliconWafer && slot == FabricatorSlots.SILICON_WAFER.slotId) return true
+        // if (itemDescriptor === Eln.plateCopper && slot == FabricatorSlots.COPPER_PLATE.slotId) return true
         return false
     }
 
-    override fun canExtractItem(slot: Int, stack: ItemStack?, side: Int): Boolean {
+    override fun canTakeItemThroughFace(slot: Int, stack: ItemStack, side: net.minecraft.core.Direction): Boolean {
         return slot == FabricatorSlots.OUTPUT.slotId
     }
 }

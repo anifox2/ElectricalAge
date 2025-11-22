@@ -21,14 +21,15 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateInput
 import mods.eln.wiki.Data
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.tileentity.TileEntity
-import net.minecraftforge.client.IItemRenderer
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.network.chat.Component
+import net.minecraft.world.item.TooltipFlag
 import org.lwjgl.opengl.GL11
-import org.lwjgl.util.Color
+import java.awt.Color
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
@@ -51,12 +52,14 @@ class ElectricalVuMeterDescriptor(name: String, objName: String, var onOffOnly: 
     @JvmField
     var pinDistance: FloatArray? = null
     val isRGB: Boolean
+    /*
     override fun setParent(item: Item, damage: Int) {
         super.setParent(item, damage)
         Data.addSignal(newItemStack())
     }
+    */
 
-    fun draw(factorArg: Float, entity: TileEntity?) {
+    fun draw(factorArg: Float, entity: BlockEntity?) {
         var factor = factorArg
         if (factor < 0.0) factor = 0.0f
         if (factor > 1.0) factor = 1.0f
@@ -64,8 +67,7 @@ class ElectricalVuMeterDescriptor(name: String, objName: String, var onOffOnly: 
             ObjType.LedOnOff -> {
                 main!!.draw()
                 if (isRGB) {
-                    val ledColor = Color()
-                    ledColor.fromHSB(factor, 1f, 1f)
+                    val ledColor = Color.getHSBColor(factor, 1f, 1f)
                     if (factor > 0.005f) {
                         GL11.glColor3f(ledColor.red / 255f, ledColor.green / 255f, ledColor.blue / 255f)
                     } else {
@@ -86,7 +88,7 @@ class ElectricalVuMeterDescriptor(name: String, objName: String, var onOffOnly: 
                     val c = UtilsClient.ledOnOffColorC(s)
                     GL11.glColor3f(c.red / 255f, c.green / 255f, c.blue / 255f)
                     UtilsClient.drawLight(led)
-                    if (entity != null) UtilsClient.drawHalo(halo, c.red / 255f, c.green / 255f, c.blue / 255f, entity, false) else UtilsClient.drawLight(halo)
+                    if (entity != null) UtilsClient.drawHalo(halo, c.red / 255f, c.green / 255f, c.blue / 255f, entity as net.minecraft.world.level.block.entity.BlockEntity, false) else UtilsClient.drawLight(halo)
                 }
             }
             ObjType.Rot -> {
@@ -100,55 +102,41 @@ class ElectricalVuMeterDescriptor(name: String, objName: String, var onOffOnly: 
         }
     }
 
-    override fun addInformation(itemStack: ItemStack, entityPlayer: EntityPlayer, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
+    override fun appendHoverText(itemStack: ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<Component>, flag: TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
         if (isRGB)
-            list.add(tr("Displays a color based on the value of a signal"))
+            list.add(Component.literal(tr("Displays a color based on the value of a signal")))
         else
-            list.add(tr("Displays the value of a signal."))
+            list.add(Component.literal(tr("Displays the value of a signal.")))
     }
 
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) = type != IItemRenderer.ItemRenderType.INVENTORY
-
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
-
-    override fun shouldUseRenderHelperEln(type: IItemRenderer.ItemRenderType?, item: ItemStack?, helper: IItemRenderer.ItemRendererHelper?) = type != IItemRenderer.ItemRenderType.INVENTORY
-
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
-        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, *data)
-        } else {
-            draw(0.0f, null)
-        }
-    }
-
-    override fun getFrontFromPlace(side: Direction, player: EntityPlayer): LRDU {
+    override fun getFrontFromPlace(side: Direction, player: Player): LRDU {
         return super.getFrontFromPlace(side, player)!!.inverse()
     }
 
     init {
-        this.name = name
+        // this.name = name
         obj = Eln.obj.getObj(objName)
         if (obj != null) {
             if (obj!!.getString("type").lowercase() == "rot") {
                 objType = ObjType.Rot
                 vumeter = obj!!.getPart("Vumeter")
                 pointer = obj!!.getPart("Pointer")
-                pinDistance = Utils.getSixNodePinDistance(vumeter!!)
+                pinDistance = floatArrayOf(Utils.getSixNodePinDistance(vumeter!!).toFloat())
             }
             if (obj!!.getString("type") == "LedOnOff") {
                 objType = ObjType.LedOnOff
                 main = obj!!.getPart("main")
                 halo = obj!!.getPart("halo")
                 led = obj!!.getPart("Led")
-                pinDistance = Utils.getSixNodePinDistance(main!!)
+                pinDistance = floatArrayOf(Utils.getSixNodePinDistance(main!!).toFloat())
             }
         }
         isRGB = super.name == "Multicolor LED vuMeter"
         voltageLevelColor = VoltageLevelColor.SignalVoltage
     }
 
-    override fun canBePlacedOnSide(player: EntityPlayer?, side: Direction) = true
+    override fun canBePlacedOnSide(player: Player?, side: Direction) = true
 }
 
 
@@ -158,15 +146,15 @@ class ElectricalVuMeterElement(sixNode: SixNode, side: Direction, descriptor: Si
     var slowProcess = ElectricalVuMeterSlowProcess(this)
     @JvmField
     var descriptor: ElectricalVuMeterDescriptor = descriptor as ElectricalVuMeterDescriptor
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         val value = nbt.getByte("front")
         front = LRDU.fromInt(value.toInt() shr 0 and 0x3)
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
-        nbt.setByte("front", (front.toInt() shl 0).toByte())
+        nbt.putByte("front", (front.toInt() shl 0).toByte())
     }
 
     override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad? {
@@ -225,7 +213,7 @@ class ElectricalVuMeterRender(tileEntity: SixNodeEntity, side: Direction, descri
     override fun draw() {
         super.draw()
         drawSignalPin(front, descriptor.pinDistance)
-        if (side.isY) {
+        if (side == Direction.YP || side == Direction.YN) {
             front!!.right().glRotateOnX()
         }
         descriptor.draw(if (descriptor.onOffOnly) interpolator.target else interpolator.get(), tileEntity)
@@ -257,7 +245,7 @@ class ElectricalVuMeterRender(tileEntity: SixNodeEntity, side: Direction, descri
         }
     }
 
-    override fun getCableRender(lrdu: LRDU): CableRenderDescriptor {
+    override fun getCableRender(lrdu: LRDU): CableRenderDescriptor? {
         return Eln.instance.signalCableDescriptor.render
     }
 }

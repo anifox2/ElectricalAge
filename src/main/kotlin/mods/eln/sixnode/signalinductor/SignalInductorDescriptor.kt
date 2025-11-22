@@ -4,17 +4,14 @@ import mods.eln.node.six.SixNodeDescriptor
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.mna.component.Inductor
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
-import net.minecraft.item.Item
+import net.minecraft.world.item.Item
 
+// ...existing code...
 class SignalInductorDescriptor(name: String?, var henri: Double, @JvmField var cable: ElectricalCableDescriptor) :
     SixNodeDescriptor(name, SignalInductorElement::class.java, SignalInductorRender::class.java) {
     var descriptor: String? = null
 
-    override fun setParent(item: Item, damage: Int) {
-        super.setParent(item, damage)
-    }
-
-    fun applyTo(load: ElectricalLoad?) {
+    fun applyTo(load: ElectricalLoad) {
         cable.applyTo(load)
     }
 
@@ -22,3 +19,4 @@ class SignalInductorDescriptor(name: String?, var henri: Double, @JvmField var c
         inductor.inductance = henri
     }
 }
+

@@ -10,14 +10,11 @@ import mods.eln.misc.Utils.addChatMessage
 import mods.eln.misc.Utils.entityLivingHorizontalViewDirection
 import mods.eln.misc.UtilsClient.drawIcon
 import mods.eln.misc.VoltageLevelColor
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
 import net.minecraft.util.ResourceLocation
-import net.minecraftforge.client.IItemRenderer
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
 
-open class SixNodeDescriptor : GenericItemBlockUsingDamageDescriptor, IItemRenderer {
+open class SixNodeDescriptor : GenericItemBlockUsingDamageDescriptor {
     @JvmField
     var ElementClass: Class<*>
     @JvmField
@@ -35,36 +32,15 @@ open class SixNodeDescriptor : GenericItemBlockUsingDamageDescriptor, IItemRende
         this.RenderClass = RenderClass
     }
 
-    override fun handleRenderType(item: ItemStack, type: ItemRenderType): Boolean {
-        return voltageLevelColor !== VoltageLevelColor.None
-    }
-
-    override fun shouldUseRenderHelper(type: ItemRenderType, item: ItemStack, helper: ItemRendererHelper): Boolean {
-        return false
-    }
-
-    open fun shouldUseRenderHelperEln(type: ItemRenderType?, item: ItemStack?, helper: ItemRendererHelper?): Boolean {
-        return false
-    }
-
-    override fun renderItem(type: ItemRenderType, item: ItemStack, vararg data: Any) {
-        if (icon == null) return
-        voltageLevelColor.drawIconBackground(type)
-
-        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
-        val icon = icon.iconName.substring(4)
-        drawIcon(type, ResourceLocation("eln", "textures/blocks/$icon.png"))
-    }
-
     open fun hasVolume(): Boolean {
         return false
     }
 
-    open fun canBePlacedOnSide(player: EntityPlayer?, c: Coordinate?, side: Direction): Boolean {
+    open fun canBePlacedOnSide(player: Player?, c: Coordinate?, side: Direction): Boolean {
         return canBePlacedOnSide(player, side)
     }
 
-    open fun canBePlacedOnSide(player: EntityPlayer?, side: Direction): Boolean {
+    open fun canBePlacedOnSide(player: Player?, side: Direction): Boolean {
         if (placeDirection != null) {
             for (d in placeDirection!!) {
                 if (d === side) return true
@@ -113,7 +89,7 @@ open class SixNodeDescriptor : GenericItemBlockUsingDamageDescriptor, IItemRende
         return if (ghostGroup != null && !ghostGroup.canBePloted(coord!!)) tr("Not enough space for this block") else null
     }
 
-    open fun getFrontFromPlace(side: Direction, player: EntityPlayer): LRDU? {
+    open fun getFrontFromPlace(side: Direction, player: Player): LRDU? {
         return when (side) {
             Direction.YN, Direction.YP -> {
                 val viewDirection = entityLivingHorizontalViewDirection(player)

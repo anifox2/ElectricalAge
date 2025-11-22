@@ -1,7 +1,6 @@
 package mods.eln.integration.waila
 
 import com.google.common.cache.CacheLoader
-import cpw.mods.fml.common.Optional
 import mcp.mobius.waila.api.IWailaConfigHandler
 import mcp.mobius.waila.api.IWailaDataAccessor
 import mcp.mobius.waila.api.IWailaDataProvider
@@ -10,12 +9,12 @@ import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 import mods.eln.misc.Utils
 import mods.eln.packets.GhostNodeWailaResponsePacket
-import net.minecraft.entity.player.EntityPlayerMP
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.entity.player.ServerPlayer
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.MovingObjectPosition
-import net.minecraft.world.World
+import net.minecraft.world.level.Level
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
 class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNodeWailaProvider,
@@ -40,7 +39,7 @@ class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNod
             return coord.world()
         }
         override fun getBlock() = accessor.block
-        override fun getNBTInteger(tag: NBTTagCompound?, keyname: String?) = accessor.getNBTInteger(tag, keyname)
+        override fun getNBTInteger(tag: CompoundTag?, keyname: String?) = accessor.getNBTInteger(tag, keyname)
     }
 
     private fun getGhostData(accessor: IWailaDataAccessor): GhostNodeWailaData? {
@@ -80,8 +79,8 @@ class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNod
     override fun getWailaTail(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
                               config: IWailaConfigHandler?) = currenttip
 
-    override fun getNBTData(player: EntityPlayerMP?, te: TileEntity?, tag: NBTTagCompound?,
-                            world: World?, x: Int, y: Int, z: Int): NBTTagCompound? = null
+    override fun getNBTData(player: ServerPlayer?, te: TileEntity?, tag: CompoundTag?,
+                            world: World?, x: Int, y: Int, z: Int): CompoundTag? = null
 
     override fun getWailaHead(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
                               config: IWailaConfigHandler?): MutableList<String> = if (itemStack != null) {

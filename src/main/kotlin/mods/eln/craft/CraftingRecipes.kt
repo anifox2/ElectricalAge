@@ -1,7 +1,5 @@
 package mods.eln.craft
 
-import cpw.mods.fml.common.registry.EntityRegistry
-import cpw.mods.fml.common.registry.GameRegistry
 import mods.eln.Eln
 import mods.eln.entity.ReplicatorEntity
 import mods.eln.i18n.I18N
@@ -9,9 +7,9 @@ import mods.eln.misc.Recipe
 import mods.eln.misc.Utils.addSmelting
 import mods.eln.misc.Utils.areSame
 import mods.eln.misc.Utils.println
-import net.minecraft.init.Blocks
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.init.Items
-import net.minecraft.item.ItemStack
+import net.minecraft.world.item.ItemStack
 import net.minecraft.item.crafting.CraftingManager
 import net.minecraft.item.crafting.IRecipe
 import net.minecraft.launchwrapper.LogWrapper
@@ -1852,7 +1850,7 @@ object CraftingRecipes {
             return
         }
         val output = outOres[0].copy()
-        output.stackSize = outputCount
+        output.count = outputCount
         LogWrapper.info("Adding mod recipe from $inputName to $outputName")
         for (input in inOres) {
             Eln.instance.maceratorRecipes.addRecipe(Recipe(input, output, f.toDouble()))

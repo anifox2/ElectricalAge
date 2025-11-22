@@ -4,8 +4,8 @@ import mods.eln.Eln
 import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
-import net.minecraft.block.Block
-import net.minecraft.world.World
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.Level
 import java.util.*
 
 data class GhostGroupElement(var x: Int, var y: Int, var z: Int, var block: Block, var meta: Int)

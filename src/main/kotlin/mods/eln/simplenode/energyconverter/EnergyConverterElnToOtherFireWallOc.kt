@@ -6,7 +6,7 @@ import li.cil.oc.api.network.Node
 import li.cil.oc.api.network.Visibility
 import mods.eln.Other
 import mods.eln.misc.Utils
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundTag
 
 class EnergyConverterElnToOtherFireWallOc(var e: EnergyConverterElnToOtherEntity) {
 
@@ -19,7 +19,7 @@ class EnergyConverterElnToOtherFireWallOc(var e: EnergyConverterElnToOtherEntity
         // neighboring tile entities, which isn't possible in validate().
         // We could alternatively check node != null && node.network() == null,
         // but this has somewhat better performance, and makes it clearer.
-        if (e.worldObj.isRemote) return
+        if (e.level!!.isClientSide) return
         if (!addedToNetwork) {
             addedToNetwork = true
             Network.joinOrCreateNetwork(e)
@@ -40,19 +40,19 @@ class EnergyConverterElnToOtherFireWallOc(var e: EnergyConverterElnToOtherEntity
     fun onChunkUnload() {
         // Make sure to remove the node from its network when its environment,
         // meaning this tile entity, gets unloaded.
-        if (e.worldObj.isRemote) return
+        if (e.level!!.isClientSide) return
         if (node != null) node!!.remove()
     }
 
     fun invalidate() {
         // Make sure to remove the node from its network when its environment,
         // meaning this tile entity, gets unloaded.
-        if (e.worldObj.isRemote) return
+        if (e.level!!.isClientSide) return
         if (node != null) node!!.remove()
     }
 
     // ----------------------------------------------------------------------- //
-    fun readFromNBT(nbt: NBTTagCompound) {
+    fun readFromNBT(nbt: CompoundTag) {
         // Node check removed because it was invalid code? Doesn't seem important here - jrddunbr
         // The host check may be superfluous for you. It's just there to allow
         // some special cases, where getNode() returns some node managed by
@@ -63,21 +63,27 @@ class EnergyConverterElnToOtherFireWallOc(var e: EnergyConverterElnToOtherEntity
             // to continue working without interruption across loads. If the
             // node is a power connector this is also required to restore the
             // internal energy buffer of the node.
-            node!!.load(nbt.getCompoundTag("oc:node"))
+            node!!.load(nbt.getCompound("oc:node"))
         }
     }
 
-    fun writeToNBT(@Suppress("UNUSED_PARAMETER") nbt: NBTTagCompound?) {
+    fun writeToNBT(@Suppress("UNUSED_PARAMETER") nbt: CompoundTag?) {
         // See readFromNBT() regarding host check.
         if (node != null) {
-            val nodeNbt = NBTTagCompound()
+            val nodeNbt = CompoundTag()
             node!!.save(nodeNbt)
-            Utils.newNbtTagCompund(nodeNbt, "oc:node")
+            // Utils.newNbtTagCompund(nodeNbt, "oc:node") // Assuming this puts the tag into nbt?
+            // The original code was Utils.newNbtTagCompund(nodeNbt, "oc:node") which likely meant "put nodeNbt into something with key oc:node"?
+            // No, wait. Utils.newNbtTagCompund usually creates a new tag.
+            // If nbt is null, we can't write to it.
+            if (nbt != null) {
+                nbt.put("oc:node", nodeNbt)
+            }
         }
     }
 
     fun constructor() {
         node = Network.newNode(e, Visibility.None).withConnector().create()
-        Utils.println("******** C $node")
+        // Utils.println("******** C $node")
     }
 }

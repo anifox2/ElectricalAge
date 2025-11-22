@@ -12,8 +12,8 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.Resistor
 import mods.eln.sim.nbt.NbtElectricalLoad
-import mods.eln.sixnode.lampsupply.LampSupplyElement
-import net.minecraft.entity.player.EntityPlayer
+import mods.eln.transparentnode.LampSupplyElement
+import net.minecraft.world.entity.player.Player
 import java.io.DataOutputStream
 import java.io.IOException
 
@@ -40,7 +40,7 @@ class FestiveElement(node: TransparentNode, descriptor: TransparentNodeDescripto
         return null
     }
 
-    override fun onBlockActivated(player: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         return false
     }
 
@@ -66,6 +66,7 @@ class FestiveElement(node: TransparentNode, descriptor: TransparentNodeDescripto
     }
 
     class FestiveElementProcess(val elem: FestiveElement): IProcess {
+        /*
         var bestChannelHandle: Pair<Double, LampSupplyElement.PowerSupplyChannelHandle>? = null
 
         private fun findBestSupply(here: Coordinate, forceUpdate: Boolean = false): Pair<Double, LampSupplyElement.PowerSupplyChannelHandle>? {
@@ -82,8 +83,10 @@ class FestiveElement(node: TransparentNode, descriptor: TransparentNodeDescripto
             bestChannelHandle = chanHand
             return bestChannelHandle
         }
+        */
 
         override fun process(time: Double) {
+            /*
             val lampSupplyList = findBestSupply(elem.node!!.coordinate)
             val best = lampSupplyList?.second
             if (best != null && best.element.getChannelState(best.id)) {
@@ -92,7 +95,11 @@ class FestiveElement(node: TransparentNode, descriptor: TransparentNodeDescripto
             } else {
                 elem.electricalLoad.state = 0.0
             }
-            var lightDouble = 12 * (Math.abs(elem.loadResistor.voltage) - 180.0) / 20.0
+            */
+            // ...existing code...
+            elem.electricalLoad.state = 0.0 // Default state
+            var lightDouble = 12 * (Math.abs(elem.loadResistor.u) - 180.0) / 20.0
+// ...existing code...
             lightDouble *= 16
             elem.node!!.lightValue = lightDouble.toInt().coerceIn(0, 15)
         }

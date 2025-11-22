@@ -10,12 +10,12 @@ import mods.eln.misc.Utils.println
 import mods.eln.misc.Utils.updateAllLightTypes
 import mods.eln.misc.Utils.updateSkylight
 import mods.eln.node.NodeBlockEntity
-import net.minecraft.block.Block
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.init.Blocks
-import net.minecraft.inventory.Container
-import net.minecraft.world.World
+import net.minecraft.world.level.block.Block
+import net.minecraft.client.gui.Screen
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.level.Level
 import java.io.DataInputStream
 import java.io.IOException
 
@@ -74,13 +74,13 @@ class SixNodeEntity : NodeBlockEntity() {
             e.printStackTrace()
         }
 
-        //	worldObj.setLightValue(EnumSkyBlock.Sky, xCoord,yCoord,zCoord,15);
+        //	level.setLightValue(EnumSkyBlock.Sky, xCoord,yCoord,zCoord,15);
         if (sixNodeCacheBlock !== sixNodeCacheBlockOld) {
-            val chunk = worldObj.getChunkFromBlockCoords(xCoord, zCoord)
+            val chunk = level.getChunkFromBlockCoords(xCoord, zCoord)
             chunk.generateHeightMap()
             updateSkylight(chunk)
             chunk.generateSkylightMap()
-            updateAllLightTypes(worldObj, xCoord, yCoord, zCoord)
+            updateAllLightTypes(level, xCoord, yCoord, zCoord)
         }
     }
 
@@ -101,12 +101,12 @@ class SixNodeEntity : NodeBlockEntity() {
         return elementRenderList[direction.int] != null
     }
 
-    override fun newContainer(side: Direction, player: EntityPlayer): Container? {
+    override fun newContainer(side: Direction, player: Player): AbstractContainerMenu? {
         val n = node as SixNode? ?: return null
         return n.newContainer(side, player)
     }
 
-    override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen? {
+    override fun newGuiDraw(side: Direction, player: Player): Screen? {
         return elementRenderList[side.int]!!.newGuiDraw(side, player)
     }
 
@@ -148,7 +148,7 @@ class SixNodeEntity : NodeBlockEntity() {
     }
 
     fun hasVolume(@Suppress("UNUSED_PARAMETER") world: World?, @Suppress("UNUSED_PARAMETER") x: Int, @Suppress("UNUSED_PARAMETER") y: Int, @Suppress("UNUSED_PARAMETER") z: Int): Boolean {
-        return if (worldObj.isRemote) {
+        return if (level.isRemote) {
             for (e in elementRenderList) {
                 if (e != null && e.sixNodeDescriptor.hasVolume()) return true
             }
@@ -175,7 +175,7 @@ class SixNodeEntity : NodeBlockEntity() {
     }
 
     override fun isProvidingWeakPower(side: Direction?): Int {
-        return if (worldObj.isRemote) {
+        return if (level.isRemote) {
             var max = 0
             for (r in elementRenderList) {
                 if (r == null) continue

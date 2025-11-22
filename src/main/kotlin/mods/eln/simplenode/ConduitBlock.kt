@@ -6,30 +6,22 @@ import mods.eln.node.simple.SimpleNode
 import mods.eln.node.simple.SimpleNodeBlock
 import mods.eln.node.simple.SimpleNodeEntity
 import mods.eln.sim.ElectricalLoad
-import net.minecraft.block.material.Material
-import net.minecraft.client.renderer.texture.IIconRegister
-import net.minecraft.tileentity.TileEntity
-import net.minecraft.util.IIcon
-import net.minecraft.world.IBlockAccess
-import net.minecraft.world.World
+import mods.eln.sim.ThermalLoad
+import net.minecraft.world.level.block.state.BlockBehaviour
+import net.minecraft.world.level.material.MapColor
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.Level
 
-class ConduitBlock(): SimpleNodeBlock(Material.rock) {
-    var icon: IIcon? = null
+class ConduitBlock(): SimpleNodeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)) {
 
-    override fun createNewTileEntity(worldIn: World?, meta: Int): TileEntity {
-        return ConduitEntity()
+    override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {
+        return ConduitEntity(pos, state)
     }
 
     override fun newNode(): SimpleNode {
         return ConduitNode()
-    }
-
-    override fun registerBlockIcons(reg: IIconRegister?) {
-        icon = reg!!.registerIcon("eln:conduit")
-    }
-
-    override fun isBlockSolid(worldIn: IBlockAccess?, x: Int, y: Int, z: Int, side: Int): Boolean {
-        return true
     }
 }
 
@@ -49,9 +41,10 @@ class ConduitNode: SimpleNode() {
     override fun getElectricalLoad(side: Direction, lrdu: LRDU, mask: Int): ElectricalLoad? {
         return null
     }
-
-    override fun getThermalLoad(side: Direction, lrdu: LRDU, mask: Int) = null
-
+    
+    override fun getThermalLoad(side: Direction, lrdu: LRDU, mask: Int): ThermalLoad? {
+        return null
+    }
 
     companion object {
         fun getNodeUuidStatic(): String {
@@ -60,6 +53,5 @@ class ConduitNode: SimpleNode() {
     }
 }
 
-class ConduitEntity(): SimpleNodeEntity(ConduitNode.getNodeUuidStatic()) {
-
+class ConduitEntity(pos: BlockPos, state: BlockState): SimpleNodeEntity(null!!, pos, state, ConduitNode.getNodeUuidStatic()) {
 }

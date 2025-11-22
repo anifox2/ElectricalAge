@@ -1,17 +1,17 @@
 package mods.eln.server
 
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.world.World
-import net.minecraft.world.WorldSavedData
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.LevelSavedData
 
 class ElnWorldStorage(str: String?) : WorldSavedData(str) {
     private var dim = 0
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         dim = nbt.getInteger("dim")
         ServerEventListener.readFromEaWorldNBT(nbt)
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         nbt.setInteger("dim", dim)
         ServerEventListener.writeToEaWorldNBT(nbt, dim)
     }

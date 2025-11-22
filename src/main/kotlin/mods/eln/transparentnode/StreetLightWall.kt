@@ -8,14 +8,14 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.Resistor
 import mods.eln.sim.nbt.NbtElectricalLoad
-import mods.eln.sixnode.lampsupply.LampSupplyElement
-import net.minecraft.entity.player.EntityPlayer
+//import mods.eln.sixnode.lampsupply.LampSupplyElement
+import net.minecraft.world.entity.player.Player
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
-class StreetLightWallDescriptor(val name: String, val obj: Obj3D): TransparentNodeDescriptor(name, StreetLightWallElement::class.java, StreetLightWallRender::class.java) {
+class StreetLightWallDescriptor(name: String, val obj: Obj3D): TransparentNodeDescriptor(name, StreetLightWallElement::class.java, StreetLightWallRender::class.java) {
     private var fixture: Obj3D.Obj3DPart? = null
     private var part2: Obj3D.Obj3DPart? = null
     private var part3: Obj3D.Obj3DPart? = null
@@ -24,13 +24,16 @@ class StreetLightWallDescriptor(val name: String, val obj: Obj3D): TransparentNo
         fixture = obj.getPart("Structure_StreetLightWall_socket")
         part2 = obj.getPart("Glass_StreetLightWall_socket.002")
         part3 = obj.getPart("Light_StreetLightWall_socket.003")
+        // ...existing code...
         val gg = GhostGroup()
         gg.addElement(0, 1, 0)
         ghostGroup = gg
-        mustHaveWall()
     }
 
+    override fun mustHaveWall() = true
+
     fun draw(front: Direction, powered: Boolean) {
+// ...existing code...
         if (fixture != null && part2 != null && part3 != null) {
             front.glRotateZnRef()
             GL11.glTranslated(0.0, -0.5, -0.5)
@@ -71,7 +74,7 @@ class StreetLightWallElement(node: TransparentNode, descriptor: TransparentNodeD
         return null
     }
 
-    override fun onBlockActivated(player: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         return false
     }
 
@@ -97,6 +100,7 @@ class StreetLightWallElement(node: TransparentNode, descriptor: TransparentNodeD
     }
 
     class StreetLightWallElementProcess(val elem: StreetLightWallElement): IProcess {
+        /*
         var bestChannelHandle: Pair<Double, LampSupplyElement.PowerSupplyChannelHandle>? = null
 
         private fun findBestSupply(here: Coordinate, forceUpdate: Boolean = false): Pair<Double, LampSupplyElement.PowerSupplyChannelHandle>? {
@@ -113,8 +117,10 @@ class StreetLightWallElement(node: TransparentNode, descriptor: TransparentNodeD
             bestChannelHandle = chanHand
             return bestChannelHandle
         }
+        */
 
         override fun process(time: Double) {
+            /*
             val lampSupplyList = findBestSupply(elem.node!!.coordinate)
             val best = lampSupplyList?.second
             if (best != null && best.element.getChannelState(best.id)) {
@@ -123,6 +129,8 @@ class StreetLightWallElement(node: TransparentNode, descriptor: TransparentNodeD
             } else {
                 elem.electricalLoad.state = 0.0
             }
+            */
+            elem.electricalLoad.state = 0.0
             var lightDouble = 12 * (Math.abs(elem.loadResistor.voltage) - 180.0) / 20.0
             lightDouble *= 16
             elem.node!!.lightValue = lightDouble.toInt().coerceIn(0, 15)

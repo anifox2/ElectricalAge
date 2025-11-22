@@ -1,8 +1,6 @@
 @file:Suppress("NAME_SHADOWING")
 package mods.eln.node.transparent
 
-import cpw.mods.fml.relauncher.Side
-import cpw.mods.fml.relauncher.SideOnly
 import mods.eln.cable.CableRender
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.cable.CableRenderType
@@ -13,15 +11,15 @@ import mods.eln.misc.Direction.Companion.fromInt
 import mods.eln.misc.LRDU
 import mods.eln.misc.LRDUMask
 import mods.eln.misc.Utils.setGlColorFromDye
-import mods.eln.misc.Utils.unserializeItemStackToEntityItem
+import mods.eln.misc.Utils.unserializeItemStackToItemEntity
 import mods.eln.misc.UtilsClient
 import mods.eln.sound.LoopedSound
 import mods.eln.sound.LoopedSoundManager
 import mods.eln.sound.SoundCommand
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.item.EntityItem
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.IInventory
+import net.minecraft.client.gui.Screen
+import net.minecraft.world.entity.item.ItemEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.Container
 import org.lwjgl.opengl.GL11
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
@@ -33,12 +31,12 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeEntit
     var front: Direction? = null
     var grounded = false
     @Throws(IOException::class)
-    protected fun unserializeItemStackToEntityItem(stream: DataInputStream?, old: EntityItem?): EntityItem? {
-        return unserializeItemStackToEntityItem(stream!!, old, tileEntity)
+    protected fun unserializeItemStackToItemEntity(stream: DataInputStream?, old: ItemEntity?): ItemEntity? {
+        return unserializeItemStackToItemEntity(stream!!, old, tileEntity)
     }
 
-    fun drawEntityItem(entityItem: EntityItem?, x: Double, y: Double, z: Double, roty: Float, scale: Float) {
-        UtilsClient.drawEntityItem(entityItem, x, y, z, roty, scale)
+    fun drawItemEntity(entityItem: ItemEntity?, x: Double, y: Double, z: Double, roty: Float, scale: Float) {
+        UtilsClient.drawItemEntity(entityItem, x, y, z, roty, scale)
     }
 
     fun glCableTransform(inverse: Direction) {
@@ -57,11 +55,11 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeEntit
         }
     }
 
-    open fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen? {
+    open fun newGuiDraw(side: Direction, player: Player): Screen? {
         return null
     }
 
-    open val inventory: IInventory?
+    open val inventory: Container?
         get() = null
 
     fun preparePacketForServer(stream: DataOutputStream?) {
@@ -173,7 +171,7 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeEntit
     open fun notifyNeighborSpawn() {}
     open fun serverPacketUnserialize(stream: DataInputStream?) {}
     protected fun coordinate(): Coordinate {
-        return Coordinate(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, tileEntity.worldObj)
+        return Coordinate(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, tileEntity.level)
     }
 
     private var uuid = 0

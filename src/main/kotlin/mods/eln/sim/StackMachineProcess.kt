@@ -2,11 +2,11 @@ package mods.eln.sim
 
 import mods.eln.misc.RecipesList
 import mods.eln.misc.Utils
-import net.minecraft.inventory.IInventory
-import net.minecraft.item.ItemStack
+import net.minecraft.world.Container
+import net.minecraft.world.item.ItemStack
 
 class StackMachineProcess(
-    var inventory: IInventory?,
+    var inventory: Container?,
     private var inputSlotId: Int,
     outputSlotId: Int,
     outputSlotNbr: Int,
@@ -58,7 +58,7 @@ class StackMachineProcess(
             energyCounter = 0.0
         } else {
             smeltInProcess = true
-            energyNeeded = recipesList!!.getRecipe(inventory!!.getStackInSlot(inputSlotId))!!.energy
+            energyNeeded = recipesList!!.getRecipe(inventory!!.getItem(inputSlotId))!!.energy
             energyCounter = 0.0
         }
     }
@@ -67,7 +67,7 @@ class StackMachineProcess(
      * Returns true if the furnace can smelt an item, i.e. has a source item, destination stack isn't full, etc.
      */
     fun canSmelt(): Boolean {
-        return if (inventory!!.getStackInSlot(inputSlotId) == null) {
+        return if (inventory!!.getItem(inputSlotId) == null) {
             false
         } else {
             getSmeltResult() ?: return false
@@ -76,7 +76,7 @@ class StackMachineProcess(
     }
 
     private fun getSmeltResult(): Array<ItemStack>? {
-        val recipe = recipesList!!.getRecipe(inventory!!.getStackInSlot(inputSlotId)) ?: return null
+        val recipe = recipesList!!.getRecipe(inventory!!.getItem(inputSlotId)) ?: return null
         return recipe.output
     }
 
@@ -85,9 +85,9 @@ class StackMachineProcess(
      */
     private fun smeltItem() {
         if (canSmelt()) {
-            val recipe = recipesList!!.getRecipe(inventory!!.getStackInSlot(inputSlotId))
+            val recipe = recipesList!!.getRecipe(inventory!!.getItem(inputSlotId))
             Utils.tryPutStackInInventory(recipe!!.outputCopy.requireNoNulls(), inventory!!, outSlotIdList)
-            inventory!!.decrStackSize(inputSlotId, recipe.input.stackSize)
+            inventory!!.decrStackSize(inputSlotId, recipe.input.count)
         }
     }
 

@@ -63,4 +63,8 @@ class LRDUMask {
             set(0)
         }
     }
+
+    fun applyLRDU(front: Direction, lrdu: LRDU) {
+        set(lrdu, true)
+    }
 }

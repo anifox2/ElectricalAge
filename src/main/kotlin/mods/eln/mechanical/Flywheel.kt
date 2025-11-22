@@ -11,7 +11,7 @@ import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.sim.IProcess
 import net.minecraft.entity.Entity
-import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.world.entity.player.Player
 import net.minecraft.util.DamageSource
 
 class FlywheelDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
@@ -47,7 +47,7 @@ class FlyWheelElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
             val rads = shaft.rads
             if(rads < minRads) return
             val coord = coordinate()
-            val objects = coord.world().getEntitiesWithinAABB(Entity::class.java, coord.getAxisAlignedBB(1))
+            val objects = coord.world().getEntitiesWithinAABB(Entity::class.java, coord.getAABB(1))
             //if(objects.size > 0) Utils.println("FFP.sP: within range: " + objects.size)
             for(obj in objects) {
                 val ent = obj as Entity
@@ -74,7 +74,7 @@ class FlyWheelElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
                     else -> arrayOf(0.0, mag, 0.0) // XXX
                 }
                 val dmg = damageF.getValue(rads).toInt().coerceIn(0, 1000)
-                if (ent is EntityPlayer) {
+                if (ent is Player) {
                     val ply = ent
                     // creative mode players can't have their position set, apparently.
                     if (!ply.capabilities.isCreativeMode) {

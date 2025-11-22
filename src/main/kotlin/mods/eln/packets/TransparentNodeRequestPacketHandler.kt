@@ -1,7 +1,5 @@
 package mods.eln.packets
 
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler
-import cpw.mods.fml.common.network.simpleimpl.MessageContext
 import mods.eln.Eln
 import mods.eln.misc.Utils
 import mods.eln.node.NodeManager

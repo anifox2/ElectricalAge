@@ -8,10 +8,10 @@ import mods.eln.misc.VoltageLevelColor
 import mods.eln.sim.mna.component.Resistor
 import mods.eln.sixnode.lampsocket.LampSocketType
 import mods.eln.wiki.Data
-import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.world.entity.player.Player
 import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
@@ -59,8 +59,8 @@ class LampDescriptor(
         stack.tagCompound.setDouble("life", life)
     }
 
-    override fun getDefaultNBT(): NBTTagCompound {
-        val tag = NBTTagCompound()
+    override fun getDefaultNBT(): CompoundTag {
+        val tag = CompoundTag()
         tag.setDouble("life", nominalLifeHours)
         return tag
     }
@@ -73,8 +73,8 @@ class LampDescriptor(
         resistor.resistance = r
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
         list.add(tr("Technology: %1$", type))
         list.add(tr("Range: %1$ blocks", (nominalLight * 15).toInt()))
         list.add(tr("Power: %1\$W", Utils.plotValue(nominalP)))

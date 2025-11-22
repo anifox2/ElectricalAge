@@ -1,14 +1,13 @@
 package mods.eln.sim;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.event.TickEvent.Phase;
+import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.state.State;
-import mods.eln.sim.process.destruct.IDestructible;
+// import mods.eln.sim.process.destruct.IDestructible;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ public class Simulator /* ,IPacketHandler */ {
     private ArrayList<IProcess> thermalFastProcessList, thermalSlowProcessList;
     private ArrayList<ThermalConnection> thermalFastConnectionList, thermalSlowConnectionList;
     private ArrayList<ThermalLoad> thermalFastLoadList, thermalSlowLoadList;
-    private Set<IDestructible> destructableSet;
+    // private Set<IDestructible> destructableSet;
 
     boolean run;
 
@@ -70,7 +69,7 @@ public class Simulator /* ,IPacketHandler */ {
         this.electricalInterSystemOverSampling = electricalInterSystemOverSampling;
         this.thermalPeriod = thermalPeriod;
 
-        FMLCommonHandler.instance().bus().register(this);
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(this);
 
         mna = new RootSystem(electricalPeriod, electricalInterSystemOverSampling);
 
@@ -84,7 +83,7 @@ public class Simulator /* ,IPacketHandler */ {
         thermalFastLoadList = new ArrayList<ThermalLoad>();
         thermalSlowConnectionList = new ArrayList<ThermalConnection>();
         thermalSlowLoadList = new ArrayList<ThermalLoad>();
-        destructableSet = new HashSet<IDestructible>();
+        // destructableSet = new HashSet<IDestructible>();
 
         run = false;
     }
@@ -104,7 +103,7 @@ public class Simulator /* ,IPacketHandler */ {
         thermalFastLoadList.clear();
         thermalSlowConnectionList.clear();
         thermalSlowLoadList.clear();
-        destructableSet.clear();
+        // destructableSet.clear();
 
         run = true;
     }
@@ -124,7 +123,7 @@ public class Simulator /* ,IPacketHandler */ {
         thermalFastLoadList.clear();
         thermalSlowConnectionList.clear();
         thermalSlowLoadList.clear();
-        destructableSet.clear();
+        // destructableSet.clear();
 
         run = false;
     }
@@ -414,10 +413,12 @@ public class Simulator /* ,IPacketHandler */ {
             process.process(0.05);
         }
 
+        /*
         for (IDestructible d : destructableSet) {
             d.destructImpl();
         }
         destructableSet.clear();
+        */
 
         slowNsStack += System.nanoTime() - stackStart;
         avgTickTime += 1.0 / 20 * ((int) (System.nanoTime() - startTime) / 1000);

@@ -22,11 +22,13 @@ import mods.eln.sim.process.heater.ResistorHeatThermalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import mods.eln.sixnode.resistor.ResistorContainer
 import mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.inventory.IInventory
-import net.minecraft.item.ItemStack
-import net.minecraftforge.client.IItemRenderer
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.Container
+import net.minecraft.world.item.ItemStack
+import net.minecraft.network.chat.Component
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.resources.ResourceLocation
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -40,27 +42,31 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
         voltageLevelColor = VoltageLevelColor.Neutral
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>?, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
+    // ...existing code...
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
         if (list != null) {
             // TODO: Substantiate this with some data
-            list.add(tr("Set resistance with coal dust"))
-            list.add(tr("Control resistance with signal"))
-            list.add(tr("Dissapates ~4kW of heat passively"))
+            list.add(Component.literal(tr("Set resistance with coal dust")))
+            list.add(Component.literal(tr("Control resistance with signal")))
+            list.add(Component.literal(tr("Dissapates ~4kW of heat passively")))
         }
     }
 
+    /*
     override fun addRealismContext(list: MutableList<String>?): RealisticEnum {
         list?.add(tr("Has some caveats:"))
         list?.add(tr("  * Resistance is not impacted by temperature"))
         list?.add(tr("  * Signal input doesn't require power"))
         return RealisticEnum.REALISTIC
     }
+    */
 
-    fun getRsValue(inventory: IInventory): Double {
-        val core = inventory.getStackInSlot(ResistorContainer.coreId) ?: return series.getValue(0.0)
+    fun getRsValue(inventory: Container): Double {
+        val core = inventory.getItem(ResistorContainer.coreId)
+        if (core.isEmpty) return series.getValue(0.0)
 
-        return series.getValue(core.stackSize.toDouble())
+        return series.getValue(core.count.toDouble())
     }
 
     fun draw(position: Float = 0f) {
@@ -69,12 +75,7 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
         dissipator.obj.getPart("wiper")?.draw()
     }
 
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack,
-                                       helper: IItemRenderer.ItemRendererHelper) = type != IItemRenderer.ItemRenderType.INVENTORY
 
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) =
-        if (type != IItemRenderer.ItemRenderType.INVENTORY) draw() else super.renderItem(type, item, *data)
 }
 
 class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
@@ -162,7 +163,7 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
         controlProcess.process(0.0)
     }
 
-    override fun inventoryChange(inventory: IInventory?) {
+    override fun inventoryChange(inventory: Container?) {
         super.inventoryChange(inventory)
         setupPhysical()
     }
@@ -191,8 +192,8 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     }
 
     override fun hasGui() = true
-    override fun onBlockActivated(player: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float) = false
-    override fun newContainer(side: Direction, player: EntityPlayer) = ResistorContainer(player, inventory)
+    override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float) = false
+    override fun newContainer(side: Direction, player: Player): net.minecraft.world.inventory.AbstractContainerMenu = ResistorContainer(player, inventory)
 
     override fun getWaila(): Map<String, String> = mutableMapOf(
         Pair(tr("Resistance"), Utils.plotOhm("", resistor.resistance)),
@@ -243,18 +244,23 @@ class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDe
         }
     }
 
-    override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen {
+    override fun newGuiDraw(side: Direction, player: Player): Screen {
         return LargeRheostatGUI(player, inventory, this)
     }
 
 }
 
-class LargeRheostatGUI(player: EntityPlayer, inventory: IInventory, internal var render: LargeRheostatRender) :
-    GuiContainerEln(ResistorContainer(player, inventory)) {
+class LargeRheostatGUI(player: Player, inventory: Container, internal var render: LargeRheostatRender) :
+    GuiContainerEln<ResistorContainer>(ResistorContainer(player, inventory), player.inventory, Component.literal("Large Rheostat")) {
 
-    override fun postDraw(f: Float, x: Int, y: Int) {
-        helper.drawString(8, 12, -16777216, tr("Nom. Resistance: %1$", Utils.plotValue(render.desc.getRsValue(render.inventory), "Ω")))
-        super.postDraw(f, x, y)
+    override fun renderBg(guiGraphics: GuiGraphics, f: Float, x: Int, y: Int) {
+        val texture = ResourceLocation("eln", "textures/gui/LargeRheostat.png")
+        guiGraphics.blit(texture, leftPos, topPos, 0, 0, imageWidth, imageHeight)
+    }
+
+    override fun postDraw(guiGraphics: GuiGraphics, f: Float, x: Int, y: Int) {
+        guiGraphics.drawString(font, tr("Nom. Resistance: %1$", Utils.plotValue(render.desc.getRsValue(render.inventory), "Ω")), leftPos + 8, topPos + 12, -16777216, false)
+        super.postDraw(guiGraphics, f, x, y)
     }
 
     override fun newHelper(): GuiHelperContainer {

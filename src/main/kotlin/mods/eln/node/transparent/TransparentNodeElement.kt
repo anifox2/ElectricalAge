@@ -2,6 +2,7 @@ package mods.eln.node.transparent
 
 import mods.eln.Eln
 import mods.eln.ghost.GhostObserver
+import mods.eln.init.Registration
 import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 import mods.eln.misc.Direction.Companion.fromInt
@@ -20,15 +21,15 @@ import mods.eln.sim.mna.state.State
 import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sound.IPlayer
 import mods.eln.sound.SoundCommand
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.player.EntityPlayerMP
-import net.minecraft.inventory.Container
-import net.minecraft.inventory.IInventory
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.world.World
-import net.minecraftforge.fluids.IFluidHandler
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.Container
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.level.Level
+import net.minecraftforge.fluids.capability.IFluidHandler
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -93,7 +94,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
         needPublish()
     }
 
-    fun networkUnserialize(stream: DataInputStream, @Suppress("UNUSED_PARAMETER") player: EntityPlayerMP?): Byte {
+    fun networkUnserialize(stream: DataInputStream, @Suppress("UNUSED_PARAMETER") player: ServerPlayer?): Byte {
         return networkUnserialize(stream)
     }
 
@@ -121,7 +122,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
         return false
     }
 
-    open val inventory: IInventory?
+    open val inventory: Container?
         get() = null
 
     fun preparePacketForClient(stream: DataOutputStream?) {
@@ -157,11 +158,11 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
         node!!.sendPacketToAllClient(bos)
     }
 
-    open fun newContainer(side: Direction, player: EntityPlayer): Container? {
+    open fun newContainer(side: Direction, player: Player): AbstractContainerMenu? {
         return null
     }
 
-    open fun getFluidHandler(): IFluidHandler? = null
+    open fun getFluidHandler(): net.minecraftforge.fluids.capability.IFluidHandler? = null
 
     open fun onNeighborBlockChange() {
         checkCanStay(false)
@@ -176,7 +177,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
             if (!node!!.isBlockOpaque(Direction.YP)) needDestroy = true
         }
         if (transparentNodeDescriptor.mustHaveWallFrontInverse()) {
-            if (!node!!.isBlockOpaque(front.inverse)) needDestroy = true
+            if (!node!!.isBlockOpaque(front.inverse())) needDestroy = true
         }
         if (transparentNodeDescriptor.mustHaveWall()) {
             var wall = false
@@ -208,10 +209,10 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     }
 
     open fun onBreakElement() {
-        if (useUuid()) stop(uuid)
+        if (useUuid()) stop(getUuid())
         if (transparentNodeDescriptor.ghostGroup != null) {
-            Eln.ghostManager.removeObserver(node!!.coordinate)
-            Eln.ghostManager.removeGhostAndBlockWithObserver(node!!.coordinate)
+            Eln.ghostManager!!.removeObserver(node!!.coordinate)
+            Eln.ghostManager!!.removeGhostAndBlockWithObserver(node!!.coordinate)
         }
         node!!.dropInventory(inventory)
         node!!.dropElement(node!!.removedByPlayer)
@@ -219,8 +220,10 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
 
     val dropItemStack: ItemStack
         get() {
-            val itemStack = ItemStack(Eln.transparentNodeBlock, 1, node!!.elementId)
-            itemStack.tagCompound = getItemStackNBT()
+            val itemStack = ItemStack(Registration.TRANSPARENT_NODE_ITEM.get())
+            val nbt = getItemStackNBT() ?: CompoundTag()
+            nbt.putInt("elementId", node!!.elementId)
+            itemStack.tag = nbt
             return itemStack
         }
 
@@ -237,19 +240,19 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
         }
     }
 
-    fun initializeFromThat(front: Direction, @Suppress("UNUSED_PARAMETER") entityLiving: EntityLivingBase?, itemStackNbt: NBTTagCompound?) {
+    fun initializeFromThat(front: Direction, @Suppress("UNUSED_PARAMETER") entityLiving: LivingEntity?, itemStackNbt: CompoundTag?) {
         this.front = front
         readItemStackNBT(itemStackNbt)
         initialize()
     }
 
     abstract fun initialize()
-    open fun readItemStackNBT(nbt: NBTTagCompound?) {}
-    open fun getItemStackNBT(): NBTTagCompound? {return null}
+    open fun readItemStackNBT(nbt: CompoundTag?) {}
+    open fun getItemStackNBT(): CompoundTag? {return null}
 
-    open fun onBlockActivated(player: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean = false
+    open fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean = false
 
-    open fun readFromNBT(nbt: NBTTagCompound) {
+    open fun readFromNBT(nbt: CompoundTag) {
         val inv = inventory
         if (inv != null) {
             readFromNBT(nbt, "inv", inv)
@@ -275,7 +278,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
         grounded = b.toInt() and 8 != 0
     }
 
-    open fun writeToNBT(nbt: NBTTagCompound) {
+    open fun writeToNBT(nbt: CompoundTag) {
         val inv = inventory
         if (inv != null) {
             writeToNBT(nbt, "inv", inv)
@@ -296,7 +299,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
         for (process in thermalFastProcessList) {
             if (process is INBTTReady) (process as INBTTReady).writeToNBT(nbt, "")
         }
-        nbt.setByte("others", (front.int + if (grounded) 8 else 0).toByte())
+        nbt.putByte("others", (front.int + if (grounded) 8 else 0).toByte())
     }
 
     override fun reconnect() {
@@ -315,7 +318,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
         node!!.disconnect()
     }
 
-    override fun inventoryChange(inventory: IInventory?) {}
+    override fun inventoryChange(inventory: Container?) {}
 
     open fun getLightOpacity(): Float = 0f
 
@@ -327,13 +330,22 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
         }
     }
 
-    override fun ghostBlockActivated(UUID: Int, entityPlayer: EntityPlayer, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+    override fun ghostBlockActivated(UUID: Int, entityPlayer: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         return if (UUID == transparentNodeDescriptor.ghostGroupUuid) {
             node!!.onBlockActivated(entityPlayer, side, vx, vy, vz)
         } else false
     }
 
-    fun world(): World {
+    open val level: Level
+        get() = node!!.coordinate.world()
+
+    open val isPlayerAround: Boolean
+        get() = true // Stub
+
+    open val moved: Boolean
+        get() = false // Stub
+
+    fun world(): Level {
         return node!!.coordinate.world()
     }
 
@@ -373,6 +385,6 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     }
 
     init {
-        if (transparentNodeDescriptor.ghostGroup != null) Eln.ghostManager.addObserver(this)
+        if (transparentNodeDescriptor.ghostGroup != null) Eln.ghostManager!!.addObserver(this)
     }
 }

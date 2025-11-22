@@ -1,7 +1,5 @@
 package mods.eln.mechanical
 
-import cpw.mods.fml.common.Loader
-import cpw.mods.fml.common.LoaderState
 import mods.eln.Eln
 import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
@@ -11,7 +9,7 @@ import mods.eln.node.NodeManager
 import mods.eln.sim.process.destruct.DelayedDestruction
 import mods.eln.sim.process.destruct.ShaftSpeedWatchdog
 import mods.eln.sim.process.destruct.WorldExplosion
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundTag
 import java.util.*
 
 // Speed above which shafts will (by default) explode.
@@ -295,13 +293,13 @@ open class ShaftNetwork() : INBTTReady {
         return ret
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound, str: String) {
+    override fun readFromNBT(nbt: CompoundTag, str: String) {
         rads = nbt.getFloat(str + "rads").toDouble()
         if(!rads.isFinite()) rads = 0.0
         // Utils.println(String.format("SN.rFN: load %s r=%f", this, rads))
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound, str: String) {
+    override fun writeToNBT(nbt: CompoundTag, str: String) {
         nbt.setFloat(str + "rads", rads.toFloat())
         // Utils.println(String.format("SN.wTN: save %s r=%f", this, rads))
     }

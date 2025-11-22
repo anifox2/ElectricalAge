@@ -1,8 +1,5 @@
 package mods.eln.client
 
-import cpw.mods.fml.client.registry.ClientRegistry
-import cpw.mods.fml.common.eventhandler.SubscribeEvent
-import cpw.mods.fml.common.gameevent.InputEvent.KeyInputEvent
 import mods.eln.Eln
 import mods.eln.ServerKeyHandler
 import mods.eln.i18n.I18N.tr

@@ -6,14 +6,14 @@ import mods.eln.i18n.I18N.tr
 import mods.eln.item.electricalinterface.IItemEnergyBattery
 import mods.eln.misc.Utils
 import mods.eln.misc.UtilsClient
-import net.minecraft.block.Block
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.init.Blocks
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.item.ItemStack
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.ResourceLocation
-import net.minecraft.world.World
+import net.minecraft.world.level.Level
 import net.minecraftforge.client.IItemRenderer.ItemRenderType
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
 
@@ -22,13 +22,13 @@ open class ElectricalTool(name: String, var strengthOn: Float, var strengthOff: 
     var light = 0
     var range = 0
     var rIcon: ResourceLocation
-    override fun onEntitySwing(entityLiving: EntityLivingBase?, stack: ItemStack?): Boolean {
-        if (entityLiving!!.worldObj.isRemote) return false
+    override fun onEntitySwing(entityLiving: LivingEntity?, stack: ItemStack?): Boolean {
+        if (entityLiving!!.level.isRemote) return false
         Eln.itemEnergyInventoryProcess.addExclusion(this, 2.0)
         return super.onEntitySwing(entityLiving, stack)
     }
 
-    override fun onBlockDestroyed(stack: ItemStack, w: World, block: Block, x: Int, y: Int, z: Int, entity: EntityLivingBase): Boolean {
+    override fun onBlockDestroyed(stack: ItemStack, w: World, block: Block, x: Int, y: Int, z: Int, entity: LivingEntity): Boolean {
         subtractEnergyForBlockBreak(stack, block)
         Utils.println("destroy")
         return true
@@ -46,8 +46,8 @@ open class ElectricalTool(name: String, var strengthOn: Float, var strengthOff: 
         return if (getEnergy(stack) >= energyPerBlock) strengthOn else strengthOff
     }
 
-    override fun getDefaultNBT(): NBTTagCompound? {
-        val nbt = NBTTagCompound()
+    override fun getDefaultNBT(): CompoundTag? {
+        val nbt = CompoundTag()
         nbt.setDouble("energy", 0.0)
         nbt.setBoolean("powerOn", false)
         nbt.setInteger("rand", (Math.random() * 0xFFFFFFF).toInt())
@@ -62,8 +62,8 @@ open class ElectricalTool(name: String, var strengthOn: Float, var strengthOff: 
         getNbt(stack!!).setBoolean("powerOn", value)
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
+    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+        super.appendHoverText(itemStack, level, list, flag)
         if (itemStack != null) list.add(tr("Stored energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
             (getEnergy(itemStack) / energyStorage * 100).toInt()))
     }

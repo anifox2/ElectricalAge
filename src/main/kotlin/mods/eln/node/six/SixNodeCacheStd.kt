@@ -2,9 +2,9 @@ package mods.eln.node.six
 
 import mods.eln.misc.Utils
 import mods.eln.node.ISixNodeCache
-import net.minecraft.block.Block
-import net.minecraft.block.BlockContainer
-import net.minecraft.item.ItemStack
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.BlockContainer
+import net.minecraft.world.item.ItemStack
 
 class SixNodeCacheStd : ISixNodeCache {
     override fun accept(stack: ItemStack): Boolean {

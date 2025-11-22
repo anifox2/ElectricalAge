@@ -2,8 +2,7 @@ package mods.eln.sim;
 
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.misc.MnaConst;
-import mods.eln.sixnode.resistor.ResistorDescriptor;
-import mods.eln.sixnode.resistor.ResistorElement;
+
 
 /**
  * Created by svein on 07/08/15.

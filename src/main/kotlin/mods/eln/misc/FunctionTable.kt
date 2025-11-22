@@ -16,7 +16,7 @@ open class FunctionTable(var point: DoubleArray, var xMax: Double) : IFunction {
         return point[idx + 1] * lx + point[idx] * (1.0f - lx)
     }
 
-    open fun duplicate(xFactor: Double, yFactor: Double): FunctionTable? {
+    open fun duplicate(xFactor: Double, yFactor: Double): FunctionTable {
         val pointCpy = DoubleArray(point.size)
         for (idx in point.indices) {
             pointCpy[idx] = point[idx] * yFactor
