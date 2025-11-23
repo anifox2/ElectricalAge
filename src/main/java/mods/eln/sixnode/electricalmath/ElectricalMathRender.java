@@ -7,8 +7,8 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -43,7 +43,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
 
     @Nullable
     @Override
-    public GuiScreen newGuiDraw(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public Screen newGuiDraw(@NotNull Direction side, @NotNull Player player) {
         return new ElectricalMathGui(player, inventory, this);
     }
 
@@ -70,7 +70,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
             pinDistances = descriptor.pinDistance;
         }
 
-        if (UtilsClient.distanceFromClientPlayer(getTileEntity()) < 15) {
+        if (UtilsClient.distanceFromClientPlayer(blockEntity) < 15) {
             GL11.glColor3f(0, 0, 0);
             UtilsClient.drawConnectionPinSixNode(front, pinDistances, 1.8f, 1.35f);
             GL11.glColor3f(1, 0, 0);
@@ -103,7 +103,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
             ledTime = 0;
         }
 
-        if (!Utils.isPlayerAround(getTileEntity().getWorldObj(), coord.getAxisAlignedBB(0)))
+        if (!Utils.isPlayerAround(blockEntity.getLevel(), coord.getAxisAlignedBB(0)))
             interpolator.setTarget(0f);
         else
             interpolator.setTarget(1f);

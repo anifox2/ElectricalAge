@@ -98,7 +98,7 @@ class FestiveElement(node: TransparentNode, descriptor: TransparentNodeDescripto
             */
             // ...existing code...
             elem.electricalLoad.state = 0.0 // Default state
-            var lightDouble = 12 * (Math.abs(elem.loadResistor.u) - 180.0) / 20.0
+            var lightDouble = 12 * (Math.abs(elem.loadResistor.voltage) - 180.0) / 20.0
 // ...existing code...
             lightDouble *= 16
             elem.node!!.lightValue = lightDouble.toInt().coerceIn(0, 15)

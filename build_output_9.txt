@@ -1,0 +1,146 @@
+
+> Configure project :
+Java: 21.0.9 JVM: 21.0.9+10-LTS (Eclipse Adoptium) Arch: aarch64
+
+> Task :checkKotlinGradlePluginConfigurationErrors
+> Task :processResources UP-TO-DATE
+> Task :downloadMcpConfig
+> Task :extractSrg UP-TO-DATE
+> Task :createMcpToSrg UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+
+> Task :compileKotlin FAILED
+e: Supertypes of the following classes cannot be resolved. Please make sure you have the required dependencies in the classpath:
+    class mods.eln.sixnode.electricalmath.ElectricalMathDescriptor, unresolved supertypes: IPlugIn
+Adding -Xextended-compiler-checks argument might provide additional information.
+
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostBlock.kt:22:33 Conflicting import, imported name 'BlockHitResult' is ambiguous
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostBlock.kt:26:33 Conflicting import, imported name 'BlockHitResult' is ambiguous
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostBlock.kt:119:9 'getCloneItemStack' hides member of supertype 'Block' and needs 'override' modifier
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/BrushDescriptor.kt:58:22 Type mismatch: inferred type is String but Component was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/HeatingCorpElement.kt:3:25 Unresolved reference: GenericItemUsingDamageDescriptorUpgrade
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/LampSlot.kt:24:5 Type mismatch: inferred type is Class<LampDescriptor> but Array<Class<*>> was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/LampSlot.kt:30:32 Unresolved reference: getItemObject
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalAxe.kt:151:40 Expecting an element
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalAxe.kt:152:40 Expecting an element
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/mechanical/Clutch.kt:79:37 This type is final, so it cannot be inherited from
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/mechanical/RollingShaftMachine.kt:124:149 No value passed for parameter 'inventory'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/mechanical/RollingShaftMachine.kt:124:149 No value passed for parameter 'title'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/misc/Utils.kt:218:43 Unresolved reference: getEc
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/misc/Utils.kt:218:57 Unresolved reference: getRs
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sim/MonsterPopFreeProcess.kt:34:49 Type mismatch: inferred type is Enemy! but Entity! was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/DeviceProbe.kt:35:16 Unresolved reference: DeviceProbeEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherBlock.kt:17:16 Unresolved reference: EnergyConverterElnToOtherEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherFireWallOc.kt:11:50 Unresolved reference: EnergyConverterElnToOtherEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherFireWallRf.kt:10:25 Unresolved reference: EnergyConverterElnToOtherEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.kt:16:48 Unresolved reference: EnergyConverterElnToOtherEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.kt:66:16 Variable expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.kt:81:24 Variable expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.kt:85:24 Variable expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/AnalogChips.kt:857:13 Operator '===' cannot be applied to 'IGuiObject' and 'GuiVerticalCustomValuesBar?'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/CurrentSourceSix.kt:158:31 Return type of 'newHelper' is not a subtype of the return type of the overridden member 'public open fun newHelper(): GuiHelperContainer defined in mods.eln.gui.ScreenEln'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/CurrentSourceSix.kt:166:31 Type mismatch: inferred type is CurrentSourceGui but GuiTextFieldEln.GuiTextFieldElnObserver was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/CurrentSourceSix.kt:167:30 Type mismatch: inferred type is List<String> but Array<String> was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/CurrentSourceSix.kt:170:5 'textFieldNewValue' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/ElectricalFuse.kt:49:78 Unresolved reference: ElectricalCableDescriptor
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/ElectricalFuse.kt:220:72 Type mismatch: inferred type is ItemStack? but ItemStack was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/ElectricalVuMeter.kt:249:50 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ElectricalCableDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/EmergencyLamp.kt:291:5 'guiObjectEvent' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/PortableNaN.kt:28:9 Val cannot be reassigned
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/PowerSinkSix.kt:170:30 Type mismatch: inferred type is List<String> but Array<String> was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/PowerSourceSix.kt:165:30 Type mismatch: inferred type is List<String> but Array<String> was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/Scanner.kt:76:28 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/Scanner.kt:213:105 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ElectricalCableDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/currentcable/CurrentCable.kt:235:45 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/currentcable/CurrentCable.kt:243:53 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:98:5 'addRealismContext' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:99:15 Unresolved reference: addRealismContext
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalcable/ElectricalCableElement.kt:78:5 'saveAdditional' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalcable/ElectricalCableElement.kt:79:15 Unresolved reference: saveAdditional
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorElement.kt:83:52 Type mismatch: inferred type is Double but String was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorElement.kt:83:52 No value passed for parameter 'value'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorRender.kt:76:81 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ElectricalCableDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorSlowProcess.kt:28:55 Unresolved reference: getEnergyMax
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorSlowProcess.kt:61:83 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorSlowProcess.kt:61:135 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorSlowProcess.kt:61:187 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorSlowProcess.kt:61:239 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorSlowProcess.kt:74:99 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketElement.kt:39:64 Unresolved reference: tileEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:30:32 Unresolved reference: newGuiButton
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:31:23 Unresolved reference: newGuiTextField
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:33:32 Unresolved reference: newGuiButton
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:34:23 Unresolved reference: newGuiTextField
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:37:26 Unresolved reference: newGuiButton
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:39:30 Type mismatch: inferred type is List<String> but Array<String> was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:42:18 Unresolved reference: newGuiVerticalTrackBar
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:48:22 Unresolved reference: visible
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:52:5 'guiObjectEvent' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:53:30 Type mismatch: inferred type is IGuiObject but Int was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/powersocket/PowerSocketElement.kt:5:22 Unresolved reference: IConfigurable
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/powersocket/PowerSocketElement.kt:32:4 Unresolved reference: IConfigurable
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/powersocket/PowerSocketElement.kt:171:5 'readConfigTool' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/powersocket/PowerSocketElement.kt:181:5 'writeConfigTool' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/ArcFurnace.kt:163:17 Unresolved reference: draw
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/DcDc.kt:520:17 Unresolved reference: draw
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/Fabricator.kt:156:33 None of the following functions can be called with the arguments supplied: 
+public constructor ItemStack(p0: Holder<Item!>!, p1: Int) defined in net.minecraft.world.item.ItemStack
+public constructor ItemStack(p0: ItemLike!, p1: Int) defined in net.minecraft.world.item.ItemStack
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/Fabricator.kt:159:25 None of the following functions can be called with the arguments supplied: 
+public constructor ItemStack(p0: Holder<Item!>!, p1: Int) defined in net.minecraft.world.item.ItemStack
+public constructor ItemStack(p0: ItemLike!, p1: Int) defined in net.minecraft.world.item.ItemStack
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/Fabricator.kt:284:17 Unresolved reference: draw
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/Floodlight.kt:98:41 'name' hides member of supertype 'TransparentNodeDescriptor' and needs 'override' modifier
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/FuelGenerator.kt:147:20 Cannot access 'level': it is invisible (private in a supertype) in 'Player'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/FuelGenerator.kt:168:42 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GenericItemUsingDamageDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/FuelGenerator.kt:169:43 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GenericItemUsingDamageDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/FuelGenerator.kt:170:40 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GenericItemUsingDamageDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/LargeRheostat.kt:25:33 Unresolved reference: thermaldissipatorpassive
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/LargeRheostat.kt:39:61 Unresolved reference: ThermalDissipatorPassiveDescriptor
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/NixieTube.kt:139:19 Function invocation 'inverse()' expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/NixieTube.kt:213:27 Unresolved reference: setGlColorFromDye
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/ThermalHeatExchanger.kt:111:24 None of the following functions can be called with the arguments supplied: 
+public constructor ElementSidedFluidHandler(tankSizeMb: Int) defined in mods.eln.fluid.ElementSidedFluidHandler
+public constructor ElementSidedFluidHandler(tankData: Map<Direction, ElementSidedFluidHandler.TankData>) defined in mods.eln.fluid.ElementSidedFluidHandler
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/autominer/AutoMinerRender.kt:5:46 No value passed for parameter 'context'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxRender.kt:5:56 No value passed for parameter 'context'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxRender.kt:5:56 No value passed for parameter 'context'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/electricalmachine/MagnetizerDescriptor.kt:75:21 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ElectricalCableDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/festive/FestiveElement.kt:101:64 Unresolved reference: u
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/festive/FestiveElement.kt:103:25 Assignment operators ambiguity: 
+public open fun `<Error function>`(): [Error type: Return type for function cannot be resolved] defined in root package
+public open fun `<Error function>`(): [Error type: Return type for function cannot be resolved] defined in root package
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/solarpanel/SolarPanelRender.kt:5:47 No value passed for parameter 'context'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/teleporter/TeleporterElement.kt:35:56 Type mismatch: inferred type is TransparentNode? but NodeBase was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/teleporter/TeleporterElement.kt:44:20 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type TransparentNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/teleporter/TeleporterElement.kt:59:5 'onBreakFromWorld' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/teleporter/TeleporterElement.kt:60:15 Unresolved reference: onBreakFromWorld
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/teleporter/TeleporterRender.kt:24:26 Unresolved reference: setMaxSpeed
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/teleporter/TeleporterRender.kt:29:14 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type Direction?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/thermaldissipator/ThermalDissipatorActiveDescriptor.kt:64:14 Unresolved reference: setRs
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/thermaldissipator/ThermalDissipatorActiveElement.kt:39:56 Type mismatch: inferred type is TransparentNode? but NodeBase was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/thermaldissipator/ThermalDissipatorActiveRender.kt:21:14 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type Direction?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/thermaldissipator/ThermalDissipatorActiveRender.kt:26:12 Unresolved reference: setTarget
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/thermaldissipator/ThermalDissipatorPassiveRender.kt:16:14 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type Direction?
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.5/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 32s
+6 actionable tasks: 3 executed, 3 up-to-date

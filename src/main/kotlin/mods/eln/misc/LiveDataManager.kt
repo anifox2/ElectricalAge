@@ -2,6 +2,10 @@ package mods.eln.misc
 
 import java.util.*
 
+import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.minecraftforge.event.TickEvent
+import net.minecraftforge.common.MinecraftForge
+
 /*
 
 TODO: I'm not actually convinced this file does anything useful. It's only called in Eln.java for reasons unclear.
@@ -29,7 +33,7 @@ class LiveDataManager {
 
     var map: MutableMap<Any, Element> = HashMap()
     @SubscribeEvent
-    fun tick(event: RenderTickEvent) {
+    fun tick(event: TickEvent.RenderTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
         val keyToRemove: MutableList<Any> = ArrayList()
         for ((key, e) in map) {
@@ -45,7 +49,7 @@ class LiveDataManager {
     }
 
     init {
-        FMLCommonHandler.instance().bus().register(this)
+        MinecraftForge.EVENT_BUS.register(this)
     }
 }
 

@@ -6,7 +6,7 @@ import mods.eln.misc.Obj3D
 import mods.eln.misc.UtilsClient
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeElementRender
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.IOException
@@ -53,7 +53,7 @@ class ChristmasTreeDescriptor(name: String, val obj: Obj3D) : TransparentNodeDes
     }
 }
 
-class ChristmasTreeRender(tileEntity: TransparentNodeEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
+class ChristmasTreeRender(tileEntity: TransparentNodeBlockEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
     var x = 0
     var powered = false
 

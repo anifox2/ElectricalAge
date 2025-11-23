@@ -2,7 +2,7 @@ package mods.eln.sixnode.powersocket
 
 import mods.eln.generic.GenericItemUsingDamageDescriptor.Companion.getDescriptor
 import mods.eln.item.BrushDescriptor
-import mods.eln.misc.IConfigurable
+import mods.eln.item.IConfigurable
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
 import mods.eln.misc.Utils.plotUIP
@@ -24,10 +24,6 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.nbt.StringTag
 import java.io.DataInputStream
-import java.io.DataOutputStream
-import java.io.IOException
-
-// ...existing code...
 import java.io.DataOutputStream
 import java.io.IOException
 

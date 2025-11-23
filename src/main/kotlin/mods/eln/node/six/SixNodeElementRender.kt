@@ -8,7 +8,7 @@ import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
 import mods.eln.misc.LRDU.Companion.fromInt
 import mods.eln.misc.LRDUMask
-import mods.eln.misc.Utils.setGlColorFromDye
+import mods.eln.misc.UtilsClient.setGlColorFromDye
 import mods.eln.misc.UtilsClient
 import mods.eln.misc.UtilsClient.bindTexture
 import mods.eln.misc.UtilsClient.distanceFromClientPlayer
@@ -18,7 +18,7 @@ import mods.eln.misc.UtilsClient.glGenListsSafe
 import mods.eln.sound.LoopedSound
 import mods.eln.sound.LoopedSoundManager
 import mods.eln.sound.SoundCommand
-import net.minecraft.client.gui.Screen
+import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.Container
 import org.lwjgl.opengl.GL11
@@ -27,7 +27,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
-abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmField var side: Direction, @JvmField var sixNodeDescriptor: SixNodeDescriptor) {
+abstract class SixNodeElementRender(@JvmField var blockEntity: SixNodeEntity, @JvmField var side: Direction, @JvmField var sixNodeDescriptor: SixNodeDescriptor) {
     @JvmField
     var connectedSide = LRDUMask()
     var glList = 0
@@ -43,14 +43,14 @@ abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmFiel
     }
 
     fun drawPowerPin(front: LRDU?, d: FloatArray?) {
-        if (distanceFromClientPlayer(tileEntity) > 20) return
+        if (distanceFromClientPlayer(blockEntity) > 20) return
         GL11.glColor3f(0f, 0f, 0f)
         drawConnectionPinSixNode(front!!, d!!, 1.8f, 0.9f)
         GL11.glColor3f(1f, 1f, 1f)
     }
 
     fun drawPowerPinWhite(front: LRDU?, d: FloatArray?) {
-        if (distanceFromClientPlayer(tileEntity) > 20) return
+        if (distanceFromClientPlayer(blockEntity) > 20) return
         drawConnectionPinSixNode(front!!, d!!, 1.8f, 0.9f)
     }
 
@@ -59,7 +59,7 @@ abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmFiel
     }
 
     fun drawSignalPin(front: LRDU?, d: FloatArray?) {
-        if (distanceFromClientPlayer(tileEntity) > 20) return
+        if (distanceFromClientPlayer(blockEntity) > 20) return
         GL11.glColor3f(0f, 0f, 0f)
         drawConnectionPinSixNode(front!!, d!!, 0.9f, 0.9f)
         GL11.glColor3f(1f, 1f, 1f)
@@ -153,7 +153,7 @@ abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmFiel
 
     fun play(s: SoundCommand) {
         s.addUuid(getUuid())
-        s.set(tileEntity)
+        s.set(blockEntity)
         s.play()
     }
 
@@ -178,16 +178,16 @@ abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmFiel
 
     fun preparePacketForServer(stream: DataOutputStream) {
         try {
-            tileEntity.preparePacketForServer(stream)
+            blockEntity.preparePacketForServer(stream)
             stream.writeByte(side.int)
-            stream.writeShort(tileEntity.elementRenderIdList[side.int].toInt())
+            stream.writeShort(blockEntity.elementRenderIdList[side.int].toInt())
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
 
     fun sendPacketToServer(bos: ByteArrayOutputStream?) {
-        tileEntity.sendPacketToServer(bos)
+        blockEntity.sendPacketToServer(bos)
     }
 
     open fun getCableRender(lrdu: LRDU): CableRenderDescriptor? {
@@ -238,13 +238,13 @@ abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmFiel
         }
     }
 
-    fun clientSetString(id: Byte, text: String) {
+    fun clientSetString(id: Byte, value: String) {
         try {
             val bos = ByteArrayOutputStream()
             val stream = DataOutputStream(bos)
             preparePacketForServer(stream)
             stream.writeByte(id.toInt())
-            stream.writeUTF(text)
+            stream.writeUTF(value)
             sendPacketToServer(bos)
         } catch (e: IOException) {
             e.printStackTrace()
@@ -302,7 +302,7 @@ abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmFiel
     }
 
     private val loopedSoundManager = LoopedSoundManager()
-    @SideOnly(Side.CLIENT)
+    // @SideOnly(Side.CLIENT)
     protected fun addLoopedSound(loopedSound: LoopedSound?) {
         loopedSoundManager.add(loopedSound)
     }
@@ -320,5 +320,9 @@ abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmFiel
         cableList[1] = glGenListsSafe()
         cableList[2] = glGenListsSafe()
         cableList[3] = glGenListsSafe()
+    }
+
+    fun getTileEntity(): SixNodeEntity {
+        return blockEntity
     }
 }

@@ -1,15 +1,18 @@
 package mods.eln.sixnode.electricaldatalogger;
 
 import mods.eln.gui.GuiContainerEln;
+import mods.eln.gui.GuiButtonEln;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.GuiTextFieldEln.GuiTextFieldElnObserver;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.FC;
 import mods.eln.misc.UtilsClient;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
 import org.lwjgl.opengl.GL11;
 
 import java.text.NumberFormat;
@@ -17,9 +20,9 @@ import java.text.ParseException;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextFieldElnObserver {
+public class ElectricalDataLoggerGui extends GuiContainerEln {
 
-    GuiButton resetBt, voltageType, energyType, currentType, powerType, celsiusType, percentType, noType, config, printBt, pause;
+    GuiButtonEln resetBt, voltageType, energyType, currentType, powerType, celsiusType, percentType, noType, config, printBt, pause;
     GuiTextFieldEln samplingPeriod, maxValue, minValue, yCursorValue;
     ElectricalDataLoggerRender render;
 
@@ -27,13 +30,13 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 
     State state = State.display;
 
-    public ElectricalDataLoggerGui(EntityPlayer player, IInventory inventory, ElectricalDataLoggerRender render) {
-        super(new ElectricalDataLoggerContainer(player, inventory));
+    public ElectricalDataLoggerGui(Player player, Container inventory, ElectricalDataLoggerRender render) {
+        super(new ElectricalDataLoggerContainer(player, inventory), player.getInventory(), Component.literal("Data Logger"));
         this.render = render;
     }
 
     void displayEntry() {
-        config.displayString = tr("Configuration");
+        config.setMessage(Component.literal(tr("Configuration")));
         config.visible = true;
         pause.visible = true;
         resetBt.visible = true;
@@ -54,7 +57,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
     void configEntry() {
         pause.visible = false;
         config.visible = true;
-        config.displayString = tr("Back to display");
+        config.setMessage(Component.literal(tr("Back to display")));
         resetBt.visible = false;
         printBt.visible = true;
         voltageType.visible = true;
@@ -91,15 +94,15 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
         printBt = newGuiButton(176 / 2 - 48 / 2, 146, 48, tr("Print"));
 
         samplingPeriod = newGuiTextField(30, 124, 50);
-        samplingPeriod.setText(render.log.samplingPeriod);
+        samplingPeriod.setText(String.valueOf(render.log.samplingPeriod));
         samplingPeriod.setComment(new String[]{tr("Sampling period")});
 
         maxValue = newGuiTextField(176 - 50 - 30, 124 - 7, 50);
-        maxValue.setText(render.log.maxValue);
+        maxValue.setText(String.valueOf(render.log.maxValue));
         maxValue.setComment(new String[]{tr("Y-axis max")});
 
         minValue = newGuiTextField(176 - 50 - 30, 124 + 8, 50);
-        minValue.setText(render.log.minValue);
+        minValue.setText(String.valueOf(render.log.minValue));
         minValue.setComment(new String[]{tr("Y-axis min")});
 
         displayEntry();
@@ -147,7 +150,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
             } else if (object == samplingPeriod) {
                 float value = NumberFormat.getInstance().parse(samplingPeriod.getText()).floatValue();
                 if (value < 0.05f) value = 0.05f;
-                samplingPeriod.setText(value);
+                samplingPeriod.setText(String.valueOf(value));
 
                 render.clientSetFloat(ElectricalDataLoggerElement.setSamplingPeriodeId, value);
             }
@@ -156,58 +159,58 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
     }
 
     @Override
-    protected void preDraw(float f, int x, int y) {
-        super.preDraw(f, x, y);
-        powerType.enabled = true;
-        currentType.enabled = true;
-        voltageType.enabled = true;
-        celsiusType.enabled = true;
-        percentType.enabled = true;
-        energyType.enabled = true;
+    public void preDraw(GuiGraphics guiGraphics, float f, int x, int y) {
+        super.preDraw(guiGraphics, f, x, y);
+        powerType.active = true;
+        currentType.active = true;
+        voltageType.active = true;
+        celsiusType.active = true;
+        percentType.active = true;
+        energyType.active = true;
 
         switch (render.log.unitType) {
             case DataLogs.currentType:
-                currentType.enabled = false;
+                currentType.active = false;
                 break;
             case DataLogs.voltageType:
-                voltageType.enabled = false;
+                voltageType.active = false;
                 break;
             case DataLogs.powerType:
-                powerType.enabled = false;
+                powerType.active = false;
                 break;
             case DataLogs.celsiusType:
-                celsiusType.enabled = false;
+                celsiusType.active = false;
                 break;
             case DataLogs.percentType:
-                percentType.enabled = false;
+                percentType.active = false;
                 break;
             case DataLogs.energyType:
-                energyType.enabled = false;
+                energyType.active = false;
                 break;
             case DataLogs.noType:
-                noType.enabled = false;
+                noType.active = false;
                 break;
         }
 
         if (render.pause)
-            pause.displayString = FC.DARK_YELLOW + "Paused";
+            pause.setMessage(Component.literal(FC.DARK_YELLOW + "Paused"));
         else
-            pause.displayString = FC.BRIGHT_GREEN + "Running";
+            pause.setMessage(Component.literal(FC.BRIGHT_GREEN + "Running"));
 
-        boolean a = inventorySlots.getSlot(ElectricalDataLoggerContainer.paperSlotId).getStack() != null;
-        boolean b = inventorySlots.getSlot(ElectricalDataLoggerContainer.printSlotId).getStack() == null;
-        printBt.enabled = a && b;
+        boolean a = menu.getSlot(ElectricalDataLoggerContainer.paperSlotId).getItem() != null;
+        boolean b = menu.getSlot(ElectricalDataLoggerContainer.printSlotId).getItem() == null;
+        printBt.active = a && b;
     }
 
     @Override
-    protected void postDraw(float f, int x, int y) {
-        super.postDraw(f, x, y);
+    public void postDraw(GuiGraphics guiGraphics, float f, int x, int y) {
+        super.postDraw(guiGraphics, f, x, y);
         final float bckrndMargin = 0.05f;
 
         if (state == State.display) {
 
             GL11.glPushMatrix();
-            GL11.glTranslatef(guiLeft + 8, guiTop + 53, 0);
+            GL11.glTranslatef(leftPos + 8, topPos + 53, 0);
             GL11.glScalef(50, 50, 1f);
 
             GL11.glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
@@ -223,13 +226,13 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
             UtilsClient.enableTexture();
 
             GL11.glColor4f(render.descriptor.cr, render.descriptor.cg, render.descriptor.cb, 1);
-            render.log.draw(2.9f, 1.6f, render.descriptor.textColor);
+            render.log.draw(guiGraphics, 2.9f, 1.6f, render.descriptor.textColor);
             GL11.glPopMatrix();
         }
     }
 
     @Override
-    protected GuiHelperContainer newHelper() {
+    public GuiHelperContainer newHelper() {
         return new GuiHelperContainer(this, 176, 253, 8, 171);
     }
 }

@@ -1,6 +1,6 @@
 package mods.eln.sixnode.diode;
 
-import mods.eln.misc.Direction;
+import net.minecraft.core.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -18,7 +18,7 @@ public class DiodeRender extends SixNodeElementRender {
     LRDU front;
 
     public DiodeRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-        super(tileEntity, side, descriptor);
+        super(tileEntity, mods.eln.misc.Direction.fromMCDirection(side), descriptor);
         this.descriptor = (DiodeDescriptor) descriptor;
     }
 

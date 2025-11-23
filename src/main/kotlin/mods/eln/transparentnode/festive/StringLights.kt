@@ -5,7 +5,7 @@ import mods.eln.misc.Obj3D
 import mods.eln.misc.UtilsClient
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeElementRender
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.level.Level
@@ -48,7 +48,7 @@ class StringLightsDescriptor(name: String, val obj: Obj3D): TransparentNodeDescr
      */
 }
 
-class StringLightsRender(tileEntity: TransparentNodeEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
+class StringLightsRender(tileEntity: TransparentNodeBlockEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
 
     var powered = false
 

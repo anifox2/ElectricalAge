@@ -232,7 +232,7 @@ open class CurrentCableElement(_sixNode: SixNode?, side: Direction?, descriptor:
         if (isPlayerUsingWrench(entityPlayer)) {
             colorCare = colorCare xor 1
             addChatMessage(entityPlayer, "Wire color care $colorCare")
-            (this as SixNodeElement).sixNode.reconnect()
+            (this as SixNodeElement).sixNode!!.reconnect()
         } else if (currentItemStack != null) {
             val gen = getDescriptor(currentItemStack)
             if (gen is BrushDescriptor) {
@@ -240,7 +240,7 @@ open class CurrentCableElement(_sixNode: SixNode?, side: Direction?, descriptor:
                 val brushColor = brush.getColor(currentItemStack)
                 if (brushColor != color && brush.use(currentItemStack, entityPlayer)) {
                     color = brushColor
-                    (this as SixNodeElement).sixNode.reconnect()
+                    (this as SixNodeElement).sixNode!!.reconnect()
                 }
             }
         }

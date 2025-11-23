@@ -7,7 +7,9 @@ import com.mojang.blaze3d.systems.RenderSystem
 
 open class ScreenEln(title: Component = Component.empty()) : Screen(title), IGuiObject {
     var helper: GuiHelperContainer? = null
+    @JvmField
     var leftPos: Int = 0
+    @JvmField
     var topPos: Int = 0
 
     override fun init() {
@@ -38,6 +40,7 @@ open class ScreenEln(title: Component = Component.empty()) : Screen(title), IGui
     open fun postDraw(guiGraphics: GuiGraphics, f: Float, x: Int, y: Int) {}
 
     override fun guiObjectEvent(eventId: Int) {}
+    open fun guiObjectEvent(obj: IGuiObject) {}
 
     fun newGuiVerticalProgressBar(x: Int, y: Int, w: Int, h: Int): GuiVerticalProgressBar {
         return GuiVerticalProgressBar(x, y, w, h)
@@ -49,7 +52,7 @@ open class ScreenEln(title: Component = Component.empty()) : Screen(title), IGui
         return tf
     }
 
-    fun newGuiButton(x: Int, y: Int, width: Int, text: String, onPress: (net.minecraft.client.gui.components.Button) -> Unit = {}): GuiButtonEln {
+    fun newGuiButton(x: Int, y: Int, width: Int, text: String, onPress: net.minecraft.client.gui.components.Button.OnPress = net.minecraft.client.gui.components.Button.OnPress {}): GuiButtonEln {
         val btn = GuiButtonEln(leftPos + x, topPos + y, width, 20, text, onPress)
         addRenderableWidget(btn)
         return btn

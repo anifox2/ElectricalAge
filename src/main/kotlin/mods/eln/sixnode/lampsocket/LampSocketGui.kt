@@ -27,31 +27,68 @@ class LampSocketGuiDraw(player: Player, inventory: Container, var lampRender: La
         var x = 0
         if (lampRender.descriptor.alphaZMax == lampRender.descriptor.alphaZMin) {
             x = -0
-            buttonSupplyType = newGuiButton(x + 176 / 2 - 140 / 2, 8, 140, "")
+            buttonSupplyType = newGuiButton(x + 176 / 2 - 140 / 2, 8, 140, "") {
+                clientSendPacket(LampSocketElement.tooglePowerSupplyType)
+            }
             channel = newGuiTextField(x + 176 / 2 - 140 / 2 + 1, 34, 140)
         } else {
-            buttonSupplyType = newGuiButton(x + 176 / 2 - 140 / 2 - 12, 8, 136, "")
+            buttonSupplyType = newGuiButton(x + 176 / 2 - 140 / 2 - 12, 8, 136, "") {
+                clientSendPacket(LampSocketElement.tooglePowerSupplyType)
+            }
             channel = newGuiTextField(x + 176 / 2 - 140 / 2 - 11, 34, 135)
         }
 
-        buttonGrounded = newGuiButton(x + 176 / 2 - 30, -2000, 60, "")
+        buttonGrounded = newGuiButton(x + 176 / 2 - 30, -2000, 60, "") {
+            clientSendPacket(LampSocketElement.setGroundedId)
+        }
 
-        channel!!.setComment(listOf(tr("Specify the supply channel")))
+        channel!!.setComment(arrayOf(tr("Specify the supply channel")))
 
         channel!!.value = lampRender.channel ?: ""
+        channel!!.observer = GuiTextFieldEln.GuiTextFieldElnObserver { _, _ ->
+            clientSendPacket(LampSocketElement.setChannel)
+        }
+
         alphaZ = newGuiVerticalTrackBar(176 - 8 - 20, 8, 20, 69)
         alphaZ!!.setRange(lampRender.descriptor.alphaZMin, lampRender.descriptor.alphaZMax)
         alphaZ!!.setStepIdMax(200)
-        alphaZ!!.value = lampRender.alphaZ
+        alphaZ!!.value = lampRender.alphaZ.toFloat()
 
         if (lampRender.descriptor.alphaZMax == lampRender.descriptor.alphaZMin) {
             alphaZ!!.visible = false
         }
     }
 
-    override fun guiObjectEvent(guiObject: IGuiObject) {
-        super.guiObjectEvent(guiObject)
-        // Event handling skipped for now
+    fun clientSendPacket(id: Int) {
+        val bos = java.io.ByteArrayOutputStream()
+        val stream = java.io.DataOutputStream(bos)
+        try {
+            stream.writeByte(mods.eln.Eln.packetPublishForNode.toInt())
+            val pos = lampRender.blockEntity.blockPos
+            stream.writeInt(pos.x)
+            stream.writeInt(pos.y)
+            stream.writeInt(pos.z)
+            stream.writeByte(0) // Dimension TODO
+            stream.writeUTF(lampRender.blockEntity.nodeUuid)
+            stream.writeByte(lampRender.side.int)
+            
+            when (id) {
+                LampSocketElement.setAlphaZId -> stream.writeFloat(alphaZ!!.value)
+                LampSocketElement.setChannel -> stream.writeUTF(channel!!.value)
+            }
+            
+            mods.eln.ElnNetwork.sendToServer(mods.eln.ElnPacket(bos.toByteArray()))
+        } catch (e: java.io.IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun guiObjectEvent(eventId: Int) {
+        super.guiObjectEvent(eventId)
+        if (alphaZ != null && alphaZ!!.pending) {
+            alphaZ!!.pending = false
+            clientSendPacket(LampSocketElement.setAlphaZId)
+        }
     }
 
     override fun newHelper(): GuiHelperContainer {

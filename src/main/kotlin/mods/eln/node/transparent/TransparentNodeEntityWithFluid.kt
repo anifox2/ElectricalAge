@@ -5,13 +5,17 @@ import net.minecraftforge.fluids.FluidStack
 import net.minecraftforge.fluids.capability.IFluidHandler
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
 
+import net.minecraft.world.level.block.entity.BlockEntityType
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.block.state.BlockState
+
 /**
  * Proxy class for TNEs with Forge fluids.
  */
-class TransparentNodeEntityWithFluid : TransparentNodeEntity(), IFluidHandler {
+class TransparentNodeBlockEntityWithFluid(type: BlockEntityType<*>, pos: BlockPos, state: BlockState) : TransparentNodeBlockEntity(type, pos, state), IFluidHandler {
     private val fluidHandler: IFluidHandler
         get() {
-            if (level != null && !level!!.isRemote) {
+            if (level != null && !level!!.isClientSide) {
                 val node = node
                 if (node != null && node is TransparentNode) {
                     val i = node.fluidHandler

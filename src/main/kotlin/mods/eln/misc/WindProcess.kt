@@ -45,7 +45,7 @@ class WindProcess : IProcess, INBTTReady {
         windTarget = nbt.getDouble(str + "windTarget")
         windVariation = nbt.getDouble(str + "windVariation")
         // NOTE: Please leave this for backwards compatibility
-        if (nbt.hasKey(str + "windTargetFiltred")) {
+        if (nbt.contains(str + "windTargetFiltred")) {
             windTargetFiltered.setValue(nbt.getFloat(str + "windTargetFiltred"))
         } else {
             windTargetFiltered.setValue(nbt.getFloat(str + "windTargetFiltered"))
@@ -53,9 +53,9 @@ class WindProcess : IProcess, INBTTReady {
     }
 
     override fun writeToNBT(nbt: CompoundTag, str: String) {
-        nbt.setDouble(str + "windHit", windHit)
-        nbt.setDouble(str + "windTarget", windTarget)
-        nbt.setDouble(str + "windVariation", windVariation)
-        nbt.setFloat(str + "windTargetFiltered", windTargetFiltered.get())
+        nbt.putDouble(str + "windHit", windHit)
+        nbt.putDouble(str + "windTarget", windTarget)
+        nbt.putDouble(str + "windVariation", windVariation)
+        nbt.putFloat(str + "windTargetFiltered", windTargetFiltered.get())
     }
 }

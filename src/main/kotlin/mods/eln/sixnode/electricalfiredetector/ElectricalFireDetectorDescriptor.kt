@@ -30,7 +30,7 @@ class ElectricalFireDetectorDescriptor(
         if (obj != null) {
             detector = obj.getPart("Detector")
             led = obj.getPart("Led")
-            pinDistance = floatArrayOf(Utils.getSixNodePinDistance(detector).toFloat())
+            pinDistance = Utils.getSixNodePinDistance(detector)
         }
 
         if (batteryPowered) {

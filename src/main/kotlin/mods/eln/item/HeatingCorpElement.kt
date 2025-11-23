@@ -1,6 +1,6 @@
 package mods.eln.item
 
-import mods.eln.generic.GenericItemUsingDamageDescriptorUpgrade
+import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import mods.eln.sim.ElectricalLoad
 import kotlin.math.sqrt
@@ -11,7 +11,7 @@ class HeatingCorpElement(
     var electricalNominalP: Double,
     var electricalMaximalP: Double,
     var cableDescriptor: ElectricalCableDescriptor
-) : GenericItemUsingDamageDescriptorUpgrade(name) {
+) : GenericItemUsingDamageDescriptor(name) {
 
     var electricalR: Double = electricalNominalU * electricalNominalU / electricalNominalP
     var Umax: Double = sqrt(electricalMaximalP * electricalR)

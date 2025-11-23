@@ -4,9 +4,12 @@ import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -55,11 +58,14 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List<String> list, boolean par4) {
-        super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Tells the time."));
-        list.add(tr("Requires batteries for operation."));
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, level, tooltip, flag);
+        tooltip.add(Component.literal(tr("Tells the time.")));
+        tooltip.add(Component.literal(tr("Requires batteries for operation.")));
     }
+
+    // Removed IItemRenderer methods as they are no longer supported in 1.20.x
+    // Rendering should be handled by BlockEntityWithoutLevelRenderer or baked models.
 
     void draw(float hour, float min, boolean isEnergyAvailable) {
         if (kind == Kind.ANALOG) {
@@ -69,7 +75,7 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
         } else if (kind == Kind.DIGITAL) {
             //Digits
             obj.bindTexture("Digits.png");
-            UtilsClient.disableLight();
+            mods.eln.misc.UtilsClient.INSTANCE.disableLight();
             GL11.glColor3f(0.95f, 0.f, 0.f);
             if (isEnergyAvailable) {
                 int fulltimeMin = (int) (12.0f * 60.0f * hour);
@@ -93,19 +99,19 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
                 dot.draw();
             }
             GL11.glColor3f(1.f, 1.f, 1.f);
-            UtilsClient.enableLight();
+            mods.eln.misc.UtilsClient.INSTANCE.enableLight();
             //Frame
             base.draw();
             //Glass (reflections)
-            UtilsClient.enableBlend();
+            mods.eln.misc.UtilsClient.INSTANCE.enableBlend();
             //UtilsClient.enableBilinear();
             obj.bindTexture("Reflection.png");
-            float rotYaw = Minecraft.getMinecraft().thePlayer.rotationYaw / 360.f;
-            float rotPitch = Minecraft.getMinecraft().thePlayer.rotationPitch / 180.f;
-            float pos = (((float) Minecraft.getMinecraft().thePlayer.posX) + ((float) Minecraft.getMinecraft().thePlayer.posZ)) / 64.f;
+            float rotYaw = Minecraft.getInstance().player.getYRot() / 360.f;
+            float rotPitch = Minecraft.getInstance().player.getXRot() / 180.f;
+            float pos = (((float) Minecraft.getInstance().player.getX()) + ((float) Minecraft.getInstance().player.getZ())) / 64.f;
             glass.draw(rotYaw + pos, rotPitch * 0.875f);
             //UtilsClient.disableBilinear(); //BUG: Not always disabled.
-            UtilsClient.disableBlend();
+            mods.eln.misc.UtilsClient.INSTANCE.disableBlend();
         }
     }
 
@@ -115,34 +121,9 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
         //Data.addSignal(newItemStack());
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glRotatef(90, 1, 0, 0);
-            draw(0.1f, 0.2f, true);
-        }
-    }
-
     @Nullable
     @Override
-    public LRDU getFrontFromPlace(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public mods.eln.misc.LRDU getFrontFromPlace(@NotNull mods.eln.misc.Direction side, @NotNull Player player) {
         return super.getFrontFromPlace(side, player).left();
     }
 }

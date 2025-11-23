@@ -21,25 +21,25 @@ class GhostElement : INBTTReady {
     }
 
     fun breakBlock() {
-        Eln.ghostManager.removeGhost(elementCoordinate)
-        val observer = Eln.ghostManager.getObserver(observatorCoordonate)
+        Eln.ghostManager!!.removeGhost(elementCoordinate)
+        val observer = Eln.ghostManager!!.getObserver(observatorCoordonate)
         observer?.ghostDestroyed(uUID)
     }
 
     fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
-        val observer = Eln.ghostManager.getObserver(observatorCoordonate)
+        val observer = Eln.ghostManager!!.getObserver(observatorCoordonate)
         return observer?.ghostBlockActivated(uUID, entityPlayer!!, side!!, vx, vy, vz) ?: false
     }
 
     override fun readFromNBT(nbt: CompoundTag, str: String) {
         elementCoordinate = Coordinate(nbt, str + "elemCoord")
         observatorCoordonate = Coordinate(nbt, str + "obserCoord")
-        uUID = nbt.getInteger(str + "UUID")
+        uUID = nbt.getInt(str + "UUID")
     }
 
     override fun writeToNBT(nbt: CompoundTag, str: String) {
         elementCoordinate!!.writeToNBT(nbt, str + "elemCoord")
         observatorCoordonate!!.writeToNBT(nbt, str + "obserCoord")
-        nbt.setInteger(str + "UUID", uUID)
+        nbt.putInt(str + "UUID", uUID)
     }
 }

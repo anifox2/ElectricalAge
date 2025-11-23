@@ -2,15 +2,15 @@ package mods.eln.sixnode.electricalalarm;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.Direction;
+import net.minecraft.core.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,7 +30,7 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
     boolean mute = false;
 
     public ElectricalAlarmRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-        super(tileEntity, side, descriptor);
+        super(tileEntity, mods.eln.misc.Direction.fromMCDirection(side), descriptor);
         this.descriptor = (ElectricalAlarmDescriptor) descriptor;
     }
 
@@ -79,7 +79,7 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
 
     @Nullable
     @Override
-    public GuiScreen newGuiDraw(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public Screen newGuiDraw(@NotNull mods.eln.misc.Direction side, @NotNull Player player) {
         return new ElectricalAlarmGui(player, this);
     }
 }

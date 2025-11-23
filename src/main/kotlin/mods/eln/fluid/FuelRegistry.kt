@@ -77,7 +77,7 @@ object FuelRegistry {
 
     fun fluidListToFluids(fluidNames: Array<String>) =
         fluidNames.mapNotNull { name ->
-            ForgeRegistries.FLUIDS.entries.find { it.key.path == name }?.value
+            ForgeRegistries.FLUIDS.entries.find { it.key.location().path == name }?.value
         }.toTypedArray()
 
     fun heatEnergyPerMilliBucket(fuelName: String): Double = Eln.fuelHeatValueFactor * (allFuels[fuelName] ?: 0.0)

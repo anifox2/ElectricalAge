@@ -3,6 +3,10 @@ package cpw.mods.fml.common
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.fml.loading.FMLEnvironment
 
+enum class Side {
+    CLIENT, SERVER
+}
+
 class FMLCommonHandler {
     val effectiveSide: Side
         get() = if (FMLEnvironment.dist == Dist.CLIENT) Side.CLIENT else Side.SERVER

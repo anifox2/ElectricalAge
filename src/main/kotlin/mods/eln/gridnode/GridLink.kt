@@ -132,19 +132,19 @@ class GridLink : INBTTReady {
     override fun readFromNBT(nbt: CompoundTag, str: String) {
         a.readFromNBT(nbt, str + "a")
         b.readFromNBT(nbt, str + "b")
-        `as` = Direction.readFromNBT(nbt, str + "as")!!
-        bs = Direction.readFromNBT(nbt, str + "bs")!!
+        `as` = Direction.load(nbt, str + "as")!!
+        bs = Direction.load(nbt, str + "bs")!!
         rs = nbt.getDouble(str + "rs")
-        cable = ItemStack.loadItemStackFromNBT(nbt)
+        cable = ItemStack.of(nbt)
     }
 
     override fun writeToNBT(nbt: CompoundTag, str: String) {
         a.writeToNBT(nbt, str + "a")
         b.writeToNBT(nbt, str + "b")
-        `as`.writeToNBT(nbt, str + "as")
-        bs.writeToNBT(nbt, str + "bs")
-        nbt.setDouble(str + "rs", rs)
-        cable.writeToNBT(nbt)
+        `as`.save(nbt, str + "as")
+        bs.save(nbt, str + "bs")
+        nbt.putDouble(str + "rs", rs)
+        cable.save(nbt)
     }
 
     fun selfDestroy() {

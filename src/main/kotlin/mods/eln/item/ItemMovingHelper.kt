@@ -10,6 +10,15 @@ abstract class ItemMovingHelper {
     abstract fun acceptsStack(stack: ItemStack): Boolean
     abstract fun newStackOfSize(items: Int): ItemStack
 
+    companion object {
+        fun syncEntireInventory(player: net.minecraft.world.entity.player.Player) {
+            if (player is ServerPlayer) {
+                player.containerMenu.broadcastChanges()
+                player.inventoryMenu.broadcastChanges()
+            }
+        }
+    }
+
     fun move(src: Inventory, dst: Container, dstSlot: Int, desired: Int) {
         if (src.player is ServerPlayer && (src.player as ServerPlayer).isCreative) {
             if (desired == 0) {

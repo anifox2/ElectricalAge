@@ -86,8 +86,8 @@ class StackMachineProcess(
     private fun smeltItem() {
         if (canSmelt()) {
             val recipe = recipesList!!.getRecipe(inventory!!.getItem(inputSlotId))
-            Utils.tryPutStackInInventory(recipe!!.outputCopy.requireNoNulls(), inventory!!, outSlotIdList)
-            inventory!!.decrStackSize(inputSlotId, recipe.input.count)
+            Utils.tryPutStackInInventory(recipe!!.getOutputCopy(), inventory!!, outSlotIdList)
+            inventory!!.removeItem(inputSlotId, recipe!!.input.count)
         }
     }
 

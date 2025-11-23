@@ -9,7 +9,7 @@ object Other {
     fun isTeLoaded(): Boolean = false
     fun isOcLoaded(): Boolean = false
 
-    fun getWattsToEu(): Double = 0.25
-    fun getWattsToRf(): Double = 1.0
-    fun getWattsToOC(): Double = 1.0
+    var wattsToEu: Double = 0.25
+    var wattsToRf: Double = 1.0
+    var wattsToOC: Double = 1.0
 }

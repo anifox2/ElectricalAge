@@ -1,13 +1,15 @@
 package mods.eln.sixnode.lampsupply;
 
+import static mods.eln.i18n.I18N.tr;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +30,6 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
 
     public LampSupplyDescriptor(String name, Obj3D obj, int range) {
         super(name, LampSupplyElement.class, LampSupplyRender.class);
-        this.isWireless = isWireless;
         this.range = range;
         this.obj = obj;
         if (obj != null) {
@@ -45,7 +46,7 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
     @Override
     public void setParent(Item item, int damage) {
         super.setParent(item, damage);
-        Data.addLight(newItemStack(1));
+        Data.addLight(new ItemStack(item, 1));
     }
 
     public void draw(float openFactor) {
@@ -55,9 +56,9 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
         //UtilsClient.disableDepthTest();
         UtilsClient.enableBlend();
         obj.bindTexture("Glass.png");
-        float rotYaw = Minecraft.getMinecraft().thePlayer.rotationYaw / 360.f;
-        float rotPitch = Minecraft.getMinecraft().thePlayer.rotationPitch / 180.f;
-        float pos = (((float) Minecraft.getMinecraft().thePlayer.posX) + ((float) Minecraft.getMinecraft().thePlayer.posZ)) / 64.f;
+        float rotYaw = Minecraft.getInstance().player.getYRot() / 360.f;
+        float rotPitch = Minecraft.getInstance().player.getXRot() / 180.f;
+        float pos = (((float) Minecraft.getInstance().player.getX()) + ((float) Minecraft.getInstance().player.getZ())) / 64.f;
         if (window != null)
             window.draw((1f - openFactor) * windowOpenAngle, 0f, 0f, 1f, rotYaw + pos + (openFactor * 0.5f), rotPitch * 0.65f);
         UtilsClient.disableBlend();
@@ -65,6 +66,7 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
         UtilsClient.enableCulling();
     }
 
+    /*
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
         return type != ItemRenderType.INVENTORY;
@@ -88,13 +90,16 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
             draw(1f);
         }
     }
+    */
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, @Nullable Player entityPlayer, List<String> list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         list.add(tr("Supplies power to nearby lamps."));
         list.add(tr("Capable of operating 3 light channels."));
-        Collections.addAll(list,tr("Supports control from a wireless signal\nchannel for each lighting channel.").split("\n"));
+        for (String s : tr("Supports control from a wireless signal\nchannel for each lighting channel.").split("\n")) {
+            list.add(s);
+        }
     }
 
     @Override
@@ -108,7 +113,7 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
 
     @Nullable
     @Override
-    public LRDU getFrontFromPlace(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public LRDU getFrontFromPlace(@NotNull Direction side, @NotNull Player player) {
         return super.getFrontFromPlace(side, player).inverse();
     }
 }

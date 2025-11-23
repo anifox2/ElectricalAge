@@ -1,75 +1,65 @@
 package mods.eln.node.six
 
 import mods.eln.misc.INBTTReady
-import mods.eln.misc.Utils.readFromNBT
-import mods.eln.misc.Utils.writeToNBT
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.Container
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.core.NonNullList
+import net.minecraft.world.ContainerHelper
 
 class SixNodeElementInventory : Container, INBTTReady {
     var sixnodeRender: SixNodeElementRender? = null
     var sixNodeElement: SixNodeElement? = null
     var stackLimit: Int
 
+    private var inv: NonNullList<ItemStack>
+
     constructor(size: Int, stackLimit: Int, sixnodeRender: SixNodeElementRender?) {
-        inv = arrayOfNulls(size)
+        inv = NonNullList.withSize(size, ItemStack.EMPTY)
         this.stackLimit = stackLimit
         this.sixnodeRender = sixnodeRender
     }
 
     constructor(size: Int, stackLimit: Int, sixNodeElement: SixNodeElement?) {
-        inv = arrayOfNulls(size)
+        inv = NonNullList.withSize(size, ItemStack.EMPTY)
         this.stackLimit = stackLimit
         this.sixNodeElement = sixNodeElement
     }
 
-    private var inv: Array<ItemStack?>
     override fun getContainerSize(): Int {
         return inv.size
     }
 
-    override fun getItem(slot: Int): ItemStack? {
-        return if (slot >= inv.size) null else inv[slot]
+    override fun isEmpty(): Boolean {
+        for (stack in inv) {
+            if (!stack.isEmpty) return false
+        }
+        return true
     }
 
-    override fun decrStackSize(slot: Int, amt: Int): ItemStack? {
-        var stack = getItem(slot)
-        if (stack != null) {
-            if (stack.count <= amt) {
-                setItem(slot, null)
-            } else {
-                stack = stack.splitStack(amt)
-                if (stack.count == 0) {
-                    setItem(slot, null)
-                }
-            }
+    override fun getItem(slot: Int): ItemStack {
+        return if (slot >= 0 && slot < inv.size) inv[slot] else ItemStack.EMPTY
+    }
+
+    override fun removeItem(slot: Int, amt: Int): ItemStack {
+        val stack = ContainerHelper.removeItem(inv, slot, amt)
+        if (!stack.isEmpty) {
+            setChanged()
         }
         return stack
     }
 
-    override fun getItemOnClosing(slot: Int): ItemStack? {
-        val stack = getItem(slot)
-        if (stack != null) {
-            setItem(slot, null)
-        }
-        return stack
+    override fun removeItemNoUpdate(slot: Int): ItemStack {
+        return ContainerHelper.takeItem(inv, slot)
     }
 
-    override fun setItem(slot: Int, stack: ItemStack?) {
-        try {
-            inv[slot] = stack
-            if (stack != null && stack.count > inventoryStackLimit) {
-                stack.count = inventoryStackLimit
-            }
-        } catch (e: Exception) {
-            // TODO: handle exception
+    override fun setItem(slot: Int, stack: ItemStack) {
+        inv[slot] = stack
+        if (!stack.isEmpty && stack.count > maxStackSize) {
+            stack.count = maxStackSize
         }
-    }
-
-    override fun getInventoryName(): String {
-        return "tco.SixNodeInventory"
+        setChanged()
     }
 
     override fun getMaxStackSize(): Int {
@@ -80,8 +70,9 @@ class SixNodeElementInventory : Container, INBTTReady {
         return true
     }
 
-    override fun startOpen() {}
-    override fun stopOpen() {}
+    override fun startOpen(player: Player) {}
+    override fun stopOpen(player: Player) {}
+    
     override fun setChanged() {
         if (sixNodeElement != null && !sixNodeElement!!.sixNode!!.isDestructing) {
             sixNodeElement!!.inventoryChanged()
@@ -89,18 +80,21 @@ class SixNodeElementInventory : Container, INBTTReady {
     }
 
     override fun readFromNBT(nbt: CompoundTag, str: String) {
-        readFromNBT(nbt, str, this)
+        val tag = nbt.getCompound(str)
+        ContainerHelper.loadAllItems(tag, inv)
     }
 
     override fun writeToNBT(nbt: CompoundTag, str: String) {
-        writeToNBT(nbt, str, this)
+        val tag = CompoundTag()
+        ContainerHelper.saveAllItems(tag, inv)
+        nbt.put(str, tag)
     }
 
     override fun canPlaceItem(i: Int, itemstack: ItemStack): Boolean {
-        return false
+        return true
     }
-
-    override fun hasCustomInventoryName(): Boolean {
-        return false
+    
+    override fun clearContent() {
+        inv.clear()
     }
 }

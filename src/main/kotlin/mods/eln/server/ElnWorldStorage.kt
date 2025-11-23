@@ -2,41 +2,35 @@ package mods.eln.server
 
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.Level
-import net.minecraft.world.level.LevelSavedData
+import net.minecraft.world.level.saveddata.SavedData
+import net.minecraft.server.level.ServerLevel
 
-class ElnWorldStorage(str: String?) : WorldSavedData(str) {
-    private var dim = 0
-    override fun readFromNBT(nbt: CompoundTag) {
-        dim = nbt.getInteger("dim")
-        ServerEventListener.readFromEaWorldNBT(nbt)
-    }
+class ElnWorldStorage : SavedData() {
+    var dim = 0
 
-    override fun writeToNBT(nbt: CompoundTag) {
-        nbt.setInteger("dim", dim)
+    override fun save(nbt: CompoundTag): CompoundTag {
+        nbt.putInt("dim", dim)
         ServerEventListener.writeToEaWorldNBT(nbt, dim)
-    }
-
-    override fun isDirty(): Boolean {
-        return true
+        return nbt
     }
 
     companion object {
         const val key = "eln.worldStorage"
+
+        fun load(nbt: CompoundTag): ElnWorldStorage {
+            val data = ElnWorldStorage()
+            data.dim = nbt.getInt("dim")
+            ServerEventListener.readFromEaWorldNBT(nbt)
+            return data
+        }
+
         @JvmStatic
-        fun forWorld(world: World): ElnWorldStorage {
-            // Retrieves the MyWorldData instance for the given world, creating it if necessary
-            val storage = world.perWorldStorage
-            val dim = world.provider.dimensionId
-            var result = storage.loadData(ElnWorldStorage::class.java, key + dim) as ElnWorldStorage?
-            if (result == null) {
-                result = storage.loadData(ElnWorldStorage::class.java, key + dim + "back") as ElnWorldStorage?
+        fun forWorld(world: Level): ElnWorldStorage {
+            if (world is ServerLevel) {
+                val storage = world.dataStorage
+                return storage.computeIfAbsent(::load, ::ElnWorldStorage, key)
             }
-            if (result == null) {
-                result = ElnWorldStorage(key + dim)
-                result.dim = dim
-                storage.setData(key + dim, result)
-            }
-            return result
+            return ElnWorldStorage()
         }
     }
 }

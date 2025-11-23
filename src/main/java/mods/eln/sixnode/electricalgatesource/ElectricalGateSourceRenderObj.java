@@ -4,7 +4,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
 import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor.ObjType;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -52,7 +52,7 @@ public class ElectricalGateSourceRenderObj {
         }
     }
 
-    public void draw(float factor, float distance, TileEntity e) {
+    public void draw(float factor, float distance, BlockEntity e) {
         switch (objType) {
             case Button:
                 if (main != null) main.draw();
@@ -61,9 +61,9 @@ public class ElectricalGateSourceRenderObj {
                 if (lever != null) lever.draw();
 
                 UtilsClient.ledOnOffColor(factor > 0.5f);
-                UtilsClient.disableLight();
+                UtilsClient.INSTANCE.disableLight();
                 if (led != null) led.draw();
-                UtilsClient.enableBlend();
+                UtilsClient.INSTANCE.enableBlend();
 
                 if (halo != null) {
                     if (e == null)
@@ -74,8 +74,8 @@ public class ElectricalGateSourceRenderObj {
                     }
                 }
 
-                UtilsClient.disableBlend();
-                UtilsClient.enableLight();
+                UtilsClient.INSTANCE.disableBlend();
+                UtilsClient.INSTANCE.enableLight();
 
                 break;
             case Pot:

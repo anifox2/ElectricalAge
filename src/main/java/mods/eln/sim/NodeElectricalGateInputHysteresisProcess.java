@@ -17,7 +17,22 @@ public abstract class NodeElectricalGateInputHysteresisProcess implements IProce
         this.name = name;
     }
 
-    protected abstract void setOutput(boolean value);
+        protected abstract void setOutput(boolean value);
+
+    @Override
+    public void readFromNBT(CompoundTag nbt, String str) {
+        if (gate != null) gate.readFromNBT(nbt, str + name);
+        if (nbt.contains(str + name + "state")) {
+            state = nbt.getBoolean(str + name + "state");
+        }
+    }
+
+    @Override
+    public void writeToNBT(CompoundTag nbt, String str) {
+        if (gate != null) gate.writeToNBT(nbt, str + name);
+        nbt.putBoolean(str + name + "state", state);
+    }
+
 
     @Override
     public void process(double time) {
@@ -34,13 +49,5 @@ public abstract class NodeElectricalGateInputHysteresisProcess implements IProce
         }
     }
 
-    @Override
-    public void readFromNBT(CompoundTag nbt, String str) {
-        state = nbt.getBoolean(str + name + "state");
-    }
 
-    @Override
-    public void writeToNBT(CompoundTag nbt, String str) {
-        nbt.putBoolean(str + name + "state", state);
-    }
 }

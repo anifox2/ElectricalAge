@@ -1,14 +1,15 @@
-package mods.eln.sixnode.TreeResinCollector;
+package mods.eln.sixnode.treeresincollector;
 
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.oredict.OreDictionary;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.tags.BlockTags;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
@@ -56,56 +57,22 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw(0.0f);
-        }
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Produces Tree Resin over\ntime when put on a tree.").split("\n"));
     }
 
-    public static boolean isWood(Block b) {
-        for (ItemStack s : OreDictionary.getOres("treeWood")) {
-            if (s.getItem() == Item.getItemFromBlock(b)) return true;
-        }
-        for (ItemStack s : OreDictionary.getOres("logWood")) {
-            if (s.getItem() == Item.getItemFromBlock(b)) return true;
-        }
-
-        return false;
+    public static boolean isWood(BlockState state) {
+        return state.is(BlockTags.LOGS);
     }
 
-    public static boolean isLeaf(Block b) {
-        for (ItemStack s : OreDictionary.getOres("treeLeaves")) {
-            if (s.getItem() == Item.getItemFromBlock(b)) return true;
-        }
-        return false;
+    public static boolean isLeaf(BlockState state) {
+        return state.is(BlockTags.LEAVES);
     }
 
     @Override
-    public boolean canBePlacedOnSide(EntityPlayer player, Coordinate c, Direction side) {
-        Block b = c.getBlock();
+    public boolean canBePlacedOnSide(Player player, Coordinate c, Direction side) {
+        BlockState b = c.getBlockState();
         if (!isWood(b) || side.isY()) {
             Utils.addChatMessage(player, tr("This block can only be placed on the side of a tree!"));
             return false;

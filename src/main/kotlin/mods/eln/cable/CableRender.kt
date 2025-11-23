@@ -7,7 +7,8 @@ import mods.eln.node.NodeBase.Companion.isBlockWrappable
 import mods.eln.node.NodeBlockEntity
 import mods.eln.node.six.SixNodeElementRender
 import mods.eln.node.six.SixNodeEntity
-import net.minecraft.tileentity.TileEntity
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.core.BlockPos
 import org.lwjgl.opengl.GL11
 
 object CableRender {
@@ -17,14 +18,15 @@ object CableRender {
         var y2: Int
         var z2: Int
         val connectionTypeBuild = CableRenderType()
-        var otherTileEntity: TileEntity?
+        var otherBlockEntity: BlockEntity?
         for (lrdu in LRDU.values()) {
             //noConnection
             if (!connectedSide[lrdu]) continue
             val sideLrdu = side.applyLRDU(lrdu)
-            x2 = entity.xCoord
-            y2 = entity.yCoord
-            z2 = entity.zCoord
+            val pos = entity.blockPos
+            x2 = pos.x
+            y2 = pos.y
+            z2 = pos.z
             when (sideLrdu) {
                 Direction.XN -> x2--
                 Direction.XP -> x2++
@@ -35,9 +37,10 @@ object CableRender {
             }
 
             //standardConnection
-            otherTileEntity = entity.level.getTileEntity(x2, y2, z2)
-            if (otherTileEntity is SixNodeEntity) {
-                val sixNodeEntity = otherTileEntity
+            val pos2 = BlockPos(x2, y2, z2)
+            otherBlockEntity = entity.level!!.getBlockEntity(pos2)
+            if (otherBlockEntity is SixNodeEntity) {
+                val sixNodeEntity = otherBlockEntity
                 if (sixNodeEntity.elementRenderList[side.int] != null) {
                     val otherSide = side.applyLRDU(lrdu)
                     connectionTypeBuild.otherdry[lrdu.dir] =
@@ -49,7 +52,8 @@ object CableRender {
             }
 
             //no wrappeConection ?
-            if (!isBlockWrappable(entity.level.getBlock(x2, y2, z2), entity.level, x2, y2, z2)) {
+            val state = entity.level!!.getBlockState(pos2)
+            if (!isBlockWrappable(state, entity.level!!, pos2)) {
                 continue
             } else {
                 when (side) {
@@ -60,12 +64,13 @@ object CableRender {
                     Direction.ZN -> z2--
                     Direction.ZP -> z2++
                 }
-                otherTileEntity = entity.level.getTileEntity(x2, y2, z2)
-                if (otherTileEntity is NodeBlockEntity) {
-                    val otherDirection = side.inverse
+                val pos3 = BlockPos(x2, y2, z2)
+                otherBlockEntity = entity.level!!.getBlockEntity(pos3)
+                if (otherBlockEntity is NodeBlockEntity) {
+                    val otherDirection = side.inverse()
                     val otherLRDU = otherDirection.getLRDUGoingTo(sideLrdu)!!.inverse()
                     val render = entity.getCableRender(sideLrdu, sideLrdu.getLRDUGoingTo(side)!!)
-                    val otherNode = otherTileEntity
+                    val otherNode = otherBlockEntity
                     val otherRender = otherNode.getCableRender(otherDirection, otherLRDU)
                     if (render == null) {
                         //Utils.println("ASSERT cableRender missing");
@@ -106,17 +111,17 @@ object CableRender {
         var y2: Int
         var z2: Int
         val connectionTypeBuild = CableRenderType()
-        var otherTileEntity: TileEntity?
+        var otherBlockEntity: BlockEntity?
         for (lrdu in LRDU.values()) {
             //noConnection
             if (!element.connectedSide[lrdu]) continue
             val sideLrdu = side.applyLRDU(lrdu)
 
             //InternalConnection
-            if (element.tileEntity.elementRenderList[sideLrdu.int] != null) {
+            if (element.blockEntity.elementRenderList[sideLrdu.int] != null) {
                 val otherLRDU = sideLrdu.getLRDUGoingTo(side)
                 val render = element.getCableRender(lrdu)
-                val otherElement = element.tileEntity.elementRenderList[sideLrdu.int]!!
+                val otherElement = element.blockEntity.elementRenderList[sideLrdu.int]!!
                 val otherRender = otherElement.getCableRender(otherLRDU!!)
                 if (otherRender == null || render == null) {
                     continue
@@ -141,9 +146,10 @@ object CableRender {
                 connectionTypeBuild.otherRender[lrdu.dir] = otherElement.getCableRender(otherLRDU)
                 continue
             }
-            x2 = element.tileEntity.xCoord
-            y2 = element.tileEntity.yCoord
-            z2 = element.tileEntity.zCoord
+            val pos = element.blockEntity.blockPos
+            x2 = pos.x
+            y2 = pos.y
+            z2 = pos.z
             when (sideLrdu) {
                 Direction.XN -> x2--
                 Direction.XP -> x2++
@@ -154,9 +160,10 @@ object CableRender {
             }
 
             //standardConnection
-            otherTileEntity = element.tileEntity.level.getTileEntity(x2, y2, z2)
-            if (otherTileEntity is SixNodeEntity) {
-                val sixNodeEntity = otherTileEntity
+            val pos2 = BlockPos(x2, y2, z2)
+            otherBlockEntity = element.blockEntity.level!!.getBlockEntity(pos2)
+            if (otherBlockEntity is SixNodeEntity) {
+                val sixNodeEntity = otherBlockEntity
                 if (sixNodeEntity.elementRenderList[side.int] != null) {
                     connectionTypeBuild.otherdry[lrdu.dir] =
                         sixNodeEntity.elementRenderList[side.int]!!.getCableDry(lrdu.inverse())
@@ -167,12 +174,11 @@ object CableRender {
             }
 
             //no wrappeConection ?
+            val state = element.blockEntity.level!!.getBlockState(pos2)
             if (!isBlockWrappable(
-                    element.tileEntity.level.getBlock(x2, y2, z2),
-                    element.tileEntity.level,
-                    x2,
-                    y2,
-                    z2
+                    state,
+                    element.blockEntity.level!!,
+                    pos2
                 )
             ) {
                 continue
@@ -185,12 +191,13 @@ object CableRender {
                     Direction.ZN -> z2--
                     Direction.ZP -> z2++
                 }
-                otherTileEntity = element.tileEntity.level.getTileEntity(x2, y2, z2)
-                if (otherTileEntity is NodeBlockEntity) {
-                    val otherDirection = side.inverse
+                val pos3 = BlockPos(x2, y2, z2)
+                otherBlockEntity = element.blockEntity.level!!.getBlockEntity(pos3)
+                if (otherBlockEntity is NodeBlockEntity) {
+                    val otherDirection = side.inverse()
                     val otherLRDU = otherDirection.getLRDUGoingTo(sideLrdu)!!.inverse()
                     val render = element.getCableRender(lrdu) ?: continue
-                    val otherNode = otherTileEntity
+                    val otherNode = otherBlockEntity
                     val otherRender = otherNode.getCableRender(otherDirection, otherLRDU)
                     if (otherRender == null) {
                         connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend

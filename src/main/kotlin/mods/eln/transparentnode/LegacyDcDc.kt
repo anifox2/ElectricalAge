@@ -32,7 +32,7 @@ import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeElement
 import mods.eln.node.transparent.TransparentNodeElementInventory
 import mods.eln.node.transparent.TransparentNodeElementRender
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
@@ -41,7 +41,7 @@ import mods.eln.sim.mna.process.TransformerInterSystemProcess
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.process.destruct.VoltageStateWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
-import mods.eln.cable.ElectricalCableDescriptor
+import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import mods.eln.sound.LoopedSound
 import net.minecraft.client.resources.sounds.SoundInstance
 import net.minecraft.client.gui.screens.Screen
@@ -377,7 +377,7 @@ class LegacyDcDcProcess(val element: LegacyDcDcElement): IProcess {
     }
 }
 
-class LegacyDcDcRender(tileEntity: TransparentNodeEntity, val descriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, descriptor) {
+class LegacyDcDcRender(tileEntity: TransparentNodeBlockEntity, val descriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, descriptor) {
 
     override val inventory = TransparentNodeElementInventory(4, 64, this)
 

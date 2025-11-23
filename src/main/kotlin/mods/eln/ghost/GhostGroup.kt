@@ -14,7 +14,7 @@ class GhostGroup {
     var elementList = ArrayList<GhostGroupElement>()
 
     fun addElement(x: Int, y: Int, z: Int) {
-        elementList.add(GhostGroupElement(x, y, z, Eln.ghostBlock, GhostBlock.tCube))
+        elementList.add(GhostGroupElement(x, y, z, Eln.ghostBlock, 0))
     }
 
     fun addElement(x: Int, y: Int, z: Int, block: Block, meta: Int) {
@@ -53,36 +53,36 @@ class GhostGroup {
     }
 
     fun canBePloted(c: Coordinate): Boolean {
-        return canBePloted(c.world(), c.x, c.y, c.z)
+        return c.world()?.let { canBePloted(it, c.x, c.y, c.z) } ?: false
     }
 
-    fun canBePloted(world: World, x: Int, y: Int, z: Int): Boolean {
+    fun canBePloted(world: Level, x: Int, y: Int, z: Int): Boolean {
         for (element in elementList) {
-            if (!Eln.ghostManager.canCreateGhostAt(world, x + element.x, y + element.y, z + element.z)) return false
+            if (!Eln.ghostManager!!.canCreateGhostAt(world, x + element.x, y + element.y, z + element.z)) return false
         }
         return true
     }
 
     fun plot(coordinate: Coordinate, observerCoordinate: Coordinate, UUID: Int): Boolean {
-        if (!canBePloted(coordinate.world(), coordinate.x, coordinate.y, coordinate.z)) return false
+        if (!canBePloted(coordinate.world()!!, coordinate.x, coordinate.y, coordinate.z)) return false
         for (element in elementList) {
             val offsetCoordinate = coordinate.newWithOffset(element.x, element.y, element.z)
-            Eln.ghostManager.createGhost(offsetCoordinate, observerCoordinate, UUID, element.block, element.meta)
+            Eln.ghostManager!!.createGhost(offsetCoordinate, observerCoordinate, UUID, element.block, element.meta)
         }
         return true
     }
 
     fun erase(observerCoordinate: Coordinate?) {
-        Eln.ghostManager.removeGhostAndBlockWithObserver(observerCoordinate)
+        Eln.ghostManager!!.removeGhostAndBlockWithObserver(observerCoordinate)
     }
 
     fun erase(observerCoordinate: Coordinate?, uuid: Int) {
-        Eln.ghostManager.removeGhostAndBlockWithObserver(observerCoordinate, uuid)
+        Eln.ghostManager!!.removeGhostAndBlockWithObserver(observerCoordinate, uuid)
     }
 
     fun eraseGeo(coordinate: Coordinate) {
         for (element in elementList) {
-            Eln.ghostManager.removeGhostAndBlock(coordinate.newWithOffset(element.x, element.y, element.z))
+            Eln.ghostManager!!.removeGhostAndBlock(coordinate.newWithOffset(element.x, element.y, element.z))
         }
     }
 

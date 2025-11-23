@@ -39,13 +39,13 @@ class PowerSocketRender(tileEntity: SixNodeEntity?, side: Direction?, descriptor
     }
 
     override fun draw() {
-        super.draw()
+        
         descriptor.draw(paintColor)
     }
 
     override fun refresh(deltaT: Float) {}
     override fun getCableRender(lrdu: LRDU): CableRenderDescriptor? {
-        return Eln.instance.lowCurrentCableRender
+        return Eln.instance!!.lowCurrentCableRender
     }
 
     override fun newGuiDraw(side: Direction, player: Player): Screen {

@@ -4,25 +4,27 @@ import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.IGuiObject;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class ElectricalMathGui extends GuiContainerEln {
+public class ElectricalMathGui extends GuiContainerEln implements GuiTextFieldEln.GuiTextFieldElnObserver {
 
     GuiTextFieldEln expression;
     ElectricalMathRender render;
 
-    public ElectricalMathGui(EntityPlayer player, IInventory inventory, ElectricalMathRender render) {
-        super(new ElectricalMathContainer(null, player, inventory));
+    public ElectricalMathGui(Player player, Container inventory, ElectricalMathRender render) {
+        super(new ElectricalMathContainer(null, player, inventory), player.getInventory(), Component.literal("Electrical Math"));
         //this.inventory = (TransparentNodeElementInventory) inventory;
         this.render = render;
     }
 
     @Override
-    protected GuiHelperContainer newHelper() {
+    public GuiHelperContainer newHelper() {
         return new GuiHelperContainer(this, 176 + 44, 166 - 38, 8 + 44 / 2, 84 - 38);
     }
 
@@ -46,29 +48,33 @@ public class ElectricalMathGui extends GuiContainerEln {
     }
 
     @Override
-    protected void postDraw(float f, int x, int y) {
-        super.postDraw(f, x, y);
+    public void postDraw(GuiGraphics guiGraphics, float f, int x, int y) {
+        super.postDraw(guiGraphics, f, x, y);
         int c;
         int redNbr = 0;
-        ItemStack stack = render.inventory.getStackInSlot(ElectricalMathContainer.restoneSlotId);
+        ItemStack stack = render.inventory.getItem(ElectricalMathContainer.restoneSlotId);
 
         if (stack != null)
-            redNbr = stack.stackSize;
+            redNbr = stack.getCount();
         if (!expression.getText().equals(render.expression)) {
             c = 0xFF404040;
-            helper.drawString(8 + 44 / 2, 29, c, tr("Waiting for completion..."));
+            helper.drawString(guiGraphics, 8 + 44 / 2, 29, tr("Waiting for completion..."), c);
         } else if (expression.getText().equals("")) {
             c = 0xFF404040;
-            helper.drawString(8 + 44 / 2, 29, c, tr("Equation required!"));
+            helper.drawString(guiGraphics, 8 + 44 / 2, 29, tr("Equation required!"), c);
         } else if (render.equationIsValid) {
             if (redNbr >= render.redstoneRequired)
                 c = 0xFF108F00;
             else
                 c = 0xFFFF0000;
-            helper.drawString(8 + 44 / 2, 29, c, tr("%1$ Redstone(s) required", render.redstoneRequired));
+            helper.drawString(guiGraphics, 8 + 44 / 2, 29, tr("%1$ Redstone(s) required", render.redstoneRequired), c);
         } else {
             c = 0xFFFF0000;
-            helper.drawString(8 + 44 / 2, 29, c, tr("Invalid equation!"));
+            helper.drawString(guiGraphics, 8 + 44 / 2, 29, tr("Invalid equation!"), c);
         }
+    }
+
+    @Override
+    public void textFieldNewValue(GuiTextFieldEln textField, String value) {
     }
 }

@@ -2,7 +2,7 @@ package mods.eln.sixnode.electricalredstoneoutput;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.Direction;
+import net.minecraft.core.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
@@ -21,7 +21,7 @@ public class ElectricalRedstoneOutputRender extends SixNodeElementRender {
     int redOutput;
 
     public ElectricalRedstoneOutputRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-        super(tileEntity, side, descriptor);
+        super(tileEntity, mods.eln.misc.Direction.fromMCDirection(side), descriptor);
         this.descriptor = (ElectricalRedstoneOutputDescriptor) descriptor;
     }
 
@@ -35,7 +35,7 @@ public class ElectricalRedstoneOutputRender extends SixNodeElementRender {
     }
 
     @Override
-    public int isProvidingWeakPower(Direction side) {
+    public int isProvidingWeakPower(mods.eln.misc.Direction side) {
         return redOutput;
     }
 

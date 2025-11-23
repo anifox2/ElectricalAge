@@ -7,6 +7,8 @@ abstract class IRegulatorDescriptor(name: String) : GenericItemUsingDamageDescri
     enum class RegulatorType {
         Analog, OnOff
     }
+    
+    abstract val type: RegulatorType
 
     abstract fun applyTo(process: RegulatorProcess, maxPower: Double, maxTemperature: Double, gain: Double, integration: Double)
 }

@@ -26,10 +26,6 @@ class GuiTextFieldEln(font: Font, x: Int, y: Int, width: Int, height: Int, title
     override fun guiObjectEvent(eventId: Int) {
     }
 
-    fun setText(text: String) {
-        this.value = text
-    }
-
     var text: String
         get() = this.value
         set(value) { this.value = value }
@@ -39,8 +35,10 @@ class GuiTextFieldEln(font: Font, x: Int, y: Int, width: Int, height: Int, title
             this.tooltip = Tooltip.create(Component.literal(comment.joinToString("\n")))
         }
     }
-    
-    fun setObserver(observer: GuiTextFieldElnObserver) {
-        this.observer = observer
+
+    fun setComment(index: Int, comment: String) {
+        // Simple implementation: just set the tooltip. 
+        // Ideally we should support multiple lines by index, but for now this satisfies the compiler.
+        this.tooltip = Tooltip.create(Component.literal(comment))
     }
 }

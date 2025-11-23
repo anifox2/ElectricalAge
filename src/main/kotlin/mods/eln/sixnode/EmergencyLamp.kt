@@ -279,18 +279,20 @@ class EmergencyLampGui(private var render: EmergencyLampRender)
         channel = newGuiTextField(19, 38, 138)
         channel.setComment(arrayOf(tr("Specify the supply channel")))
         channel.text = render.channel
-        channel.setObserver(object : GuiTextFieldEln.GuiTextFieldElnObserver {
+        channel.observer = object : GuiTextFieldEln.GuiTextFieldElnObserver {
             override fun textFieldNewValue(textField: GuiTextFieldEln, value: String) {
                 render.clientSetString(EmergencyLampElement.Event.SET_CHANNEL.value, value)
             }
-        })
+        }
         charge = newGuiVerticalProgressBar(166, 12, 16, 39)
         charge.setColor(0.2f, 0.5f, 0.8f)
     }
 
+    /*
     override fun guiObjectEvent(guiObject: IGuiObject) {
         // super.guiObjectEvent(guiObject)
     }
+    */
 
     override fun newHelper(): GuiHelperContainer = GuiHelperContainer(this, 196, 64, 8, 84)
 
@@ -308,7 +310,7 @@ class EmergencyLampGui(private var render: EmergencyLampRender)
             channel.visible = false
             buttonSupplyType.message = Component.literal(tr("Powered by cable"))
         }
-        charge.setValue(render.charge)
+        charge.value = render.charge
         charge.setComment(0, Utils.plotPercent("Charge: ", render.charge.toDouble()))
     }
 }

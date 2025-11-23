@@ -6,8 +6,9 @@ import mods.eln.misc.preserveMatrix
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import net.minecraft.world.item.ItemStack
-import net.minecraft.util.Vec3
-import net.minecraftforge.client.IItemRenderer
+import net.minecraft.world.phys.Vec3
+// import net.minecraftforge.client.IItemRenderer
+
 
 import java.util.ArrayList
 
@@ -17,7 +18,7 @@ open class GridDescriptor(name: String, protected val obj: Obj3D, ElementClass: 
     val plus = ArrayList<Obj3D.Obj3DPart>()
     val gnd = ArrayList<Obj3D.Obj3DPart>()
 
-    var renderOffset: Vec3 = Vec3.createVectorHelper(0.0, 0.0, 0.0)
+    var renderOffset: Vec3 = Vec3(0.0, 0.0, 0.0)
 
     protected var static_parts = ArrayList<Obj3D.Obj3DPart>()
     protected var rotating_parts = ArrayList<Obj3D.Obj3DPart>()
@@ -40,7 +41,7 @@ open class GridDescriptor(name: String, protected val obj: Obj3D, ElementClass: 
     fun draw(idealRenderingAngle: Float) {
         preserveMatrix {
             glTranslated(
-                renderOffset.xCoord, renderOffset.yCoord, renderOffset.zCoord
+                renderOffset.x, renderOffset.y, renderOffset.z
             )
             preserveMatrix {
                 glRotatef(idealRenderingAngle, 0f, 1f, 0f)
@@ -56,6 +57,7 @@ open class GridDescriptor(name: String, protected val obj: Obj3D, ElementClass: 
 
     open fun hasCustomIcon() = false
 
+    /*
     override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
         if(type == IItemRenderer.ItemRenderType.INVENTORY &&
             hasCustomIcon()) {
@@ -81,6 +83,8 @@ open class GridDescriptor(name: String, protected val obj: Obj3D, ElementClass: 
             return !hasCustomIcon()
         return true
     }
+    */
+
 
     open fun rotationIsFixed(): Boolean {
         return false

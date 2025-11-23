@@ -1,0 +1,491 @@
+
+> Configure project :
+Java: 21.0.9 JVM: 21.0.9+10-LTS (Eclipse Adoptium) Arch: aarch64
+
+> Task :checkKotlinGradlePluginConfigurationErrors
+> Task :processResources UP-TO-DATE
+> Task :downloadMcpConfig
+> Task :extractSrg UP-TO-DATE
+> Task :createMcpToSrg UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+
+> Task :compileKotlin
+w: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SixNodeRegistration.kt:105:20 Variable 'name' initializer is redundant
+w: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SixNodeRegistration.kt:123:20 Variable 'name' initializer is redundant
+w: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SixNodeRegistration.kt:149:13 Variable 'name' is never used
+w: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SixNodeRegistration.kt:358:13 Variable 'name' is never used
+w: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SixNodeRegistration.kt:562:20 Variable 'name' initializer is redundant
+w: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SixNodeRegistration.kt:574:20 Variable 'name' initializer is redundant
+w: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SixNodeRegistration.kt:608:20 Variable 'name' initializer is redundant
+w: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SixNodeRegistration.kt:810:20 Variable 'name' initializer is redundant
+w: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SixNodeRegistration.kt:868:20 Variable 'name' initializer is redundant
+w: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SixNodeRegistration.kt:984:20 Variable 'name' initializer is redundant
+w: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SixNodeRegistration.kt:1029:20 Variable 'name' initializer is redundant
+w: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SixNodeRegistration.kt:1369:13 Name shadowed: id
+
+> Task :compileJava
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerElement.java:237: error: cannot find symbol
+    public Container newContainer(@NotNull Direction side, @NotNull EntityPlayer player) {
+                                                                    ^
+  symbol:   class EntityPlayer
+  location: class ElectricalBreakerElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorRender.java:17: error: cannot find symbol
+import net.minecraft.client.gui.GuiScreen;
+                               ^
+  symbol:   class GuiScreen
+  location: package net.minecraft.client.gui
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorRender.java:18: error: package net.minecraft.entity.player does not exist
+import net.minecraft.entity.player.EntityPlayer;
+                                  ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorRender.java:19: error: package net.minecraft.item does not exist
+import net.minecraft.item.ItemStack;
+                         ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorRender.java:86: error: cannot find symbol
+    public GuiScreen newGuiDraw(@NotNull Direction side, @NotNull EntityPlayer player) {
+                                                                  ^
+  symbol:   class EntityPlayer
+  location: class ThermalSensorRender
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorRender.java:86: error: cannot find symbol
+    public GuiScreen newGuiDraw(@NotNull Direction side, @NotNull EntityPlayer player) {
+           ^
+  symbol:   class GuiScreen
+  location: class ThermalSensorRender
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java:4: error: package net.minecraft.entity.player does not exist
+import net.minecraft.entity.player.EntityPlayer;
+                                  ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java:5: error: package net.minecraft.inventory does not exist
+import net.minecraft.inventory.IInventory;
+                              ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyRender.java:11: error: cannot find symbol
+import net.minecraft.client.gui.GuiScreen;
+                               ^
+  symbol:   class GuiScreen
+  location: package net.minecraft.client.gui
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyRender.java:12: error: package net.minecraft.entity.player does not exist
+import net.minecraft.entity.player.EntityPlayer;
+                                  ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyRender.java:13: error: package net.minecraft.item does not exist
+import net.minecraft.item.ItemStack;
+                         ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java:22: error: cannot find symbol
+    public LampSupplyGui(LampSupplyRender render, EntityPlayer player, IInventory inventory) {
+                                                  ^
+  symbol:   class EntityPlayer
+  location: class LampSupplyGui
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java:22: error: cannot find symbol
+    public LampSupplyGui(LampSupplyRender render, EntityPlayer player, IInventory inventory) {
+                                                                       ^
+  symbol:   class IInventory
+  location: class LampSupplyGui
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:8: error: package net.minecraft.entity.player does not exist
+import net.minecraft.entity.player.EntityPlayer;
+                                  ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:9: error: package net.minecraft.item does not exist
+import net.minecraft.item.Item;
+                         ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:10: error: package net.minecraft.item does not exist
+import net.minecraft.item.ItemStack;
+                         ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:32: error: package net.minecraft.entity.player does not exist
+import net.minecraft.entity.player.EntityPlayer;
+                                  ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:33: error: package net.minecraft.entity.player does not exist
+import net.minecraft.entity.player.EntityPlayerMP;
+                                  ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:34: error: package net.minecraft.inventory does not exist
+import net.minecraft.inventory.Container;
+                              ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:35: error: package net.minecraft.inventory does not exist
+import net.minecraft.inventory.IInventory;
+                              ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:36: error: package net.minecraft.item does not exist
+import net.minecraft.item.ItemStack;
+                         ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyRender.java:79: error: cannot find symbol
+    public GuiScreen newGuiDraw(@NotNull Direction side, @NotNull EntityPlayer player) {
+                                                                  ^
+  symbol:   class EntityPlayer
+  location: class LampSupplyRender
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyRender.java:79: error: cannot find symbol
+    public GuiScreen newGuiDraw(@NotNull Direction side, @NotNull EntityPlayer player) {
+           ^
+  symbol:   class GuiScreen
+  location: class LampSupplyRender
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:95: error: cannot find symbol
+    public IInventory getInventory() {
+           ^
+  symbol:   class IInventory
+  location: class LampSupplyElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:104: error: cannot find symbol
+    public Container newContainer(@NotNull Direction side, @NotNull EntityPlayer player) {
+                                                                    ^
+  symbol:   class EntityPlayer
+  location: class LampSupplyElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:104: error: cannot find symbol
+    public Container newContainer(@NotNull Direction side, @NotNull EntityPlayer player) {
+           ^
+  symbol:   class Container
+  location: class LampSupplyElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:267: error: cannot find symbol
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+                                    ^
+  symbol:   class EntityPlayer
+  location: class LampSupplyElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:274: error: cannot find symbol
+    public void destroy(EntityPlayerMP entityPlayer) {
+                        ^
+  symbol:   class EntityPlayerMP
+  location: class LampSupplyElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:292: error: cannot find symbol
+    public void writeToNBT(NBTTagCompound nbt) {
+                           ^
+  symbol:   class NBTTagCompound
+  location: class LampSupplyElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:308: error: cannot find symbol
+    public void readFromNBT(@NotNull NBTTagCompound nbt) {
+                                     ^
+  symbol:   class NBTTagCompound
+  location: class LampSupplyElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:416: error: cannot find symbol
+    private int getRange(LampSupplyDescriptor desc, IInventory inventory2) {
+                                                    ^
+  symbol:   class IInventory
+  location: class LampSupplyElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:423: error: cannot find symbol
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+                               ^
+  symbol:   class NBTTagCompound
+  location: class LampSupplyElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:423: error: cannot find symbol
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+                                                        ^
+  symbol:   class EntityPlayer
+  location: class LampSupplyElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:454: error: cannot find symbol
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+                                ^
+  symbol:   class NBTTagCompound
+  location: class LampSupplyElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java:454: error: cannot find symbol
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+                                                         ^
+  symbol:   class EntityPlayer
+  location: class LampSupplyElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:46: error: cannot find symbol
+    public void setParent(Item item, int damage) {
+                          ^
+  symbol:   class Item
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:69: error: cannot find symbol
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+                                         ^
+  symbol:   class ItemRenderType
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:69: error: cannot find symbol
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+                                                              ^
+  symbol:   class ItemStack
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:69: error: cannot find symbol
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+                                                                              ^
+  symbol:   class ItemRendererHelper
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:74: error: cannot find symbol
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+                                    ^
+  symbol:   class ItemStack
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:74: error: cannot find symbol
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+                                                    ^
+  symbol:   class ItemRenderType
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:79: error: cannot find symbol
+    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+                                            ^
+  symbol:   class ItemRenderType
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:79: error: cannot find symbol
+    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+                                                                 ^
+  symbol:   class ItemStack
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:79: error: cannot find symbol
+    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+                                                                                 ^
+  symbol:   class ItemRendererHelper
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:84: error: cannot find symbol
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+                           ^
+  symbol:   class ItemRenderType
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:84: error: cannot find symbol
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+                                                ^
+  symbol:   class ItemStack
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:93: error: cannot find symbol
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+                               ^
+  symbol:   class ItemStack
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:93: error: cannot find symbol
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+                                                    ^
+  symbol:   class EntityPlayer
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java:111: error: cannot find symbol
+    public LRDU getFrontFromPlace(@NotNull Direction side, @NotNull EntityPlayer player) {
+                                                                    ^
+  symbol:   class EntityPlayer
+  location: class LampSupplyDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java:27: error: cannot inherit from final GuiButtonEln
+    class AggregatorBt extends GuiButtonEln {
+                               ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java:7: error: package net.minecraft.entity.player does not exist
+import net.minecraft.entity.player.EntityPlayer;
+                                  ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java:8: error: package net.minecraft.inventory does not exist
+import net.minecraft.inventory.IInventory;
+                              ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java:9: error: package net.minecraft.inventory does not exist
+import net.minecraft.inventory.Slot;
+                              ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java:17: error: cannot find symbol
+    public LampSupplyContainer(EntityPlayer player, IInventory inventory) {
+                               ^
+  symbol:   class EntityPlayer
+  location: class LampSupplyContainer
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java:17: error: cannot find symbol
+    public LampSupplyContainer(EntityPlayer player, IInventory inventory) {
+                                                    ^
+  symbol:   class IInventory
+  location: class LampSupplyContainer
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorElement.java:19: error: package net.minecraft.entity.player does not exist
+import net.minecraft.entity.player.EntityPlayer;
+                                  ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorElement.java:20: error: package net.minecraft.inventory does not exist
+import net.minecraft.inventory.Container;
+                              ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorElement.java:21: error: package net.minecraft.inventory does not exist
+import net.minecraft.inventory.IInventory;
+                              ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:8: error: package net.minecraft.entity.player does not exist
+import net.minecraft.entity.player.EntityPlayer;
+                                  ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:9: error: package net.minecraft.item does not exist
+import net.minecraft.item.Item;
+                         ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:10: error: package net.minecraft.item does not exist
+import net.minecraft.item.ItemStack;
+                         ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorSlowProcess.java:10: error: package net.minecraft.block does not exist
+import net.minecraft.block.Block;
+                          ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorSlowProcess.java:11: error: package net.minecraft.entity does not exist
+import net.minecraft.entity.Entity;
+                           ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorSlowProcess.java:12: error: package net.minecraft.entity does not exist
+import net.minecraft.entity.EntityLivingBase;
+                           ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorSlowProcess.java:13: error: package net.minecraft.entity.player does not exist
+import net.minecraft.entity.player.EntityPlayerMP;
+                                  ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorSlowProcess.java:14: error: package net.minecraft.item does not exist
+import net.minecraft.item.ItemStack;
+                         ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorSlowProcess.java:15: error: cannot find symbol
+import net.minecraft.nbt.NBTTagCompound;
+                        ^
+  symbol:   class NBTTagCompound
+  location: package net.minecraft.nbt
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorSlowProcess.java:16: error: cannot find symbol
+import net.minecraft.util.AxisAlignedBB;
+                         ^
+  symbol:   class AxisAlignedBB
+  location: package net.minecraft.util
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorSlowProcess.java:17: error: cannot find symbol
+import net.minecraft.util.Vec3;
+                         ^
+  symbol:   class Vec3
+  location: package net.minecraft.util
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorSlowProcess.java:18: error: cannot find symbol
+import net.minecraft.world.World;
+                          ^
+  symbol:   class World
+  location: package net.minecraft.world
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorElement.java:99: error: cannot find symbol
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+                                    ^
+  symbol:   class EntityPlayer
+  location: class ElectricalEntitySensorElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorElement.java:110: error: cannot find symbol
+    public IInventory getInventory() {
+           ^
+  symbol:   class IInventory
+  location: class ElectricalEntitySensorElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorElement.java:119: error: cannot find symbol
+    public Container newContainer(@NotNull Direction side, @NotNull EntityPlayer player) {
+                                                                    ^
+  symbol:   class EntityPlayer
+  location: class ElectricalEntitySensorElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorElement.java:119: error: cannot find symbol
+    public Container newContainer(@NotNull Direction side, @NotNull EntityPlayer player) {
+           ^
+  symbol:   class Container
+  location: class ElectricalEntitySensorElement
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorSlowProcess.java:36: error: cannot find symbol
+    HashMap<Object, Vec3> lastEPos = new HashMap<Object, Vec3>();
+                    ^
+  symbol:   class Vec3
+  location: class ElectricalEntitySensorSlowProcess
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorSlowProcess.java:118: error: cannot find symbol
+    public void readFromNBT(NBTTagCompound nbt, String str) {
+                            ^
+  symbol:   class NBTTagCompound
+  location: class ElectricalEntitySensorSlowProcess
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorSlowProcess.java:124: error: cannot find symbol
+    public void writeToNBT(NBTTagCompound nbt, String str) {
+                           ^
+  symbol:   class NBTTagCompound
+  location: class ElectricalEntitySensorSlowProcess
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:56: error: cannot find symbol
+    public void setParent(Item item, int damage) {
+                          ^
+  symbol:   class Item
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:62: error: cannot find symbol
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+                               ^
+  symbol:   class ItemStack
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:62: error: cannot find symbol
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+                                                    ^
+  symbol:   class EntityPlayer
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:69: error: cannot find symbol
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+                                    ^
+  symbol:   class ItemStack
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:69: error: cannot find symbol
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+                                                    ^
+  symbol:   class ItemRenderType
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:74: error: cannot find symbol
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+                                         ^
+  symbol:   class ItemRenderType
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:74: error: cannot find symbol
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+                                                              ^
+  symbol:   class ItemStack
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:74: error: cannot find symbol
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+                                                                              ^
+  symbol:   class ItemRendererHelper
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:79: error: cannot find symbol
+    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+                                            ^
+  symbol:   class ItemRenderType
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:79: error: cannot find symbol
+    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+                                                                 ^
+  symbol:   class ItemStack
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:79: error: cannot find symbol
+    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+                                                                                 ^
+  symbol:   class ItemRendererHelper
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:84: error: cannot find symbol
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+                           ^
+  symbol:   class ItemRenderType
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:84: error: cannot find symbol
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+                                                ^
+  symbol:   class ItemStack
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java:95: error: cannot find symbol
+    public LRDU getFrontFromPlace(@NotNull Direction side, @NotNull EntityPlayer player) {
+                                                                    ^
+  symbol:   class EntityPlayer
+  location: class ElectricalEntitySensorDescriptor
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java:7: error: package net.minecraft.entity.player does not exist
+import net.minecraft.entity.player.EntityPlayer;
+                                  ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java:8: error: package net.minecraft.inventory does not exist
+import net.minecraft.inventory.IInventory;
+                              ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java:9: error: package net.minecraft.inventory does not exist
+import net.minecraft.inventory.Slot;
+                              ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java:17: error: cannot find symbol
+    public ElectricalEntitySensorContainer(EntityPlayer player, IInventory inventory) {
+                                           ^
+  symbol:   class EntityPlayer
+  location: class ElectricalEntitySensorContainer
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java:17: error: cannot find symbol
+    public ElectricalEntitySensorContainer(EntityPlayer player, IInventory inventory) {
+                                                                ^
+  symbol:   class IInventory
+  location: class ElectricalEntitySensorContainer
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorRender.java:13: error: cannot find symbol
+import net.minecraft.client.gui.GuiScreen;
+                               ^
+  symbol:   class GuiScreen
+  location: package net.minecraft.client.gui
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorRender.java:14: error: package net.minecraft.entity.player does not exist
+import net.minecraft.entity.player.EntityPlayer;
+                                  ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorRender.java:15: error: package net.minecraft.item does not exist
+import net.minecraft.item.ItemStack;
+                         ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorRender.java:64: error: cannot find symbol
+    public GuiScreen newGuiDraw(@NotNull Direction side, @NotNull EntityPlayer player) {
+                                                                  ^
+  symbol:   class EntityPlayer
+  location: class ElectricalEntitySensorRender
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/misc/Obj3D.java:29: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+        ResourceLocation textureResource = new ResourceLocation("eln", "model/" + dirPath + "/" + texFilename);
+                                           ^
+/Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/misc/Obj3D.java:360: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+        return new ResourceLocation("eln", "model/" + dirPath + "/" + name);
+               ^
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+100 errors
+2 warnings
+only showing the first 100 errors, of 1862 total; use -Xmaxerrs if you would like to see more
+
+> Task :compileJava FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler error output for details.
+
+* Try:
+> Run with --info option to get more log output.
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.5/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 15s
+7 actionable tasks: 4 executed, 3 up-to-date

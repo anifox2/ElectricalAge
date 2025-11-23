@@ -168,10 +168,10 @@ open class LogicGateRender(entity: SixNodeEntity, side: Direction, descriptor: S
     }
 
     override fun getCableRender(lrdu: LRDU): CableRenderDescriptor? = when (lrdu) {
-        front -> Eln.instance.signalCableDescriptor?.render
-        front!!.inverse() -> if (descriptor.function.inputCount >= 1) Eln.instance.signalCableDescriptor?.render else null
-        front!!.left() -> if (descriptor.function.inputCount >= 2) Eln.instance.signalCableDescriptor?.render else null
-        front!!.right() -> if (descriptor.function.inputCount >= 3) Eln.instance.signalCableDescriptor?.render else null
+        front -> Eln.instance!!.signalCableDescriptor?.render
+        front!!.inverse() -> if (descriptor.function.inputCount >= 1) Eln.instance!!.signalCableDescriptor?.render else null
+        front!!.left() -> if (descriptor.function.inputCount >= 2) Eln.instance!!.signalCableDescriptor?.render else null
+        front!!.right() -> if (descriptor.function.inputCount >= 3) Eln.instance!!.signalCableDescriptor?.render else null
         else -> null
     }
 }
@@ -476,7 +476,7 @@ class PalGui(val render: PalRender) : ScreenEln() {
         }
     }
 
-    fun guiObjectEvent(sender: IGuiObject) {
+    override fun guiObjectEvent(sender: IGuiObject) {
     }
 
     override fun newHelper(): GuiHelperContainer = GuiHelperContainer(this, 160, 110, 0, 0, "pal.png")

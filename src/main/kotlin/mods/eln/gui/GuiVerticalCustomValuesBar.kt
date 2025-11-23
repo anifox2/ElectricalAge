@@ -15,13 +15,13 @@ class GuiVerticalCustomValuesBar(x: Int, y:Int, width: Int, height: Int, helper:
         setRange(0f, (positions.size - 1).toFloat())
     }
 
-    override fun getValue() = positions.getOrElse(super.getValue().toInt(), { 0f })
-
-    override fun setValue(value: Float) {
-        val pos = positions.indexOfFirst { it >= value }
-        when(pos) {
-            -1 -> super.setValue(0f)
-            else -> super.setValue(pos.toFloat())
+    override var value: Float
+        get() = positions.getOrElse(super.value.toInt(), { 0f })
+        set(v) {
+            val pos = positions.indexOfFirst { it >= v }
+            when(pos) {
+                -1 -> super.value = 0f
+                else -> super.value = pos.toFloat()
+            }
         }
-    }
 }

@@ -1,6 +1,7 @@
 package mods.eln.gridnode
 
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor
+import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.misc.*
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
@@ -8,10 +9,10 @@ import mods.eln.node.transparent.TransparentNodeElement
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.entity.player.ServerPlayer
+// import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.util.Vec3
+import net.minecraft.world.phys.Vec3
 import org.apache.commons.lang3.tuple.Pair
 
 import java.io.DataOutputStream
@@ -33,8 +34,8 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     /* Connect one GridNode to another. */
     override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         // Check if user is holding an appropriate tool.
-        val stack = player.currentEquippedItem
-        val itemDesc = GenericItemBlockUsingDamageDescriptor.getDescriptor(stack)
+        val stack = player.mainHandItem
+        val itemDesc = GenericItemUsingDamageDescriptor.getDescriptor(stack)
         if (itemDesc is ElectricalCableDescriptor) {
             return onTryGridConnect(player, stack, itemDesc, side)
         }
@@ -44,7 +45,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
 
     private fun onTryGridConnect(entityPlayer: Player, stack: ItemStack, cable: ElectricalCableDescriptor, side: Direction): Boolean {
         // First node, or second node?
-        val uuid = entityPlayer.persistentID
+        val uuid = entityPlayer.uuid
         val p = pending[uuid]
         var other: GridElement? = null
         if (p != null) {
@@ -67,9 +68,9 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             val distance = other.coordinate().trueDistanceTo(this.coordinate())
             val cableLength = Math.ceil(distance).toInt()
             val range = Math.min(connectRange, other.connectRange)
-            val stackSize = entityPlayer.totalItemsCarried(stack)
+            val stackSize = entityPlayer.inventory.countItem(stack.item)
 
-            if (stackSize < distance && !Utils.isCreative(entityPlayer as ServerPlayer)) {
+            if (stackSize < distance && !entityPlayer.isCreative) {
                 Utils.addChatMessage(entityPlayer, "You need $cableLength units of cable")
             } else if (distance > range) {
                 Utils.addChatMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks")
@@ -83,7 +84,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
                     Utils.addChatMessage(entityPlayer, "Added connection")
                     entityPlayer.removeMultipleItems(stack, cableLength)
                 } catch (e: UserError) {
-                    Utils.addChatMessage(entityPlayer, e.message)
+                    Utils.addChatMessage(entityPlayer, e.message ?: "Unknown error")
                 }
             }
             pending.remove(uuid)
@@ -143,11 +144,11 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         super.readFromNBT(nbt)
 
         assert(gridLinkList.isEmpty())
-        val gridLinks = nbt.getCompoundTag("gridLinks")
+        val gridLinks = nbt.getCompound("gridLinks")
         var i: Int? = 0
         while (true) {
-            val linkTag = gridLinks.getCompoundTag(i!!.toString())
-            if (linkTag.hasNoTags())
+            val linkTag = gridLinks.getCompound(i!!.toString())
+            if (linkTag.isEmpty)
                 break
             gridLinksBooting.add(GridLink(linkTag, ""))
             i++
@@ -187,10 +188,10 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             val angles = DoubleArray(gridLinkList.size)
             var i = 0
             for (link in gridLinkList) {
-                var vec = link.a.subtract(link.b)
+                var vec = Vec3((link.a.x - link.b.x).toDouble(), (link.a.y - link.b.y).toDouble(), (link.a.z - link.b.z).toDouble())
                 // Angles 180 degrees apart are equivalent.
                 if (vec.z < 0)
-                    vec = vec.negate()
+                    vec = vec.reverse()
                 val h = Math.sqrt((vec.x * vec.x + vec.z * vec.z).toDouble())
                 angles[i++] = Math.acos(vec.x / h)
             }
@@ -233,13 +234,13 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
                 val ourSide = link.getSide(this)
                 val theirSide = link.getSide(target)
                 // It's always the "a" side doing this.
-                val offset = link.b.subtract(link.a)
+                val offset = Vec3((link.b.x - link.a.x).toDouble(), (link.b.y - link.a.y).toDouble(), (link.b.z - link.a.z).toDouble())
                 for (i in 0..1) {
-                    val start = getRenderCablePoint(ourSide, i)
-                    start.rotateAroundY(Math.toRadians(idealRenderingAngle.toDouble()).toFloat())
+                    var start = getRenderCablePoint(ourSide, i)
+                    start = start.yRot(Math.toRadians(-idealRenderingAngle.toDouble()).toFloat())
                     var end = target.getRenderCablePoint(theirSide, i)
-                    end.rotateAroundY(Math.toRadians(target.idealRenderingAngle.toDouble()).toFloat())
-                    end = end.addVector(offset.x.toDouble(), offset.y.toDouble(), offset.z.toDouble())
+                    end = end.yRot(Math.toRadians(-target.idealRenderingAngle.toDouble()).toFloat())
+                    end = end.add(offset.x, offset.y, offset.z)
                     writeVec(stream, start)
                     writeVec(stream, end)
                 }
@@ -258,15 +259,15 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     }
 
     protected open fun getRenderCablePoint(side: Direction, i: Int): Vec3 =
-        getCablePoint(side, i).addVector(
-            desc.renderOffset.xCoord, desc.renderOffset.yCoord, desc.renderOffset.zCoord
+        getCablePoint(side, i).add(
+            desc.renderOffset.x, desc.renderOffset.y, desc.renderOffset.z
         )
 
     @Throws(IOException::class)
     private fun writeVec(stream: DataOutputStream, sp: Vec3) {
-        stream.writeFloat(sp.xCoord.toFloat())
-        stream.writeFloat(sp.yCoord.toFloat())
-        stream.writeFloat(sp.zCoord.toFloat())
+        stream.writeFloat(sp.x.toFloat())
+        stream.writeFloat(sp.y.toFloat())
+        stream.writeFloat(sp.z.toFloat())
     }
 
     override fun multiMeterString(side: Direction): String {

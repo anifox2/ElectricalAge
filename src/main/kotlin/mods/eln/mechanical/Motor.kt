@@ -8,7 +8,7 @@ import mods.eln.node.NodeBase
 import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoadInitializer
@@ -31,7 +31,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 
 class MotorDescriptor(
-    val name: String,
+    name: String,
     obj: Obj3D,
     cable: ElectricalCableDescriptor,
     nominalRads: Float,
@@ -91,10 +91,10 @@ class MotorDescriptor(
     }
 }
 
-class MotorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
+class MotorRender(entity: TransparentNodeBlockEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
     val entity = entity
 
-    override val cableRender = Eln.instance.stdCableRender3200V
+    override val cableRender = Eln.instance!!.stdCableRender3200V
     val desc = desc_ as MotorDescriptor
 
     val ledColors: Array<Color> = arrayOf(
@@ -155,7 +155,7 @@ class MotorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescripto
     }
 
     override fun getCableRenderSide(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
-        if(lrdu == LRDU.Down && side == front) return Eln.instance.stdCableRender3200V
+        if(lrdu == LRDU.Down && side == front) return Eln.instance!!.stdCableRender3200V
         return null
     }
 
@@ -195,7 +195,7 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
         desc.cable.applyTo(wireShaftResistor)
 
         desc.thermalLoadInitializer.applyTo(thermal)
-        desc.thermalLoadInitializer.applyTo(thermalWatchdog)
+        thermalWatchdog.setMaximumTemperature(desc.thermalLoadInitializer.maximumTemperature)
         thermal.setAsSlow()
         thermalLoadList.add(thermal)
         thermalWatchdog.setDestroys(WorldExplosion(this as ShaftElement).machineExplosion())

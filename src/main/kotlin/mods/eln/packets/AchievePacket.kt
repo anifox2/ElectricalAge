@@ -2,7 +2,7 @@ package mods.eln.packets
 
 import io.netty.buffer.ByteBuf
 
-class AchievePacket : IMessage {
+class AchievePacket /*: IMessage*/ {
 
     var text: String?
 
@@ -15,11 +15,13 @@ class AchievePacket : IMessage {
         this.text = text
     }
 
-    override fun fromBytes(buf: ByteBuf) {
+    /*
+    override fun fromBytes(buf: ByteBuf?) {
         text = ByteBufUtils.readUTF8String(buf)
     }
 
-    override fun toBytes(buf: ByteBuf) {
+    override fun toBytes(buf: ByteBuf?) {
         ByteBufUtils.writeUTF8String(buf, text)
     }
+    */
 }

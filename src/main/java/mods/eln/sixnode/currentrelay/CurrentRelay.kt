@@ -2,9 +2,6 @@ package mods.eln.sixnode.currentrelay
 
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
-import mods.eln.gui.GuiHelper
-import mods.eln.gui.GuiScreenEln
-import mods.eln.gui.IGuiObject
 import mods.eln.i18n.I18N.tr
 import mods.eln.item.IConfigurable
 import mods.eln.misc.*
@@ -31,23 +28,30 @@ import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad
 import mods.eln.sixnode.currentcable.CurrentCableDescriptor
 import mods.eln.sixnode.electricalrelay.ElectricalRelayElement
 import mods.eln.sound.SoundCommand
-import net.minecraft.client.gui.GuiButton
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.Component
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.TooltipFlag
+import net.minecraft.world.level.Level
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
+// Temporary compatibility shim: provide a default nodeMask for current-cable descriptors.
+// TODO: Replace with the real mask from CurrentCableDescriptor once that class is fully ported.
+val CurrentCableDescriptor.nodeMask: Int
+    get() = NodeBase.maskElectricalInputGate
+
 class CurrentRelayDescriptor(
     name: String?,
     val obj: Obj3D,
     val cable: CurrentCableDescriptor
-): SixNodeDescriptor(name, CurrentRelayElement::class.java, CurrentRelayRender::class.java) {
+) : SixNodeDescriptor(name, CurrentRelayElement::class.java, CurrentRelayRender::class.java) {
     var speed: Float = 0f
 
     private val relay1: Obj3DPart = obj.getPart("relay1")
@@ -92,36 +96,37 @@ class CurrentRelayDescriptor(
         cable.applyTo(load)
     }
 
-    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        list.addAll(
-            tr("A relay is an electrical\ncontact that conducts\ncurrent when a signal\nvoltage is applied.")
-                .split("\n".toRegex()).dropLastWhile { it.isEmpty() }
+    /**
+     * Tooltip helper for the relay item. Uses modern Component-based tooltips.
+     *
+     * NOTE: This intentionally does *not* use @Override so it doesn't depend
+     * on the exact signature defined in SixNodeDescriptor/Item wrappers.
+     * You can wire this up from your Item's appendHoverText implementation.
+     */
+    fun addInformation(
+        itemStack: ItemStack?,
+        level: Level?,
+        tooltip: MutableList<Component>,
+        flag: TooltipFlag
+    ) {
+        // Basic description
+        tr(
+            "A relay is an electrical\n" +
+                "contact that conducts\n" +
+                "current when a signal\n" +
+                "voltage is applied."
         )
-        list.addAll(
-            tr("The relay's input behaves\nlike a Schmitt Trigger.").split("\n".toRegex())
-                .dropLastWhile { it.isEmpty() }
-        )
-    }
+            .split("\n")
+            .filter { it.isNotEmpty() }
+            .map { Component.literal(it) }
+            .forEach(tooltip::add)
 
-    override fun shouldUseRenderHelper(type: ItemRenderType, item: ItemStack, helper: ItemRendererHelper): Boolean {
-        return type != ItemRenderType.INVENTORY
-    }
-
-    override fun handleRenderType(item: ItemStack, type: ItemRenderType): Boolean {
-        return true
-    }
-
-    override fun shouldUseRenderHelperEln(type: ItemRenderType?, item: ItemStack?, helper: ItemRendererHelper?): Boolean {
-        return type != ItemRenderType.INVENTORY
-    }
-
-    override fun renderItem(type: ItemRenderType, item: ItemStack, vararg data: Any) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data)
-        } else {
-            draw(0f)
-        }
+        // Schmitt trigger behaviour
+        tr("The relay's input behaves\nlike a Schmitt Trigger.")
+            .split("\n")
+            .filter { it.isNotEmpty() }
+            .map { Component.literal(it) }
+            .forEach(tooltip::add)
     }
 
     fun draw(factor: Float) {
@@ -137,12 +142,17 @@ class CurrentRelayDescriptor(
         enableCulling()
     }
 
-    override fun getFrontFromPlace(side: Direction, player: EntityPlayer): LRDU {
+    override fun getFrontFromPlace(side: Direction, player: Player): LRDU {
+        // Keep the original behaviour (front then rotated left), but use modern Player
         return super.getFrontFromPlace(side, player)!!.left()
     }
 }
 
-class CurrentRelayElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor): SixNodeElement(sixNode, side, descriptor), IConfigurable {
+class CurrentRelayElement(
+    sixNode: SixNode,
+    side: Direction,
+    descriptor: SixNodeDescriptor
+) : SixNodeElement(sixNode, side, descriptor), IConfigurable {
 
     private val currentRelayDescriptor = descriptor as CurrentRelayDescriptor
 
@@ -205,7 +215,7 @@ class CurrentRelayElement(sixNode: SixNode, side: Direction, descriptor: SixNode
         return true
     }
 
-    override fun readFromNBT(nbt: NBTTagCompound) {
+    override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         val value = nbt.getByte("front")
         front = fromInt(value.toInt() shr 0 and 0x3)
@@ -213,11 +223,11 @@ class CurrentRelayElement(sixNode: SixNode, side: Direction, descriptor: SixNode
         defaultOutput = nbt.getBoolean("defaultOutput")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
-        nbt.setByte("front", (front.toInt() shl 0).toByte())
-        nbt.setBoolean("switchState", switchState)
-        nbt.setBoolean("defaultOutput", defaultOutput)
+        nbt.putByte("front", (front.toInt() shl 0).toByte())
+        nbt.putBoolean("switchState", switchState)
+        nbt.putBoolean("defaultOutput", defaultOutput)
     }
 
     override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad? {
@@ -317,51 +327,55 @@ class CurrentRelayElement(sixNode: SixNode, side: Direction, descriptor: SixNode
         return true
     }
 
-    override fun readConfigTool(compound: NBTTagCompound, invoker: EntityPlayer?) {
-        if (compound.hasKey("nc")) {
+    override fun readConfigTool(compound: CompoundTag, invoker: Player) {
+        if (compound.contains("nc")) {
             defaultOutput = compound.getBoolean("nc")
         }
     }
 
-    override fun writeConfigTool(compound: NBTTagCompound, invoker: EntityPlayer?) {
-        compound.setBoolean("nc", defaultOutput)
+    override fun writeConfigTool(compound: CompoundTag, invoker: Player) {
+        compound.putBoolean("nc", defaultOutput)
     }
 }
 
-class CurrentRelayGateProcess(val element: CurrentRelayElement, name: String?, gateProcess: NbtElectricalGateInput): NodeElectricalGateInputHysteresisProcess(name, gateProcess) {
+class CurrentRelayGateProcess(
+    val element: CurrentRelayElement,
+    name: String?,
+    gateProcess: NbtElectricalGateInput
+) : NodeElectricalGateInputHysteresisProcess(name, gateProcess) {
     override fun setOutput(value: Boolean) {
         element.switchState = value xor element.defaultOutput
     }
-
 }
 
-class CurrentRelayGui(val render: CurrentRelayRender): GuiScreenEln() {
-    private lateinit var toggleDefaultOutput: GuiButton
+class CurrentRelayGui(val render: CurrentRelayRender) : Screen(Component.literal("Current Relay")) {
 
-    override fun initGui() {
-        super.initGui()
-        toggleDefaultOutput = newGuiButton(6, 32 / 2 - 10, 115, tr("Toggle switch"))
+    override fun init() {
+        super.init()
+        // Simple button to toggle the relay's default output state.
+        val buttonWidth = 120
+        val buttonHeight = 20
+        val x = this.width / 2 - buttonWidth / 2
+        val y = this.height / 2 - buttonHeight / 2
+
+        addRenderableWidget(
+            Button.builder(Component.literal(tr("Toggle switch"))) {
+                render.clientToggleDefaultOutput()
+            }.bounds(x, y, buttonWidth, buttonHeight).build()
+        )
     }
 
-    override fun guiObjectEvent(`object`: IGuiObject?) {
-        super.guiObjectEvent(`object`)
-        if (`object` === toggleDefaultOutput) {
-            render.clientToggleDefaultOutput()
-        }
-    }
-
-    override fun preDraw(f: Float, x: Int, y: Int) {
-        super.preDraw(f, x, y)
-        if (render.defaultOutput) toggleDefaultOutput.displayString =
-            tr("Normally closed") else toggleDefaultOutput.displayString = tr("Normally open")
-    }
-
-    override fun newHelper(): GuiHelper {
-        return GuiHelper(this, 128, 32)
+    override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
+        renderBackground(guiGraphics)
+        super.render(guiGraphics, mouseX, mouseY, partialTick)
     }
 }
 
-class CurrentRelayRender(override var tileEntity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor): SixNodeElementRender(tileEntity, side, descriptor) {
+class CurrentRelayRender(
+    blockEntity: SixNodeEntity,
+    side: Direction,
+    descriptor: SixNodeDescriptor
+) : SixNodeElementRender(blockEntity, side, descriptor) {
 
     private val currentRelayDescriptor = descriptor as CurrentRelayDescriptor
 
@@ -401,12 +415,13 @@ class CurrentRelayRender(override var tileEntity: SixNodeEntity, side: Direction
         clientSend(ElectricalRelayElement.toogleOutputDefaultId.toInt())
     }
 
-    override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen {
+    override fun newGuiDraw(side: Direction, player: Player): Screen {
         return CurrentRelayGui(this)
     }
 
     override fun getCableRender(lrdu: LRDU): CableRenderDescriptor? {
-        if (lrdu === front) return Eln.instance.signalCableDescriptor.render
-        return if (lrdu === front!!.left() || lrdu === front!!.right()) currentRelayDescriptor.cable.render else null
+        if (lrdu === front) return Eln.instance!!.signalCableDescriptor?.render
+        val render = currentRelayDescriptor.cable?.render
+        return if (lrdu === front!!.left() || lrdu === front!!.right()) render else null
     }
 }

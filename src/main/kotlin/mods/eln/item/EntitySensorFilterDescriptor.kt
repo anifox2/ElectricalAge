@@ -4,10 +4,10 @@ import org.lwjgl.opengl.GL11
 
 class EntitySensorFilterDescriptor(
     name: String,
-    var entityClass: Class<*>,
-    var r: Float,
-    var g: Float,
-    var b: Float
+    @JvmField var entityClass: Class<*>,
+    @JvmField var r: Float,
+    @JvmField var g: Float,
+    @JvmField var b: Float
 ) : GenericItemUsingDamageDescriptorUpgrade(name) {
 
     fun glColor() {

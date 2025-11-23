@@ -3,11 +3,11 @@ package mods.eln.transparentnode.thermaldissipator
 import mods.eln.misc.RcInterpolator
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeElementRender
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import java.io.DataInputStream
 
 class ThermalDissipatorActiveRender(
-    entity: TransparentNodeEntity,
+    entity: TransparentNodeBlockEntity,
     descriptor: TransparentNodeDescriptor
 ) : TransparentNodeElementRender(entity, descriptor) {
 
@@ -17,13 +17,13 @@ class ThermalDissipatorActiveRender(
     private var powerFactor = 0f
 
     override fun draw() {
-        super.draw()
-        front.glRotateXnRef()
+        
+        front!!.glRotateXnRef()
         descriptor.draw(alpha)
     }
 
     override fun refresh(deltaT: Float) {
-        rc.setTarget(powerFactor)
+        rc.target = powerFactor
         rc.step(deltaT)
         alpha += rc.get() * 360f * deltaT
         while (alpha > 360f) alpha -= 360f

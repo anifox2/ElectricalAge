@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.TooltipFlag
 import org.lwjgl.opengl.GL11
@@ -108,7 +109,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
 
     override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
-        front = LRDU.readFromNBT(nbt, "front")
+        front = LRDU.load(nbt, "front")
 
         val fuseCompound = nbt.get("fuse") as? CompoundTag
         if (fuseCompound != null) {
@@ -123,7 +124,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
 
     override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
-        front.writeToNBT(nbt, "front")
+        front.save(nbt, "front")
 
         if (installedFuse != null) {
             val fuseCompaound = CompoundTag()
@@ -217,6 +218,7 @@ class ElectricalFuseHolderRender(tileEntity: SixNodeEntity, side: Direction, des
 
     override fun publishUnserialize(stream: DataInputStream) {
         super.publishUnserialize(stream)
-        installedFuse = GenericItemUsingDamageDescriptor.getDescriptor(Utils.unserialiseItemStack(stream)) as? ElectricalFuseDescriptor
+        val stack = Utils.unserialiseItemStack(stream)
+        installedFuse = if (stack != null) GenericItemUsingDamageDescriptor.getDescriptor(stack) as? ElectricalFuseDescriptor else null
     }
 }

@@ -21,9 +21,10 @@ import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sim.process.heater.ResistorHeatThermalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,7 +33,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResistorElement extends SixNodeElement {
+import mods.eln.sim.IResistorElement;
+
+public class ResistorElement extends SixNodeElement implements IResistorElement {
 
     ResistorDescriptor descriptor;
     NbtElectricalLoad aLoad = new NbtElectricalLoad("aLoad");
@@ -47,6 +50,16 @@ public class ResistorElement extends SixNodeElement {
     ResistorProcess resistorProcess;
 
     public double nominalRs = 1;
+
+    @Override
+    public double getNominalRs() {
+        return nominalRs;
+    }
+
+    @Override
+    public IResistorControl getControl() {
+        return control;
+    }
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
 
@@ -160,7 +173,7 @@ public class ResistorElement extends SixNodeElement {
     }
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         return inventory;
     }
 
@@ -171,7 +184,7 @@ public class ResistorElement extends SixNodeElement {
 
     @Nullable
     @Override
-    public Container newContainer(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public AbstractContainerMenu newContainer(@NotNull Direction side, @NotNull Player player) {
         return new ResistorContainer(player, inventory);
     }
 }

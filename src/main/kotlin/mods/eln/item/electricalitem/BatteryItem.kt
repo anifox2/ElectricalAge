@@ -4,77 +4,69 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.i18n.I18N.tr
 import mods.eln.item.electricalinterface.IItemEnergyBattery
 import mods.eln.misc.Utils
-import mods.eln.misc.UtilsClient
+//import mods.eln.misc.UtilsClient
 import mods.eln.wiki.Data
 import net.minecraft.world.entity.player.Player
-import net.minecraft.item.Item
+import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.util.ResourceLocation
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.level.Level
+import net.minecraft.network.chat.Component
+import net.minecraft.world.item.TooltipFlag
+import mods.eln.misc.nbt
+import mods.eln.misc.getDouble
+import mods.eln.misc.putDouble
 
 class BatteryItem(name: String, var energyStorage: Double, var chargePower: Double, var dischargePower: Double, private val priority: Int) : GenericItemUsingDamageDescriptor(name), IItemEnergyBattery {
 
-    override fun setParent(item: Item?, damage: Int) {
-        super.setParent(item, damage)
-        Data.addPortable(newItemStack())
+    override fun setParent(registry: Any?, id: Int) {
+        super.setParent(registry, id)
+        //Data.addPortable(newItemStack())
     }
 
     override fun getDefaultNBT(): CompoundTag? {
         val nbt = CompoundTag()
-        nbt.setDouble("energy", 0.0)
+        nbt.putDouble("energy", 0.0)
         return nbt
     }
 
-    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
-        super.appendHoverText(itemStack, level, list, flag)
-        list.add(tr("Charge power: %1\$W", Utils.plotValue(chargePower)))
-        list.add(tr("Discharge power: %1\$W", Utils.plotValue(dischargePower)))
-        if (itemStack != null) {
-            list.add(tr("Stored energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
-                (getEnergy(itemStack) / energyStorage * 100).toInt()))
-        }
+    override fun appendHoverText(stack: ItemStack, level: Level?, list: MutableList<Component>, flag: TooltipFlag) {
+        super.appendHoverText(stack, level, list, flag)
+        list.add(Component.literal(tr("Charge power: %1\$W", Utils.plotValue(chargePower))))
+        list.add(Component.literal(tr("Discharge power: %1\$W", Utils.plotValue(dischargePower))))
+        
+        list.add(Component.literal(tr("Stored energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(stack)),
+            (getEnergy(stack) / energyStorage * 100).toInt())))
     }
 
     override fun getEnergy(stack: ItemStack): Double {
-        return getNbt(stack).getDouble("energy")
+        return stack.getDouble("energy")
     }
 
     override fun setEnergy(stack: ItemStack, value: Double) {
-        getNbt(stack).setDouble("energy", Math.max(0.0, value))
+        stack.putDouble("energy", Math.max(0.0, value))
     }
 
     override fun getEnergyMax(stack: ItemStack): Double {
         return energyStorage
     }
 
+    override fun getTransferRate(stack: ItemStack): Double {
+        return chargePower
+    }
+
     override fun getChargePower(stack: ItemStack): Double {
         return chargePower
     }
 
-    override fun getDischagePower(stack: ItemStack): Double {
+    fun getDischagePower(stack: ItemStack): Double {
         return dischargePower
     }
 
-    override fun getPriority(stack: ItemStack): Int {
+    fun getPriority(stack: ItemStack): Int {
         return priority
     }
 
-    override fun shouldUseRenderHelper(type: ItemRenderType?, item: ItemStack?, helper: ItemRendererHelper?): Boolean {
-        return type != ItemRenderType.INVENTORY
-    }
-
-    override fun handleRenderType(item: ItemStack?, type: ItemRenderType?): Boolean {
-        return true
-    }
-
-    override fun renderItem(type: ItemRenderType?, item: ItemStack?, vararg data: Any?) {
-        super.renderItem(type, item, *data)
-        if (type == ItemRenderType.INVENTORY) {
-            UtilsClient.drawEnergyBare(type, (getEnergy(item!!) / getEnergyMax(item)).toFloat())
-        }
-    }
-
-    override fun electricalItemUpdate(stack: ItemStack, time: Double) {}
+    fun electricalItemUpdate(stack: ItemStack, time: Double) {}
 }

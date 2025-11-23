@@ -7,9 +7,9 @@ import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,7 +46,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
         super.draw();
 
         front.glRotateOnX();
-        descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(getTileEntity()));
+        descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(blockEntity));
     }
 
     @Override
@@ -139,7 +139,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
 
     @Nullable
     @Override
-    public GuiScreen newGuiDraw(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public Screen newGuiDraw(@NotNull Direction side, @NotNull Player player) {
         return new ElectricalBreakerGui(player, inventory, this);
     }
 }

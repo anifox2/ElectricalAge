@@ -1,9 +1,10 @@
 package mods.eln.mechanical
 
+import mods.eln.gui.GuiButtonEln
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.cable.CableRenderType
-import mods.eln.gui.GuiHelper
+import mods.eln.gui.GuiHelperContainer
 import mods.eln.gui.ScreenEln
 import mods.eln.gui.GuiTextFieldEln
 import mods.eln.gui.IGuiObject
@@ -18,15 +19,15 @@ import mods.eln.node.NodeBase
 import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
 import mods.eln.sixnode.electricaldatalogger.DataLogs
-import net.minecraft.client.gui.GuiButton
-import net.minecraft.client.gui.Screen
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.entity.player.Player
 import net.minecraft.nbt.CompoundTag
 import java.io.ByteArrayOutputStream
@@ -68,7 +69,7 @@ open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescri
 
     override fun getElectricalLoad(side: Direction, lrdu: LRDU): ElectricalLoad? = outputGate
 
-    override fun getConnectionMask(side: Direction, lrdu: LRDU): Int = if (side == front || side == front.inverse) {
+    override fun getConnectionMask(side: Direction, lrdu: LRDU): Int = if (side == front || side == front.inverse()) {
         NodeBase.maskElectricalOutputGate
     } else {
         0
@@ -104,8 +105,8 @@ open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescri
 
     override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
-        nbt.setFloat("minRads", minRads)
-        nbt.setFloat("maxRads", maxRads)
+        nbt.putFloat("minRads", minRads)
+        nbt.putFloat("maxRads", maxRads)
     }
 
     override fun getWaila(): Map<String, String> {
@@ -117,21 +118,21 @@ open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescri
     }
 
     override fun readConfigTool(compound: CompoundTag, invoker: Player) {
-        if(compound.hasKey("min"))
+        if(compound.contains("min"))
             minRads = compound.getFloat("min")
-        if(compound.hasKey("max"))
+        if(compound.contains("max"))
             maxRads = compound.getFloat("max")
         needPublish()
     }
 
     override fun writeConfigTool(compound: CompoundTag, invoker: Player) {
-        compound.setFloat("min", minRads)
-        compound.setFloat("max", maxRads)
-        compound.setByte("unit", DataLogs.noType)
+        compound.putFloat("min", minRads)
+        compound.putFloat("max", maxRads)
+        compound.putByte("unit", DataLogs.noType.toByte())
     }
 }
 
-class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
+class TachometerRender(entity: TransparentNodeBlockEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
     override val cableRender: CableRenderDescriptor? = null
     private var renderPreProcess: CableRenderType? = null
     private val connections = LRDUMask()
@@ -139,7 +140,7 @@ class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     internal var maxRads = TachometerElement.DefaultMaxRads
 
     override fun draw() {
-        renderPreProcess = drawCable(Direction.YN, Eln.instance.stdCableRenderSignal, connections, renderPreProcess)
+        renderPreProcess = drawCable(Direction.YN, Eln.instance!!.stdCableRenderSignal, connections, renderPreProcess)
         super.draw()
     }
 
@@ -154,25 +155,8 @@ class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
 }
 
 class TachometerGui(val render: TachometerRender) : ScreenEln() {
-    val validate: GuiButton by lazy { newGuiButton(82, 12, 80, tr("Validate")) }
-    val lowValue: GuiTextFieldEln by lazy { newGuiTextField(8, 24, 70) }
-    val highValue: GuiTextFieldEln by lazy { newGuiTextField(8, 8, 70) }
-
-    override fun newHelper(): GuiHelper? = GuiHelper(this, 169, 44)
-
-    override fun initGui() {
-        super.initGui()
-        validate.enabled = true
-        lowValue.setComment(tr("Rads/s corresponding\nto 0% output").split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray())
-        highValue.setComment(tr("Rads/s corresponding\nto 100% output").split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray())
-        lowValue.setText(render.minRads)
-        highValue.setText(render.maxRads)
-    }
-
-    override fun guiObjectEvent(`object`: IGuiObject?) {
-        super.guiObjectEvent(`object`)
-        if (`object` === validate) {
-
+    val validate: GuiButtonEln by lazy { 
+        newGuiButton(82, 12, 80, tr("Validate")) {
             try {
                 val minRads = NumberFormat.getInstance().parse(lowValue.text).toFloat()
                 val maxRads = NumberFormat.getInstance().parse(highValue.text).toFloat()
@@ -195,5 +179,18 @@ class TachometerGui(val render: TachometerRender) : ScreenEln() {
             } catch (e: ParseException) {
             }
         }
+    }
+    val lowValue: GuiTextFieldEln by lazy { newGuiTextField(8, 24, 70) }
+    val highValue: GuiTextFieldEln by lazy { newGuiTextField(8, 8, 70) }
+
+    override fun newHelper(): GuiHelperContainer = GuiHelperContainer(this, 169, 44)
+
+    override fun initGui() {
+        super.initGui()
+        validate.active = true
+        lowValue.setComment(tr("Rads/s corresponding\nto 0% output").split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray())
+        highValue.setComment(tr("Rads/s corresponding\nto 100% output").split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray())
+        lowValue.text = render.minRads.toString()
+        highValue.text = render.maxRads.toString()
     }
 }

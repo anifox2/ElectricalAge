@@ -5,11 +5,11 @@ import mods.eln.misc.PhysicalInterpolator
 import mods.eln.misc.RcInterpolator
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeElementRender
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import java.io.DataInputStream
 
 class TeleporterRender(
-    entity: TransparentNodeEntity,
+    entity: TransparentNodeBlockEntity,
     descriptor: TransparentNodeDescriptor
 ) : TransparentNodeElementRender(entity, descriptor) {
 
@@ -21,12 +21,12 @@ class TeleporterRender(
     private var gyroAlpha = 0f
 
     init {
-        doorInterpolator.setMaxSpeed(0.3f)
+        //doorInterpolator.setMaxSpeed(0.3f)
     }
 
     override fun draw() {
-        super.draw()
-        front.glRotateXnRef()
+        
+        front!!.glRotateXnRef()
         // Drawing logic
         d.main?.draw()
     }

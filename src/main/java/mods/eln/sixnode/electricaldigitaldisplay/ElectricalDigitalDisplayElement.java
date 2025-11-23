@@ -14,9 +14,12 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.DataInputStream;
@@ -127,14 +130,14 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement implements I
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        ItemStack stack = entityPlayer.getCurrentEquippedItem();
-        if(stack != null) {
+    public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
+        ItemStack stack = player.getMainHandItem();
+        if(!stack.isEmpty()) {
             GenericItemUsingDamageDescriptor desc = BrushDescriptor.getDescriptor(stack);
             if(desc != null && desc instanceof BrushDescriptor) {
                 BrushDescriptor brush = (BrushDescriptor) desc;
                 int color = brush.getColor(stack);
-                if(color != dye && brush.use(stack, entityPlayer)) {
+                if(color != dye && brush.use(stack, player)) {
                     dye = color;
                     needPublish();
                     return true;
@@ -145,17 +148,17 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement implements I
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
 
-        nbt.setFloat("current", current);
-        nbt.setFloat("min", min);
-        nbt.setFloat("max", max);
-        nbt.setByte("dye", (byte) dye);
+        nbt.putFloat("current", current);
+        nbt.putFloat("min", min);
+        nbt.putFloat("max", max);
+        nbt.putByte("dye", (byte) dye);
     }
 
     @Override
-    public void readFromNBT(@NotNull NBTTagCompound nbt) {
+    public void readFromNBT(@NotNull CompoundTag nbt) {
         super.readFromNBT(nbt);
 
         current = nbt.getFloat("current");
@@ -175,17 +178,17 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement implements I
     }
 
     @Override
-    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
-        if(compound.hasKey("min"))
+    public void readConfigTool(CompoundTag compound, Player invoker) {
+        if(compound.contains("min"))
             min = compound.getFloat("min");
-        if(compound.hasKey("max"))
+        if(compound.contains("max"))
             max = compound.getFloat("max");
         needPublish();
     }
 
     @Override
-    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
-        compound.setFloat("min", min);
-        compound.setFloat("max", max);
+    public void writeConfigTool(CompoundTag compound, Player invoker) {
+        compound.putFloat("min", min);
+        compound.putFloat("max", max);
     }
 }

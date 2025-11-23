@@ -3,13 +3,14 @@ package mods.eln.transparentnode
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
 import mods.eln.misc.Obj3D
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.*
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
 import net.minecraft.world.entity.player.Player
 import org.lwjgl.opengl.GL11
 
-class BasicFloodlightDescriptor(val name: String, val obj: Obj3D): TransparentNodeDescriptor(name, BasicFloodlightElement::class.java, BasicFloodlightRender::class.java) {
+class BasicFloodlightDescriptor(name: String, val obj: Obj3D): TransparentNodeDescriptor(name, BasicFloodlightElement::class.java, BasicFloodlightRender::class.java) {
     val base: Obj3D.Obj3DPart
     val swivel: Obj3D.Obj3DPart
     val head: Obj3D.Obj3DPart
@@ -77,7 +78,7 @@ class BasicFloodlightElement(node: TransparentNode, descriptor: TransparentNodeD
     }
 }
 
-class BasicFloodlightRender(tileEntity: TransparentNodeEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
+class BasicFloodlightRender(tileEntity: TransparentNodeBlockEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
 
     var x: Double = 0.0
     var y: Double = 0.0
@@ -94,7 +95,7 @@ class BasicFloodlightRender(tileEntity: TransparentNodeEntity, transparentNodede
     }
 }
 
-class MotorizedFloodlightDescriptor(val name: String, val obj: Obj3D): TransparentNodeDescriptor(name, MotorizedFloodlightElement::class.java, MotorizedFloodlightRender::class.java) {
+class MotorizedFloodlightDescriptor(name: String, val obj: Obj3D): TransparentNodeDescriptor(name, MotorizedFloodlightElement::class.java, MotorizedFloodlightRender::class.java) {
 
     val base: Obj3D.Obj3DPart
     val swivel: Obj3D.Obj3DPart
@@ -170,7 +171,7 @@ class MotorizedFloodlightElement(node: TransparentNode, descriptor: TransparentN
     }
 }
 
-class MotorizedFloodlightRender(tileEntity: TransparentNodeEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
+class MotorizedFloodlightRender(tileEntity: TransparentNodeBlockEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
 
     var x: Double = 0.0
     var y: Double = 0.0

@@ -2,15 +2,15 @@ package mods.eln.sixnode.electricalentitysensor;
 
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelperContainer;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
 
 public class ElectricalEntitySensorGui extends GuiContainerEln {
 
     ElectricalEntitySensorRender render;
 
-    public ElectricalEntitySensorGui(EntityPlayer player, IInventory inventory, ElectricalEntitySensorRender render) {
-        super(new ElectricalEntitySensorContainer(player, inventory));
+    public ElectricalEntitySensorGui(Player player, Container inventory, ElectricalEntitySensorRender render) {
+        super(new ElectricalEntitySensorContainer(player, inventory), player.getInventory(), net.minecraft.network.chat.Component.literal("Entity Sensor"));
         this.render = render;
     }
 
@@ -20,7 +20,7 @@ public class ElectricalEntitySensorGui extends GuiContainerEln {
     }
 
     @Override
-    protected GuiHelperContainer newHelper() {
+    public GuiHelperContainer newHelper() {
         return new GuiHelperContainer(this, 176, 166 - 52, 8, 84 - 52);
     }
 }

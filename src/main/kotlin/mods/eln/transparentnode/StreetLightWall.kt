@@ -2,6 +2,7 @@ package mods.eln.transparentnode
 
 import mods.eln.ghost.GhostGroup
 import mods.eln.misc.*
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.*
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
@@ -138,7 +139,7 @@ class StreetLightWallElement(node: TransparentNode, descriptor: TransparentNodeD
     }
 }
 
-class StreetLightWallRender(tileEntity: TransparentNodeEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
+class StreetLightWallRender(tileEntity: TransparentNodeBlockEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
     var powered = false
 
     override fun networkUnserialize(stream: DataInputStream) {

@@ -1,16 +1,16 @@
 package mods.eln.fluid
 
 import net.minecraft.nbt.CompoundTag
-import net.minecraftforge.common.util.ForgeDirection
+import net.minecraft.core.Direction
 
 class PreciseElementSidedFluidHandler: ElementSidedFluidHandler {
     /**
      * This method allows you to create tank references for each side of a block. You can use the same reference of tank
-     * to create a block that allows access from all sides, or just a tank per ForgeDirection for machinery.
+     * to create a block that allows access from all sides, or just a tank per Direction for machinery.
      *
-     * @param tankData a mutable map of TankData, accessed by the ForgeDirection.
+     * @param tankData a mutable map of TankData, accessed by the Direction.
      */
-    constructor(tankData: Map<ForgeDirection, TankData>): super(tankData)
+    constructor(tankData: Map<Direction, TankData>): super(tankData)
 
     /**
      * This method makes a single tank that can be accessed from all sides. Commonly used in Eln.
@@ -18,33 +18,36 @@ class PreciseElementSidedFluidHandler: ElementSidedFluidHandler {
      */
     constructor(tankSizeMb: Int): super(tankSizeMb)
 
-    private var fixup = ForgeDirection.VALID_DIRECTIONS.map {Pair(it, 0.0)}.toMap().toMutableMap()
+    private var fixup = Direction.values().associateWith { 0.0 }.toMutableMap()
 
     override fun readFromNBT(nbt: CompoundTag, str: String) {
         super.readFromNBT(nbt, str)
-        ForgeDirection.VALID_DIRECTIONS.forEach {
+        Direction.values().forEach {
             fixup[it] = nbt.getDouble(str + "fixup" + it.name)
         }
     }
 
     override fun writeToNBT(nbt: CompoundTag, str: String) {
         super.writeToNBT(nbt, str)
-        ForgeDirection.VALID_DIRECTIONS.forEach {
-            nbt.setDouble(str + "fixup" + it.name, fixup[it]?: 0.0)
+        Direction.values().forEach {
+            nbt.putDouble(str + "fixup" + it.name, fixup[it]?: 0.0)
         }
     }
 
-    fun drain(direction: ForgeDirection, demand: Double): Double {
+    fun drain(direction: Direction, demand: Double): Double {
         val drain = Math.ceil(demand - (fixup[direction]?: 0.0))
-        val drained = drain(direction, drain.toInt(), true)?.amount?.toDouble() ?: 0.0
+        val handler = getHandler(direction)
+        val drained = handler?.drain(drain.toInt(), net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE)?.amount?.toDouble() ?: 0.0
         val available = (fixup[direction]?: 0.0) + drained
         val actual = Math.min(demand, available)
         fixup[direction] = Math.max(0.0, available - demand)
         return actual
     }
 
-    fun drainEnergy(direction: ForgeDirection, energy: Double): Double {
-        val heatValue = FuelRegistry.heatEnergyPerMilliBucket(tanks[direction]!!.tank.fluid?.getFluid())
+    fun drainEnergy(direction: Direction, energy: Double): Double {
+        val tankData = tanks[direction]
+        val fluid = tankData?.tank?.fluid?.fluid
+        val heatValue = FuelRegistry.heatEnergyPerMilliBucket(fluid)
         return if (heatValue > 0)
             heatValue * drain(direction, energy / heatValue)
         else

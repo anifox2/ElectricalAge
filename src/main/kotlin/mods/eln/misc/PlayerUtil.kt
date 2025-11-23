@@ -5,8 +5,8 @@ import net.minecraft.world.entity.player.Player
 
 fun Player?.isHoldingMeter(): Boolean {
     if (this == null) return false
-    val equippedItem = currentEquippedItem
-    return (Eln.multiMeterElement.checkSameItemStack(equippedItem)
-        || Eln.thermometerElement.checkSameItemStack(equippedItem)
-        || Eln.allMeterElement.checkSameItemStack(equippedItem))
+    val equippedItem = mainHandItem
+    return (Eln.multiMeterElement?.checkSameItemStack(equippedItem) == true
+        || Eln.thermometerElement?.checkSameItemStack(equippedItem) == true
+        || Eln.allMeterElement?.checkSameItemStack(equippedItem) == true)
 }

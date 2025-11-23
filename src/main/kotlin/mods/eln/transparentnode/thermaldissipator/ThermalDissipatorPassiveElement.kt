@@ -15,7 +15,8 @@ class ThermalDissipatorPassiveElement(
     descriptor: TransparentNodeDescriptor
 ) : TransparentNodeElement(node, descriptor) {
 
-    val descriptor: ThermalDissipatorPassiveDescriptor = descriptor as ThermalDissipatorPassiveDescriptor
+    override val descriptor: ThermalDissipatorPassiveDescriptor
+        get() = transparentNodeDescriptor as ThermalDissipatorPassiveDescriptor
     private val thermalLoad = NbtThermalLoad("thermalLoad")
     private val thermalWatchdog = ThermalLoadWatchDog(thermalLoad)
 

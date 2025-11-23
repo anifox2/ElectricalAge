@@ -8,7 +8,6 @@ import mods.eln.misc.Direction
 import mods.eln.misc.Obj3D
 import mods.eln.misc.Utils.entityLivingHorizontalViewDirection
 import mods.eln.misc.Utils.entityLivingViewDirection
-import mods.eln.misc.UtilsClient.drawIcon
 import mods.eln.misc.VoltageLevelColor
 import mods.eln.node.transparent.TransparentNode.FrontType
 import net.minecraft.world.level.block.Block
@@ -81,6 +80,10 @@ open class TransparentNodeDescriptor @JvmOverloads constructor(
         return false
     }
 
+    open fun mustHaveWallFront(): Boolean {
+        return false
+    }
+
     open fun mustHaveWallFrontInverse(): Boolean {
         return false
     }
@@ -135,9 +138,9 @@ open class TransparentNodeDescriptor @JvmOverloads constructor(
         var front = Direction.XN
         when (frontType) {
             FrontType.BlockSide -> front = side
-            FrontType.BlockSideInv -> front = side.inverse
-            FrontType.PlayerView -> front = entityLivingViewDirection(entityLiving!!).inverse
-            FrontType.PlayerViewHorizontal -> front = entityLivingHorizontalViewDirection(entityLiving!!).inverse
+            FrontType.BlockSideInv -> front = side.inverse()
+            FrontType.PlayerView -> front = entityLivingViewDirection(entityLiving!!).inverse()
+            FrontType.PlayerViewHorizontal -> front = entityLivingHorizontalViewDirection(entityLiving!!).inverse()
             null -> TODO()
         }
         return front
@@ -156,8 +159,11 @@ open class TransparentNodeDescriptor @JvmOverloads constructor(
     open val spawnDeltaZ: Int
         get() = 0
 
-    open fun addCollisionBoxesToList(par5AABB: AABB, list: MutableList<AABB?>, world: World?, x: Int, y: Int, z: Int) {
-        val bb = Blocks.stone.getCollisionBoundingBoxFromPool(world, x, y, z)
-        if (par5AABB.intersectsWith(bb)) list.add(bb)
+    open fun addCollisionBoxesToList(par5AABB: AABB, list: MutableList<AABB?>, world: Level?, x: Int, y: Int, z: Int) {
+        // Legacy collision code - usually handled by Block.getCollisionShape
+        /*
+        val bb = Blocks.STONE.getCollisionShape(world, BlockPos(x, y, z)).bounds()
+        if (par5AABB.intersects(bb)) list.add(bb)
+        */
     }
 }

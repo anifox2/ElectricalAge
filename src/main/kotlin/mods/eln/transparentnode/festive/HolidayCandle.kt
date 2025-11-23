@@ -3,6 +3,7 @@ package mods.eln.transparentnode.festive
 import mods.eln.misc.Direction
 import mods.eln.misc.Obj3D
 import mods.eln.misc.UtilsClient
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.*
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
@@ -39,7 +40,7 @@ class HolidayCandleDescriptor(name: String, val obj: Obj3D) : TransparentNodeDes
     }
 }
 
-class HolidayCandleRender(tileEntity: TransparentNodeEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
+class HolidayCandleRender(tileEntity: TransparentNodeBlockEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
 
     var powered = false
 

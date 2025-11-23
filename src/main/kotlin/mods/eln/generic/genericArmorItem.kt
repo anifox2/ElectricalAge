@@ -5,7 +5,7 @@ import net.minecraft.world.item.ArmorMaterial
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.CreativeModeTab
 
-class genericArmorItem : ArmorItem {
+open class genericArmorItem : ArmorItem {
 
     constructor(
         material: ArmorMaterial,

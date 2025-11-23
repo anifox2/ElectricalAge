@@ -29,9 +29,9 @@ class RcRcInterpolator(tao1: Float, tao2: Float) : INBTTReady {
     }
 
     override fun writeToNBT(nbt: CompoundTag, str: String) {
-        nbt.setFloat(str + "c1", c1)
-        nbt.setFloat(str + "c2", c2)
-        nbt.setFloat(str + "target", target)
+        nbt.putFloat(str + "c1", c1)
+        nbt.putFloat(str + "c2", c2)
+        nbt.putFloat(str + "target", target)
     }
 
     init {

@@ -2,7 +2,6 @@ package mods.eln.sixnode.electricalredstoneoutput;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
-import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
@@ -12,7 +11,8 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +29,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
     int redstoneValue = 0;
 
     public ElectricalRedstoneOutputElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
-        super(sixNode, side, descriptor);
+        super(sixNode, mods.eln.misc.Direction.fromMCDirection(side), descriptor);
         electricalLoadList.add(inputGate);
         slowProcessList.add(slowProcess);
     }
@@ -60,18 +60,18 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
     }
 
     @Override
-    public void readFromNBT(@NotNull NBTTagCompound nbt) {
+    public void readFromNBT(@NotNull CompoundTag nbt) {
         super.readFromNBT(nbt);
         byte value = nbt.getByte("front");
         front = LRDU.fromInt((value >> 0) & 0x3);
-        redstoneValue = nbt.getInteger("redstoneValue");
+        redstoneValue = nbt.getInt("redstoneValue");
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setByte("front", (byte) (front.toInt() << 0));
-        nbt.setInteger("redstoneValue", redstoneValue);
+        nbt.putByte("front", (byte) (front.toInt() << 0));
+        nbt.putInt("redstoneValue", redstoneValue);
     }
 
     @Override

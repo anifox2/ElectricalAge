@@ -4,7 +4,7 @@ import net.minecraft.client.gui.components.Button
 import net.minecraft.network.chat.Component
 import net.minecraft.client.gui.components.Tooltip
 
-class GuiButtonEln(x: Int, y: Int, width: Int, height: Int, message: String, onPress: (Button) -> Unit) : Button(x, y, width, height, Component.literal(message), onPress, DEFAULT_NARRATION), IGuiObject {
+class GuiButtonEln(x: Int, y: Int, width: Int, height: Int, message: String, onPress: Button.OnPress) : Button(x, y, width, height, Component.literal(message), onPress, DEFAULT_NARRATION), IGuiObject {
     
     var enabled: Boolean
         get() = this.active
@@ -26,6 +26,10 @@ class GuiButtonEln(x: Int, y: Int, width: Int, height: Int, message: String, onP
             val text = comment.joinToString("\n")
             this.tooltip = Tooltip.create(Component.literal(text))
         }
+    }
+
+    fun clearComment() {
+        this.tooltip = null
     }
 
     override fun guiObjectEvent(eventId: Int) {}

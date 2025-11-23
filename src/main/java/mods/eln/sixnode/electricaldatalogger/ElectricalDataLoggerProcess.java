@@ -2,7 +2,7 @@ package mods.eln.sixnode.electricaldatalogger;
 
 import mods.eln.Eln;
 import mods.eln.sim.IProcess;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -28,13 +28,13 @@ public class ElectricalDataLoggerProcess implements IProcess {
         }
         //p.add("B");
         if (e.printToDo) {
-            ItemStack paperStack = e.inventory.getStackInSlot(ElectricalDataLoggerContainer.paperSlotId);
-            ItemStack printStack = e.inventory.getStackInSlot(ElectricalDataLoggerContainer.printSlotId);
-            if (paperStack != null && printStack == null) {
-                e.inventory.decrStackSize(ElectricalDataLoggerContainer.paperSlotId, 1);
+            ItemStack paperStack = e.inventory.getItem(ElectricalDataLoggerContainer.paperSlotId);
+            ItemStack printStack = e.inventory.getItem(ElectricalDataLoggerContainer.printSlotId);
+            if (!paperStack.isEmpty() && printStack.isEmpty()) {
+                e.inventory.removeItem(ElectricalDataLoggerContainer.paperSlotId, 1);
                 ItemStack print = Eln.instance.dataLogsPrintDescriptor.newItemStack(1);
                 Eln.instance.dataLogsPrintDescriptor.initializeStack(print, e.logs);
-                e.inventory.setInventorySlotContents(ElectricalDataLoggerContainer.printSlotId, print);
+                e.inventory.setItem(ElectricalDataLoggerContainer.printSlotId, print);
             }
             e.printToDo = false;
         }

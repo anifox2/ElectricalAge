@@ -25,7 +25,6 @@ import java.util.HashMap
 class PortableNaNDescriptor(name: String, renderIn: CableRenderDescriptor): GenericCableDescriptor(name, PortableNaNElement::class.java, PortableNaNRender::class.java) {
 
     init {
-        this.name = name
         this.render = renderIn
     }
 

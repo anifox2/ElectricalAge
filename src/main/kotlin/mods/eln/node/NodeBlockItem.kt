@@ -1,21 +1,19 @@
 package mods.eln.node
 
 import net.minecraft.world.level.block.Block
-import net.minecraft.world.entity.LivingEntity
-import net.minecraft.item.ItemBlock
-import net.minecraft.world.item.ItemStack
-import net.minecraft.world.level.Level
+import net.minecraft.world.item.BlockItem
+import net.minecraft.world.item.Item
 
-class NodeBlockItem(b: Block?) : ItemBlock(b) {
+class NodeBlockItem(b: Block, properties: Item.Properties) : BlockItem(b, properties) {
 
-    override fun getMetadata(damageValue: Int): Int {
-        return damageValue
-    }
+    // override fun getMetadata(damageValue: Int): Int {
+    //    return damageValue
+    // }
 
-    val block: NodeBlock
-        get() = Block.getBlockFromItem(this) as NodeBlock
+    // val block: NodeBlock
+    //    get() = this.block as NodeBlock
 
-    init {
-        unlocalizedName = "NodeBlockItem"
-    }
+    // init {
+    //    // unlocalizedName = "NodeBlockItem"
+    // }
 }

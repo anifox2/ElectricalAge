@@ -103,7 +103,7 @@ object ItemRegistration {
                 Eln.LVU,
                 150.0,
                 190.0,
-                Eln.instance.lowVoltageCableDescriptor!!
+                Eln.instance!!.lowVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -115,7 +115,7 @@ object ItemRegistration {
                 Eln.LVU,
                 250.0,
                 320.0,
-                Eln.instance.lowVoltageCableDescriptor!!
+                Eln.instance!!.lowVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -127,7 +127,7 @@ object ItemRegistration {
                 Eln.MVU,
                 400.0,
                 500.0,
-                Eln.instance.meduimVoltageCableDescriptor!!
+                Eln.instance!!.meduimVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -139,7 +139,7 @@ object ItemRegistration {
                 Eln.MVU,
                 600.0,
                 750.0,
-                Eln.instance.highVoltageCableDescriptor!!
+                Eln.instance!!.highVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -151,7 +151,7 @@ object ItemRegistration {
                 Eln.LVU,
                 180.0,
                 225.0,
-                Eln.instance.lowVoltageCableDescriptor!!
+                Eln.instance!!.lowVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -163,7 +163,7 @@ object ItemRegistration {
                 Eln.LVU,
                 375.0,
                 480.0,
-                Eln.instance.lowVoltageCableDescriptor!!
+                Eln.instance!!.lowVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -175,7 +175,7 @@ object ItemRegistration {
                 Eln.MVU,
                 600.0,
                 750.0,
-                Eln.instance.meduimVoltageCableDescriptor!!
+                Eln.instance!!.meduimVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -187,7 +187,7 @@ object ItemRegistration {
                 Eln.MVU,
                 900.0,
                 1050.0,
-                Eln.instance.highVoltageCableDescriptor!!
+                Eln.instance!!.highVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -199,7 +199,7 @@ object ItemRegistration {
                 Eln.LVU,
                 240.0,
                 300.0,
-                Eln.instance.lowVoltageCableDescriptor!!
+                Eln.instance!!.lowVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -211,7 +211,7 @@ object ItemRegistration {
                 Eln.LVU,
                 500.0,
                 640.0,
-                Eln.instance.lowVoltageCableDescriptor!!
+                Eln.instance!!.lowVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -223,7 +223,7 @@ object ItemRegistration {
                 Eln.MVU,
                 800.0,
                 1000.0,
-                Eln.instance.meduimVoltageCableDescriptor!!
+                Eln.instance!!.meduimVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -235,7 +235,7 @@ object ItemRegistration {
                 Eln.MVU,
                 1200.0,
                 1500.0,
-                Eln.instance.highVoltageCableDescriptor!!
+                Eln.instance!!.highVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -247,7 +247,7 @@ object ItemRegistration {
                 Eln.HVU,
                 3600.0,
                 4800.0,
-                Eln.instance.veryHighVoltageCableDescriptor!!
+                Eln.instance!!.veryHighVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -259,7 +259,7 @@ object ItemRegistration {
                 Eln.HVU,
                 4812.0,
                 6015.0,
-                Eln.instance.veryHighVoltageCableDescriptor!!
+                Eln.instance!!.veryHighVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -271,7 +271,7 @@ object ItemRegistration {
                 Eln.VVU,
                 4000.0,
                 6000.0,
-                Eln.instance.veryHighVoltageCableDescriptor!!
+                Eln.instance!!.veryHighVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -283,7 +283,7 @@ object ItemRegistration {
                 Eln.VVU,
                 12000.0,
                 15000.0,
-                Eln.instance.veryHighVoltageCableDescriptor!!
+                Eln.instance!!.veryHighVoltageCableDescriptor!!
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -674,7 +674,7 @@ object ItemRegistration {
             element = GenericItemUsingDamageDescriptorWithComment(name, arrayOf())
             Eln.sharedItem.addElement(id, element)
             Data.addResource(element.newItemStack())
-            if (Eln.dictTungstenDust) addToOre("dustTungsten", element.newItemStack())
+            if (Eln.dictTungstenDust.isNotEmpty()) addToOre("dustTungsten", element.newItemStack())
         }
 
         run {
@@ -750,7 +750,7 @@ object ItemRegistration {
             Eln.sharedItem.addElement(completId, element)
             Eln.tungstenIngot = element
             Data.addResource(element.newItemStack())
-            if (Eln.dictTungstenIngot) addToOre("ingotTungsten", element.newItemStack())
+            if (Eln.dictTungstenIngot.isNotEmpty()) addToOre("ingotTungsten", element.newItemStack())
         }
 
         run {
@@ -1236,7 +1236,7 @@ object ItemRegistration {
             subId = 32
             name = I18N.TR_NAME(I18N.Type.NONE, "X-Ray Scanner")
             val desc = PortableOreScannerItem(
-                name, Eln.obj.getObj("XRayScanner"), 100000.0, 400.0,
+                name, 100000.0, 400.0,
                 300.0, Eln.xRayScannerRange.toFloat(), (Math.PI / 2).toFloat(), 32, 20
             )
             Eln.sharedItemStackOne.addElement(subId + (id shl 6), desc)
@@ -1278,7 +1278,7 @@ object ItemRegistration {
             )
             Eln.sharedItem.addElement(subId + (id shl 6), desc)
             Data.addResource(desc.newItemStack())
-            if (Eln.dictCheapChip) OreDictionary.registerOre("chipCheap", desc.newItemStack())
+            if (Eln.dictCheapChip.isNotEmpty()) OreDictionary.registerOre("chipCheap", desc.newItemStack())
         }
         run {
             subId = 1
@@ -1289,7 +1289,7 @@ object ItemRegistration {
             )
             Eln.sharedItem.addElement(subId + (id shl 6), desc)
             Data.addResource(desc.newItemStack())
-            if (Eln.dictAdvancedChip) OreDictionary.registerOre("chipAdvanced", desc.newItemStack())
+            if (Eln.dictAdvancedChip.isNotEmpty()) OreDictionary.registerOre("chipAdvanced", desc.newItemStack())
         }
         run {
             subId = 2
@@ -1634,7 +1634,7 @@ object ItemRegistration {
             val desc =
                 OreDescriptor(name, id, 6 * (if (Eln.genTungsten) 1 else 0), 3, 9, 0, 32)
             Eln.oreItem!!.addDescriptor(id, desc)
-            if (Eln.dictTungstenOre) addToOre("oreTungsten", desc.newItemStack())
+            if (Eln.dictTungstenOre.isNotEmpty()) addToOre("oreTungsten", desc.newItemStack())
         }
         run {
             id = 6

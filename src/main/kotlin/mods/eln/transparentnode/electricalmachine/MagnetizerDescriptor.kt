@@ -72,6 +72,6 @@ class MagnetizerDescriptor(
     }
 
     override fun getPowerCableRender(): CableRenderDescriptor? {
-        return cable.render
+        return cable?.render
     }
 }

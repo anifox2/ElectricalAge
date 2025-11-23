@@ -3,9 +3,9 @@ package mods.eln.gridnode
 import mods.eln.misc.UtilsClient
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeElementRender
-import mods.eln.node.transparent.TransparentNodeEntity
-import net.minecraft.util.ResourceLocation
-import net.minecraft.util.Vec3
+import mods.eln.node.transparent.TransparentNodeBlockEntity
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.phys.Vec3
 
 import java.io.DataInputStream
 import java.io.IOException
@@ -13,7 +13,7 @@ import java.util.ArrayList
 
 import org.lwjgl.opengl.GL11.*
 
-abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) : TransparentNodeElementRender(tileEntity, descriptor) {
+abstract class GridRender(tileEntity: TransparentNodeBlockEntity, descriptor: TransparentNodeDescriptor) : TransparentNodeElementRender(tileEntity, descriptor) {
     private val descriptor: GridDescriptor
     private val cableTexture: ResourceLocation
     private val catenaries = ArrayList<Catenary>()
@@ -42,7 +42,7 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
 
     @Throws(IOException::class)
     private fun readVec(stream: DataInputStream): Vec3 {
-        return Vec3.createVectorHelper(stream.readFloat().toDouble(), stream.readFloat().toDouble(), stream.readFloat().toDouble())
+        return Vec3(stream.readFloat().toDouble(), stream.readFloat().toDouble(), stream.readFloat().toDouble())
     }
 
     override fun networkUnserialize(stream: DataInputStream) {
@@ -62,10 +62,10 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
                 val tgnd = readVec(stream)
                 var dplus = splus.subtract(tplus).normalize()
                 var dgnd = sgnd.subtract(tgnd).normalize()
-                val straightV = dplus.dotProduct(dgnd)
+                val straightV = dplus.dot(dgnd)
                 dplus = splus.subtract(tgnd).normalize()
                 dgnd = sgnd.subtract(tplus).normalize()
-                val crossV = dplus.dotProduct(dgnd)
+                val crossV = dplus.dot(dgnd)
                 if (crossV < straightV) {
                     catenaries.add(Catenary(splus, tplus))
                     catenaries.add(Catenary(sgnd, tgnd))
@@ -91,7 +91,7 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
     internal constructor(start: Vec3, end: Vec3) {
         internal val list: Int = glGenLists(1)
 
-        internal val origin = Vec3.createVectorHelper(0.0, 0.0, 0.0)
+        internal val origin = Vec3(0.0, 0.0, 0.0)
         internal val box = intArrayOf(3, 7, 5, 3, 5, 1, 4, 8, 6, 4, 6, 2, 1, 6, 5, 1, 2, 6, 3, 8, 7, 3, 4, 8)
         // Maps box coordinates (above) to texture coordinates.
         internal val boxTex = intArrayOf(0, 0, // 1
@@ -111,7 +111,7 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
             glNewList(list, GL_COMPILE)
             glBegin(GL_TRIANGLES)
 
-            if (start.xCoord == end.xCoord && start.zCoord == end.zCoord) {
+            if (start.x == end.x && start.z == end.z) {
                 // Poles right on top of each other? No catenaries here.
                 drawBox(spread(start, end), spread(end, start))
             } else {
@@ -135,11 +135,11 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
             val v = arrayOf(from[0], from[1], from[2], from[3], to[0], to[1], to[2], to[3])
 
             // Figure out the lighting.
-            //            Vec3 middle = Vec3.createVectorHelper(0, 0, 0);
+            //            Vec3 middle = Vec3(0, 0, 0);
             //            for (Vec3 x : v) {
-            //                middle = middle.addVector(x.xCoord, x.yCoord, x.zCoord);
+            //                middle = middle.add(x.x, x.y, x.z);
             //            }
-            //            middle = multiply(middle, v.length).addVector(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
+            //            middle = multiply(middle, v.length).add(tileEntity.x, tileEntity.y, tileEntity.z);
             //            glColor3d(
             //                    139 / 255.0,
             //                    69 / 255.0,
@@ -149,12 +149,12 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
             for (i in box.indices) {
                 val bc = box[i] - 1
                 glTexCoord2f(boxTex[bc * 2].toFloat(), boxTex[bc * 2 + 1].toFloat())
-                glVertex3f(v[bc].xCoord.toFloat(), v[bc].yCoord.toFloat(), v[bc].zCoord.toFloat())
+                glVertex3f(v[bc].x.toFloat(), v[bc].y.toFloat(), v[bc].z.toFloat())
             }
         }
 
         private fun translate(start: Array<Vec3>, delta: Vec3): Array<Vec3> {
-            return start.mapIndexed { _, vec3 -> vec3.addVector(delta.xCoord, delta.yCoord, delta.zCoord) }.toTypedArray()
+            return start.mapIndexed { _, vec3 -> vec3.add(delta.x, delta.y, delta.z) }.toTypedArray()
         }
 
         private fun spread(a: Vec3, b: Vec3): Array<Vec3> {
@@ -164,13 +164,13 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
             val delta = b.subtract(a)
             // This is just to copy.
             // We don't care what r is, so long as it's linearly independent of delta.
-            val r = delta.normalize()
-            r.rotateAroundY(1f)
-            r.rotateAroundX(1f)
+            var r = delta.normalize()
+            r = r.yRot(1f)
+            r = r.xRot(1f)
             // This gives us one vector which is perpendicular to delta.
-            val x1 = multiply(delta.crossProduct(r).normalize(), cableWidth)
+            val x1 = multiply(delta.cross(r).normalize(), cableWidth)
             // And this, another, perpendicular to delta and x1.
-            val y1 = multiply(delta.crossProduct(x1).normalize(), cableWidth)
+            val y1 = multiply(delta.cross(x1).normalize(), cableWidth)
             // Now just invert those to get the other two corners.
             val x2 = negate(x1)
             val y2 = negate(y1)
@@ -182,10 +182,10 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
         }
 
         internal fun multiply(a: Vec3, b: Double): Vec3 {
-            return Vec3.createVectorHelper(
-                    a.xCoord * b,
-                    a.yCoord * b,
-                    a.zCoord * b
+            return Vec3(
+                    a.x * b,
+                    a.y * b,
+                    a.z * b
             )
         }
 
@@ -195,9 +195,9 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
             val slack = 1.005
             val vertices = 16
 
-            val dx = end.xCoord - start.xCoord
-            val dy = end.yCoord - start.yCoord
-            val dz = end.zCoord - start.zCoord
+            val dx = end.x - start.x
+            val dy = end.y - start.y
+            val dz = end.z - start.z
             val dw = Math.sqrt(dx * dx + dz * dz)
             val k = Math.sqrt(dx * dx + dy * dy + dz * dz) * slack
             var l = 0.0
@@ -217,7 +217,7 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
                 val x1 = 0 + dx * n1
                 val z1 = 0 + dz * n1
                 val y1 = a * Math.cosh((Math.sqrt(x1 * x1 + z1 * z1) - p) / a) + q
-                Vec3.createVectorHelper(start.xCoord + x1, start.yCoord + y1, start.zCoord + z1)
+                Vec3(start.x + x1, start.y + y1, start.z + z1)
             }.toTypedArray()
         }
 

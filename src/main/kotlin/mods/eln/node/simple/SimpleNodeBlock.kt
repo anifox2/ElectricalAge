@@ -31,7 +31,7 @@ abstract class SimpleNodeBlock protected constructor(properties: BlockBehaviour.
     }
 
     fun getFrontForPlacement(e: LivingEntity?): Direction {
-        return entityLivingViewDirection(e!!).inverse
+        return entityLivingViewDirection(e!!).inverse()
     }
 
     abstract fun newNode(): SimpleNode?
@@ -74,6 +74,19 @@ abstract class SimpleNodeBlock protected constructor(properties: BlockBehaviour.
         if (!world.isClientSide) {
             val entity = world.getBlockEntity(pos) as? SimpleNodeEntity
             entity?.onNeighborBlockChange()
+        }
+    }
+
+    override fun setPlacedBy(world: Level, pos: BlockPos, state: BlockState, placer: LivingEntity?, stack: net.minecraft.world.item.ItemStack) {
+        if (!world.isClientSide) {
+            val entity = world.getBlockEntity(pos) as? SimpleNodeEntity
+            if (entity != null) {
+                val node = entity.node
+                if (node != null) {
+                    node.descriptorKey = this.descriptorKey
+                    node.onBlockPlacedBy(world, mods.eln.misc.Coordinate(pos, world), getFrontForPlacement(placer), placer, stack)
+                }
+            }
         }
     }
 

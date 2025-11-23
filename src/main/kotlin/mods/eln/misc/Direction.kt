@@ -3,6 +3,9 @@ package mods.eln.misc
 import net.minecraft.core.Direction as MCDirection
 import org.lwjgl.opengl.GL11
 import net.minecraft.world.phys.Vec3
+import net.minecraft.nbt.CompoundTag
+
+typealias ForgeDirection = MCDirection
 
 enum class Direction(val int: Int) {
     XN(0), // West
@@ -43,6 +46,42 @@ enum class Direction(val int: Int) {
         }
     }
 
+    fun right(): Direction {
+        return when (this) {
+            XN -> ZN
+            XP -> ZP
+            YN -> XP
+            YP -> XN
+            ZN -> XP
+            ZP -> XN
+        }
+    }
+
+    fun applyTo(pos: IntArray, factor: Int) {
+        when (this) {
+            XN -> pos[0] -= factor
+            XP -> pos[0] += factor
+            YN -> pos[1] -= factor
+            YP -> pos[1] += factor
+            ZN -> pos[2] -= factor
+            ZP -> pos[2] += factor
+        }
+    }
+
+    fun left(): Direction {
+        return when (this) {
+            XN -> ZP
+            XP -> ZN
+            YN -> XN
+            YP -> XN
+            ZN -> XN
+            ZP -> XP
+        }
+    }
+
+    val isY: Boolean get() = this == YN || this == YP
+    val isNotY: Boolean get() = !isY
+
     fun glRotateXnRef() {
         when (this) {
             XN -> {}
@@ -76,21 +115,44 @@ enum class Direction(val int: Int) {
         }
     }
 
+    fun save(nbt: CompoundTag, name: String) {
+        nbt.putByte(name, int.toByte())
+    }
+
     companion object {
-        fun fromMCDirection(dir: MCDirection): Direction {
-            return when (dir) {
-                MCDirection.WEST -> XN
-                MCDirection.EAST -> XP
-                MCDirection.DOWN -> YN
-                MCDirection.UP -> YP
-                MCDirection.NORTH -> ZN
-                MCDirection.SOUTH -> ZP
+        @JvmField val N = ZN
+        @JvmStatic
+        fun fromIntMinecraftSide(side: Int): Direction {
+            return when (side) {
+                0 -> YN
+                1 -> YP
+                2 -> ZN
+                3 -> ZP
+                4 -> XN
+                5 -> XP
+                else -> YN
             }
         }
-        
+
         fun fromInt(i: Int): Direction {
-            return values().first { it.int == i }
+            return if (i in 0 until all.size) all[i] else XN
         }
+
+        @JvmStatic
+        fun fromMCDirection(dir: MCDirection): Direction {
+            return fromIntMinecraftSide(dir.ordinal)
+        }
+
+        fun load(nbt: CompoundTag, name: String): Direction {
+            return fromIntMinecraftSide(nbt.getByte(name).toInt())
+        }
+
+        val all = values()
+        val axes = arrayOf(
+            listOf(XN, XP),
+            listOf(YN, YP),
+            listOf(ZN, ZP)
+        )
     }
     
     fun inverse(): Direction {
@@ -104,40 +166,16 @@ enum class Direction(val int: Int) {
         }
     }
 
-    fun down(): Direction {
-        return when (this) {
-            YN, YP -> ZP
-            else -> YN
-        }
-    }
-
     fun up(): Direction {
         return when (this) {
-            YN, YP -> ZN
+            YN -> ZN
+            YP -> ZN
             else -> YP
         }
     }
 
-    fun left(): Direction {
-        return when (this) {
-            YN -> XN
-            YP -> XN
-            ZN -> XN
-            XN -> ZP
-            ZP -> XP
-            XP -> ZN
-        }
-    }
-
-    fun right(): Direction {
-        return when (this) {
-            YN -> XP
-            YP -> XP
-            ZN -> XP
-            XP -> ZP
-            ZP -> XN
-            XN -> ZN
-        }
+    fun down(): Direction {
+        return up().inverse()
     }
 
     fun back(): Direction {
@@ -151,5 +189,13 @@ enum class Direction(val int: Int) {
             LRDU.Up -> this.up()
             LRDU.Down -> this.down()
         }
+    }
+
+    fun getLRDUGoingTo(other: Direction): LRDU? {
+        if (this.left() == other) return LRDU.Left
+        if (this.right() == other) return LRDU.Right
+        if (this.up() == other) return LRDU.Up
+        if (this.down() == other) return LRDU.Down
+        return null
     }
 }

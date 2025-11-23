@@ -1,7 +1,6 @@
 package mods.eln.sixnode.electricalredstoneinput;
 
 import mods.eln.i18n.I18N;
-import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
@@ -12,10 +11,11 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +35,7 @@ public class ElectricalRedstoneInputElement extends SixNodeElement {
     boolean warm = false;
 
     public ElectricalRedstoneInputElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
-        super(sixNode, side, descriptor);
+        super(sixNode, mods.eln.misc.Direction.fromMCDirection(side), descriptor);
         electricalLoadList.add(outputGate);
         electricalComponentList.add(outputGateProcess);
         slowProcessList.add(slowProcess);
@@ -52,16 +52,16 @@ public class ElectricalRedstoneInputElement extends SixNodeElement {
     }
 
     @Override
-    public void readFromNBT(@NotNull NBTTagCompound nbt) {
+    public void readFromNBT(@NotNull CompoundTag nbt) {
         super.readFromNBT(nbt);
         byte value = nbt.getByte("front");
         front = LRDU.fromInt((value >> 0) & 0x3);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setByte("front", (byte) (front.toInt() << 0));
+        nbt.putByte("front", (byte) (front.toInt() << 0));
     }
 
     @Override
@@ -124,25 +124,25 @@ public class ElectricalRedstoneInputElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (onBlockActivatedRotate(entityPlayer)) return true;
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-        if (currentItemStack != null) {
+    public boolean onBlockActivated(Player player, mods.eln.misc.Direction side, float vx, float vy, float vz) {
+        if (onBlockActivatedRotate(player)) return true;
+        ItemStack currentItemStack = player.getMainHandItem();
+        if (!currentItemStack.isEmpty()) {
             Item item = currentItemStack.getItem();
             /*if (item== Eln.toolsSetItem) {
 				colorCare = colorCare ^ 1;
-				entityPlayer.addChatMessage("Wire color care " + colorCare);
+				player.sendSystemMessage(Component.literal("Wire color care " + colorCare));
 				sixNode.reconnect();
 			}
 			if (item == Eln.brushItem) {
-				if (currentItemStack.getItemDamage() < BrushItem.maximalUse) {
-					color = currentItemStack.getItemDamage() & 0xF;
+				if (currentItemStack.getDamageValue() < BrushItem.maximalUse) {
+					color = currentItemStack.getDamageValue() & 0xF;
 					
-					currentItemStack.setItemDamage(currentItemStack.getItemDamage() + 16);
+					currentItemStack.setDamageValue(currentItemStack.getDamageValue() + 16);
 					
 					sixNode.reconnect();
 				} else {
-					entityPlayer.addChatMessage("Brush is empty");
+					player.sendSystemMessage(Component.literal("Brush is empty"));
 				}
 			}*/
         }

@@ -3,25 +3,28 @@ package mods.eln.ghost
 
 import mods.eln.Eln
 import mods.eln.misc.Coordinate
-import mods.eln.misc.Utils.getTags
+// import mods.eln.misc.Utils.getTags
 import mods.eln.node.NodeManager
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.Level
-import net.minecraft.world.level.LevelSavedData
+import net.minecraft.core.BlockPos
 import java.util.*
+import net.minecraftforge.server.ServerLifecycleHooks
 
-class GhostManager(par1Str: String?) : WorldSavedData(par1Str) {
+class GhostManager {
     var ghostTable: MutableMap<Coordinate?, GhostElement> = Hashtable()
     var observerTable: MutableMap<Coordinate?, GhostObserver> = Hashtable()
+    
     fun clear() {
         ghostTable.clear()
         observerTable.clear()
     }
 
     fun init() {}
-    override fun isDirty(): Boolean {
+    
+    fun isDirty(): Boolean {
         return true
     }
 
@@ -54,7 +57,7 @@ class GhostManager(par1Str: String?) : WorldSavedData(par1Str) {
             if (element.observatorCoordonate!!.equals(observerCoordinate)) {
                 iterator.remove()
                 removeGhostNode(element.elementCoordinate)
-                element.elementCoordinate!!.world().setBlockToAir(element.elementCoordinate!!.x, element.elementCoordinate!!.y, element.elementCoordinate!!.z)
+                setBlockToAir(element.elementCoordinate!!)
             }
         }
     }
@@ -67,7 +70,7 @@ class GhostManager(par1Str: String?) : WorldSavedData(par1Str) {
             if (element.observatorCoordonate!!.equals(observerCoordinate) && element.uUID == uuid) {
                 iterator.remove()
                 removeGhostNode(element.elementCoordinate)
-                element.elementCoordinate!!.world().setBlockToAir(element.elementCoordinate!!.x, element.elementCoordinate!!.y, element.elementCoordinate!!.z)
+                setBlockToAir(element.elementCoordinate!!)
             }
         }
     }
@@ -80,7 +83,7 @@ class GhostManager(par1Str: String?) : WorldSavedData(par1Str) {
             if (element.observatorCoordonate!!.equals(observerCoordinate) && element.uUID != uuid) {
                 iterator.remove()
                 removeGhostNode(element.elementCoordinate)
-                element.elementCoordinate!!.world().setBlockToAir(element.elementCoordinate!!.x, element.elementCoordinate!!.y, element.elementCoordinate!!.z)
+                setBlockToAir(element.elementCoordinate!!)
             }
         }
     }
@@ -92,30 +95,40 @@ class GhostManager(par1Str: String?) : WorldSavedData(par1Str) {
 
     fun removeGhostAndBlock(coordinate: Coordinate) {
         removeGhost(coordinate)
-        coordinate.world().setBlockToAir(coordinate.x, coordinate.y, coordinate.z) //caca1.5.1
-    }
-
-    override fun readFromNBT(nbt: CompoundTag) {
-    }
-
-    override fun writeToNBT(nbt: CompoundTag) {
+        setBlockToAir(coordinate)
     }
 
     fun loadFromNBT(nbt: CompoundTag?) {
-        for (o in getTags(nbt!!)) {
+        load(nbt)
+    }
+
+    fun load(nbt: CompoundTag?) {
+        if (nbt == null) return
+        for (key in nbt.allKeys) {
+            val o = nbt.getCompound(key)
             val ghost = GhostElement()
             ghost.readFromNBT(o, "")
             ghostTable[ghost.elementCoordinate] = ghost
         }
     }
 
-    fun saveToNBT(nbt: CompoundTag, dim: Int) {
+    private fun getTags(nbt: CompoundTag): List<CompoundTag> {
+        val list = ArrayList<CompoundTag>()
+        for (key in nbt.allKeys) {
+            if (key.startsWith("n")) {
+                list.add(nbt.getCompound(key))
+            }
+        }
+        return list
+    }
+
+    fun save(nbt: CompoundTag) {
         var nodeCounter = 0
         for (ghost in ghostTable.values) {
-            if (dim != Int.MIN_VALUE && ghost.elementCoordinate!!.dimension != dim) continue
+            // Assuming global save or handled by caller
             val nbtGhost = CompoundTag()
             ghost.writeToNBT(nbtGhost, "")
-            nbt.setTag("n" + nodeCounter++, nbtGhost)
+            nbt.put("n" + nodeCounter++, nbtGhost)
         }
     }
 
@@ -129,20 +142,38 @@ class GhostManager(par1Str: String?) : WorldSavedData(par1Str) {
         }
     }
 
-    fun canCreateGhostAt(world: World, x: Int, y: Int, z: Int): Boolean {
-        return if (!world.chunkProvider.chunkExists(x shr 4, z shr 4)) {
-            false
-        } else !(world.getBlock(x, y, z) !== Blocks.air && !world.getBlock(x, y, z).isReplaceable(world, x, y, z))
+    fun canCreateGhostAt(world: Level, x: Int, y: Int, z: Int): Boolean {
+        val pos = BlockPos(x, y, z)
+        if (!world.hasChunkAt(pos)) return false
+        val state = world.getBlockState(pos)
+        return state.isAir || state.canBeReplaced()
     }
 
     @JvmOverloads
-    fun createGhost(coordinate: Coordinate, observerCoordinate: Coordinate, UUID: Int, block: Block? = Eln.ghostBlock, meta: Int = GhostBlock.tCube) {
-        var coordinate = coordinate
-        coordinate.world().setBlockToAir(coordinate.x, coordinate.y, coordinate.z)
-        if (coordinate.world().setBlock(coordinate.x, coordinate.y, coordinate.z, block, meta, 3)) {
-            coordinate = Coordinate(coordinate)
-            val element = GhostElement(coordinate, observerCoordinate, UUID)
+    fun createGhost(coordinate: Coordinate, observerCoordinate: Coordinate, UUID: Int, block: Block? = Eln.ghostBlock, meta: Int = 0) {
+        val world = getLevel(coordinate.dimension) ?: return
+        val pos = BlockPos(coordinate.x, coordinate.y, coordinate.z)
+        
+        world.removeBlock(pos, false)
+        if (world.setBlock(pos, block!!.defaultBlockState(), 3)) {
+            val element = GhostElement(Coordinate(coordinate), observerCoordinate, UUID)
             ghostTable[element.elementCoordinate] = element
         }
+    }
+    
+    private fun setBlockToAir(c: Coordinate) {
+        val world = getLevel(c.dimension) ?: return
+        world.removeBlock(BlockPos(c.x, c.y, c.z), false)
+    }
+    
+    private fun getLevel(dim: Int): Level? {
+        val server = ServerLifecycleHooks.getCurrentServer() ?: return null
+        val key = when(dim) {
+            0 -> Level.OVERWORLD
+            -1 -> Level.NETHER
+            1 -> Level.END
+            else -> return null // TODO: Support custom dimensions
+        }
+        return server.getLevel(key)
     }
 }

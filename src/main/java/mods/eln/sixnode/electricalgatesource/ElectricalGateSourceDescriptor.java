@@ -6,10 +6,10 @@ import mods.eln.misc.RealisticEnum;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -45,15 +45,18 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-        super.addInformation(itemStack, entityPlayer, list, par4);
+    public void appendHoverText(ItemStack stack, @Nullable net.minecraft.world.level.Level level, List<net.minecraft.network.chat.Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
+        // super.appendHoverText(stack, level, tooltip, flag);
         if (!onOffOnly) {
-            Collections.addAll(list, tr("Provides configurable signal\nvoltage.").split("\n"));
-        }else{
+            String[] lines = tr("Provides configurable signal\nvoltage.").split("\n");
+            for (String line : lines) tooltip.add(net.minecraft.network.chat.Component.literal(line));
+        } else {
             if (autoReset) {
-                Collections.addAll(list, tr("Acts like a\npush button.").split("\n"));
+                String[] lines = tr("Acts like a\npush button.").split("\n");
+                for (String line : lines) tooltip.add(net.minecraft.network.chat.Component.literal(line));
             } else {
-                Collections.addAll(list, tr("Acts like a\ntoggle switch.").split("\n"));
+                String[] lines = tr("Acts like a\ntoggle switch.").split("\n");
+                for (String line : lines) tooltip.add(net.minecraft.network.chat.Component.literal(line));
             }
         }
     }
@@ -62,7 +65,7 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
         autoReset = true;
     }
 
-    void draw(float factor, float distance, TileEntity e) {
+    void draw(float factor, float distance, BlockEntity e) {
         render.draw(factor, distance, e);
     }
 
@@ -72,35 +75,9 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type != ItemRenderType.INVENTORY) {
-            GL11.glScalef(1.5f, 1.5f, 1.5f);
-            //if (type == ItemRenderType.INVENTORY) GL11.glScalef(1.5f, 1.5f, 1.5f);
-            draw(0f, 1f, null);
-        } else {
-            super.renderItem(type, item, data);
-        }
-    }
-
     @Nullable
     @Override
-    public LRDU getFrontFromPlace(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public LRDU getFrontFromPlace(@NotNull Direction side, @NotNull Player player) {
         return super.getFrontFromPlace(side, player).inverse();
     }
 }

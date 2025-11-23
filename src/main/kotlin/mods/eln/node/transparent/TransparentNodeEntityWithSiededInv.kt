@@ -3,7 +3,7 @@ package mods.eln.node.transparent
 // Seems unused.
 
 /*
-class TransparentNodeEntityWithSiededInv : TransparentNodeEntity(), ISidedInventory {
+class TransparentNodeBlockEntityWithSiededInv : TransparentNodeBlockEntity(), ISidedInventory {
     override fun getSidedInventory(): ISidedInventory {
         if (level.isRemote) {
             if (elementRender == null) return instance

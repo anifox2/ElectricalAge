@@ -11,26 +11,29 @@ import mods.eln.misc.Utils.updateAllLightTypes
 import mods.eln.misc.Utils.updateSkylight
 import mods.eln.node.NodeBlockEntity
 import net.minecraft.world.level.block.Block
-import net.minecraft.client.gui.Screen
+import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.level.Level
+import net.minecraft.core.registries.BuiltInRegistries
 import java.io.DataInputStream
 import java.io.IOException
 
-class SixNodeEntity : NodeBlockEntity() {
+class SixNodeEntity(pos: net.minecraft.core.BlockPos, state: net.minecraft.world.level.block.state.BlockState) : NodeBlockEntity(Eln.sixNodeEntity!!, pos, state) {
     @JvmField
     var elementRenderList = arrayOfNulls<SixNodeElementRender>(6)
     @JvmField
     var elementRenderIdList = ShortArray(6)
-    var sixNodeCacheBlock = Blocks.air
+    var sixNodeCacheBlock: Block = Blocks.AIR
     var sixNodeCacheBlockMeta: Byte = 0
+    
     override fun serverPublishUnserialize(stream: DataInputStream) {
         val sixNodeCacheBlockOld = sixNodeCacheBlock
         super.serverPublishUnserialize(stream)
         try {
-            sixNodeCacheBlock = Block.getBlockById(stream.readInt())
+            val blockId = stream.readInt()
+            sixNodeCacheBlock = BuiltInRegistries.BLOCK.byId(blockId)
             sixNodeCacheBlockMeta = stream.readByte()
             var idx: Int
             idx = 0
@@ -43,7 +46,7 @@ class SixNodeEntity : NodeBlockEntity() {
                     if (id != elementRenderIdList[idx]) {
                         var failed = false
                         elementRenderIdList[idx] = id
-                        val descriptor = Eln.sixNodeItem.getDescriptor(id.toInt())
+                        val descriptor = Eln.sixNodeItem!!.getDescriptor(id.toInt()) as? SixNodeDescriptor
                         if (descriptor == null) {
                             println("ERROR: Server sent bad SixNodeDescriptor id $id")
                             failed = true
@@ -74,13 +77,8 @@ class SixNodeEntity : NodeBlockEntity() {
             e.printStackTrace()
         }
 
-        //	level.setLightValue(EnumSkyBlock.Sky, xCoord,yCoord,zCoord,15);
-        if (sixNodeCacheBlock !== sixNodeCacheBlockOld) {
-            val chunk = level.getChunkFromBlockCoords(xCoord, zCoord)
-            chunk.generateHeightMap()
-            updateSkylight(chunk)
-            chunk.generateSkylightMap()
-            updateAllLightTypes(level, xCoord, yCoord, zCoord)
+        if (sixNodeCacheBlock !== sixNodeCacheBlockOld && level != null) {
+            updateAllLightTypes(level!!, worldPosition)
         }
     }
 
@@ -136,8 +134,8 @@ class SixNodeEntity : NodeBlockEntity() {
         super.destructor()
     }
 
-    fun getDamageValue(world: World, @Suppress("UNUSED_PARAMETER") x: Int, @Suppress("UNUSED_PARAMETER") y: Int, @Suppress("UNUSED_PARAMETER") z: Int): Int {
-        if (world.isRemote) {
+    fun getDamageValue(level: Level, @Suppress("UNUSED_PARAMETER") x: Int, @Suppress("UNUSED_PARAMETER") y: Int, @Suppress("UNUSED_PARAMETER") z: Int): Int {
+        if (level.isClientSide) {
             for (idx in 0..5) {
                 if (elementRenderList[idx] != null) {
                     return elementRenderIdList[idx].toInt()
@@ -147,16 +145,15 @@ class SixNodeEntity : NodeBlockEntity() {
         return 0
     }
 
-    fun hasVolume(@Suppress("UNUSED_PARAMETER") world: World?, @Suppress("UNUSED_PARAMETER") x: Int, @Suppress("UNUSED_PARAMETER") y: Int, @Suppress("UNUSED_PARAMETER") z: Int): Boolean {
-        return if (level.isRemote) {
-            for (e in elementRenderList) {
-                if (e != null && e.sixNodeDescriptor.hasVolume()) return true
-            }
-            false
-        } else {
-            val node = node as SixNode? ?: return false
-            node.hasVolume()
+    fun hasVolume(level: net.minecraft.world.level.BlockGetter, pos: net.minecraft.core.BlockPos): Boolean {
+        val node = node as SixNode?
+        if (node != null) {
+            return node.hasVolume()
         }
+        for (e in elementRenderList) {
+            if (e != null && e.sixNodeDescriptor.hasVolume()) return true
+        }
+        return false
     }
 
     override fun tileEntityNeighborSpawn() {
@@ -166,7 +163,7 @@ class SixNodeEntity : NodeBlockEntity() {
     }
 
     override val nodeUuid: String
-        get() = Eln.sixNodeBlock.nodeUuid
+        get() = Eln.sixNodeBlock!!.nodeUuid
 
     override fun clientRefresh(deltaT: Float) {
         for (e in elementRenderList) {
@@ -175,7 +172,7 @@ class SixNodeEntity : NodeBlockEntity() {
     }
 
     override fun isProvidingWeakPower(side: Direction?): Int {
-        return if (level.isRemote) {
+        return if (level?.isClientSide == true) {
             var max = 0
             for (r in elementRenderList) {
                 if (r == null) continue

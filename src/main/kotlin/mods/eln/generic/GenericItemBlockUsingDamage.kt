@@ -14,10 +14,6 @@ open class GenericItemBlockUsingDamage<Descriptor : GenericItemBlockUsingDamageD
 
     var defaultElement: Descriptor? = null
 
-    fun setDefaultElement(descriptor: Descriptor) {
-        defaultElement = descriptor
-    }
-
     fun doubleEntry(src: Int, dst: Int) {
         subItemList[dst] = subItemList[src]!!
     }

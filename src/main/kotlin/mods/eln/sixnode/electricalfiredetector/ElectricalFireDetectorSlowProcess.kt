@@ -25,7 +25,7 @@ class ElectricalFireDetectorSlowProcess(val element: ElectricalFireDetectorEleme
         val batteryStack = element.inventory!!.getItem(ElectricalFireDetectorContainer.BatteryId)
         val battery = GenericItemUsingDamageDescriptor.getDescriptor(batteryStack) as? BatteryItem
         return if (battery != null) {
-            battery.getEnergy(batteryStack) / battery.getEnergyMax(batteryStack)
+            battery.getEnergy(batteryStack) / battery.energyStorage
         } else {
             0.0
         }
@@ -58,7 +58,7 @@ class ElectricalFireDetectorSlowProcess(val element: ElectricalFireDetectorEleme
             var fireDetected = false
 
             val maxRangeHalf = ((element.fireDescriptor.maxRange - 1) / 2).toInt()
-            val detectionBBCenter = Coordinate((element as SixNodeElement).sixNode.coordinate!!.x, (element as SixNodeElement).sixNode.coordinate!!.y, (element as SixNodeElement).sixNode.coordinate!!.z, (element as SixNodeElement).sixNode.coordinate!!.dimension)
+            val detectionBBCenter = Coordinate((element as SixNodeElement).sixNode!!.coordinate!!.x, (element as SixNodeElement).sixNode!!.coordinate!!.y, (element as SixNodeElement).sixNode!!.coordinate!!.z, (element as SixNodeElement).sixNode!!.coordinate!!.dimension)
             when (element.side) {
                 mods.eln.misc.Direction.XP -> detectionBBCenter.x -= maxRangeHalf
                 mods.eln.misc.Direction.XN -> detectionBBCenter.x += maxRangeHalf
@@ -71,7 +71,7 @@ class ElectricalFireDetectorSlowProcess(val element: ElectricalFireDetectorEleme
             for (dx in -maxRangeHalf..maxRangeHalf) {
                 for (dy in -maxRangeHalf..maxRangeHalf) {
                     for (dz in -maxRangeHalf..maxRangeHalf) {
-                        val block = detectionBBCenter.getBlock((element as SixNodeElement).sixNode.level!!, dx, dy, dz)
+                        val block = detectionBBCenter.getBlock((element as SixNodeElement).sixNode!!.level!!, dx, dy, dz)
                         if (block is FireBlock) {
                             fireDetected = true
                             break

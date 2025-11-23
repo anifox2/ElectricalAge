@@ -161,8 +161,8 @@ class PowerSourceGui(var render: PowerSourceRender) : ScreenEln(), GuiTextFieldE
         super.initGui()
         current = newGuiTextField(6, 6, 50)
         current!!.value = render.current.toString()
-        current!!.setObserver(this)
-        current!!.setComment(listOf(tr("Power sourced")))
+        current!!.observer = this
+        current!!.setComment(arrayOf(tr("Power sourced")))
     }
 
     override fun textFieldNewValue(textField: GuiTextFieldEln, value: String) {

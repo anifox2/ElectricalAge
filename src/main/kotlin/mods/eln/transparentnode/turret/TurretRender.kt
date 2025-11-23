@@ -2,12 +2,12 @@ package mods.eln.transparentnode.turret
 
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeElementRender
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.transparentnode.turret.TurretElement.TurretMechanicsSimulation
 import org.lwjgl.opengl.GL11
 
 class TurretRender(
-    entity: TransparentNodeEntity,
+    entity: TransparentNodeBlockEntity,
     descriptor: TransparentNodeDescriptor
 ) : TransparentNodeElementRender(entity, descriptor) {
 

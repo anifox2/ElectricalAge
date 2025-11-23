@@ -3,17 +3,25 @@ package mods.eln.item.electricalitem
 import mods.eln.i18n.I18N.tr
 import mods.eln.item.electricalinterface.IItemEnergyBattery
 import mods.eln.misc.Utils
-import mods.eln.misc.UtilsClient
+//import mods.eln.misc.UtilsClient
 import mods.eln.wiki.Data
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.entity.player.ServerPlayer
-import net.minecraft.item.Item
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.util.ResourceLocation
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.level.Level
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
+import net.minecraft.world.InteractionResultHolder
+import net.minecraft.world.InteractionHand
+import net.minecraft.network.chat.Component
+import net.minecraft.world.item.TooltipFlag
+import mods.eln.misc.nbt
+import mods.eln.misc.getDouble
+import mods.eln.misc.putDouble
+import mods.eln.misc.getInt
+import mods.eln.misc.setInt
+import mods.eln.misc.putBoolean
 
 class ElectricalLampItem(name: String, var lightMin: Int, var rangeMin: Int, dischargeMin: Double, var lightMax: Int,
                          rangeMax: Int, dischargeMax: Double, energyStorage: Double, chargePower: Double) : LampItem(name), IItemEnergyBattery {
@@ -25,10 +33,10 @@ class ElectricalLampItem(name: String, var lightMin: Int, var rangeMin: Int, dis
     var on: ResourceLocation
     var off: ResourceLocation
     var boosted: ResourceLocation
-    override fun setParent(item: Item?, damage: Int) {
+    override fun setParent(item: Any?, damage: Int) {
         super.setParent(item, damage)
-        Data.addPortable(newItemStack())
-        Data.addLight(newItemStack())
+        //Data.addPortable(newItemStack())
+        //Data.addLight(newItemStack())
     }
 
     override fun getRange(stack: ItemStack): Int {
@@ -54,49 +62,50 @@ class ElectricalLampItem(name: String, var lightMin: Int, var rangeMin: Int, dis
 
     override fun getDefaultNBT(): CompoundTag? {
         val nbt = CompoundTag()
-        nbt.setDouble("energy", 0.0)
-        nbt.setBoolean("powerOn", false)
-        nbt.setInteger("rand", (Math.random() * 0xFFFFFFF).toInt())
+        nbt.putDouble("energy", 0.0)
+        nbt.putBoolean("powerOn", false)
+        nbt.putInt("rand", (Math.random() * 0xFFFFFFF).toInt())
         return nbt
     }
 
     public override fun getLightState(stack: ItemStack): Int {
-        return getNbt(stack).getInteger("LightState")
+        return stack.getInt("LightState")
     }
 
-    fun setLightState(stack: ItemStack?, value: Int) {
-        getNbt(stack!!).setInteger("LightState", value)
+    fun setLightState(stack: ItemStack, value: Int) {
+        stack.setInt("LightState", value)
     }
 
     fun getLightLevel(stack: ItemStack): Int {
         return if (getLightState(stack) == 1) lightMin else lightMax
     }
 
-    override fun onItemRightClick(s: ItemStack, w: World, p: Player): ItemStack {
-        if (!w.isRemote && getEnergy(s) > 0) {
-            var lightState = getLightState(s) + 1
+    override fun use(level: Level, player: Player, hand: InteractionHand): InteractionResultHolder<ItemStack> {
+        val stack = player.getItemInHand(hand)
+        if (!level.isClientSide && getEnergy(stack) > 0) {
+            var lightState = getLightState(stack) + 1
             if (lightState > 2) lightState = 0
             when (lightState) {
-                0 -> Utils.addChatMessage(p as ServerPlayer, "Flashlight OFF")
-                1 -> Utils.addChatMessage(p as ServerPlayer, "Flashlight ON")
-                2 -> Utils.addChatMessage(p as ServerPlayer, "Flashlight BOOSTED")
+                0 -> player.sendSystemMessage(Component.literal("Flashlight OFF"))
+                1 -> player.sendSystemMessage(Component.literal("Flashlight ON"))
+                2 -> player.sendSystemMessage(Component.literal("Flashlight BOOSTED"))
                 else -> {
                 }
             }
-            setLightState(s, lightState)
+            setLightState(stack, lightState)
         }
-        return s
+        return InteractionResultHolder.success(stack)
     }
 
-    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
-        super.appendHoverText(itemStack, level, list, flag)
-        list.add(tr("Discharge power: %1\$W", Utils.plotValue(dischargeMin)))
-        if (itemStack != null) {
-            list.add(tr("Stored Energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
-                (getEnergy(itemStack) / energyStorage * 100).toInt()))
-            list.add(tr("State:") + " " + if (getLightState(itemStack) != 0) tr("On") else tr("Off"))
-        }
+    override fun appendHoverText(stack: ItemStack, level: Level?, list: MutableList<Component>, flag: TooltipFlag) {
+        super.appendHoverText(stack, level, list, flag)
+        list.add(Component.literal(tr("Discharge power: %1\$W", Utils.plotValue(dischargeMin))))
+        
+        list.add(Component.literal(tr("Stored Energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(stack)),
+            (getEnergy(stack) / energyStorage * 100).toInt())))
+        list.add(Component.literal(tr("State:") + " " + if (getLightState(stack) != 0) tr("On") else tr("Off")))
     }
+
 
     /*
 	@Override
@@ -112,52 +121,34 @@ class ElectricalLampItem(name: String, var lightMin: Int, var rangeMin: Int, dis
 	}
 */
     override fun getEnergy(stack: ItemStack): Double {
-        return getNbt(stack).getDouble("energy")
+        return stack.getDouble("energy")
     }
 
     override fun setEnergy(stack: ItemStack, value: Double) {
-        getNbt(stack).setDouble("energy", value)
+        stack.putDouble("energy", value)
     }
 
     override fun getEnergyMax(stack: ItemStack): Double {
         return energyStorage
     }
 
+    override fun getTransferRate(stack: ItemStack): Double {
+        return chargePower
+    }
+
     override fun getChargePower(stack: ItemStack): Double {
         return chargePower
     }
 
-    override fun getDischagePower(stack: ItemStack): Double {
+    fun getDischagePower(stack: ItemStack): Double {
         return 0.0
     }
 
-    override fun getPriority(stack: ItemStack): Int {
+    fun getPriority(stack: ItemStack): Int {
         return 0
     }
 
-    override fun shouldUseRenderHelper(type: ItemRenderType?, item: ItemStack?, helper: ItemRendererHelper?): Boolean {
-        return if (type == ItemRenderType.INVENTORY) false else true
-    }
-
-    override fun handleRenderType(item: ItemStack?, type: ItemRenderType?): Boolean {
-        return true
-    }
-
-    override fun renderItem(type: ItemRenderType?, item: ItemStack?, vararg data: Any?) {
-        var drawlightstate = off
-        when (getLightState(item!!)) {
-            0 -> drawlightstate = off
-            1 -> drawlightstate = on
-            2 -> drawlightstate = boosted
-        }
-        UtilsClient.drawIcon(type!!, drawlightstate)
-        //UtilsClient.drawIcon(type, (getLight(item) != 0 && getLightState(item) != 0 ? on : off));
-        if (type == ItemRenderType.INVENTORY) {
-            UtilsClient.drawEnergyBare(type, (getEnergy(item) / getEnergyMax(item)).toFloat())
-        }
-    }
-
-    override fun electricalItemUpdate(stack: ItemStack, time: Double) {
+    fun electricalItemUpdate(stack: ItemStack, time: Double) {
         val energy = getEnergy(stack)
         val state = getLightState(stack)
         var power = 0.0
@@ -173,13 +164,20 @@ class ElectricalLampItem(name: String, var lightMin: Int, var rangeMin: Int, dis
 		}
     }
 
+    override fun inventoryTick(stack: ItemStack, level: Level, entity: Entity, slotId: Int, isSelected: Boolean) {
+        super.inventoryTick(stack, level, entity, slotId, isSelected)
+        if (!level.isClientSide) {
+            electricalItemUpdate(stack, 0.05)
+        }
+    }
+
     init {
         this.rangeMax = rangeMax + 1 //adding 1 is a hack. Since the value is locked at 1 anyway, I would rather not change a ton of code to make this work, and just double its range by adding 1 here
         this.chargePower = chargePower
         this.dischargeMin = dischargeMin
         this.dischargeMax = dischargeMax
         this.energyStorage = energyStorage
-        setDefaultIcon(name + "off")
+        //setDefaultIcon(name + "off")
         boosted = ResourceLocation("eln", "textures/items/" + name.replace(" ", "").lowercase() + "boosted.png")
         on = ResourceLocation("eln", "textures/items/" + name.replace(" ", "").lowercase() + "on.png")
         off = ResourceLocation("eln", "textures/items/" + name.replace(" ", "").lowercase() + "off.png")

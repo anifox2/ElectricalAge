@@ -1,75 +1,40 @@
-package mods.eln.sixnode.TreeResinCollector;
+package mods.eln.sixnode.treeresincollector;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.BlockGetter;
+import org.jetbrains.annotations.Nullable;
 
-public class TreeResinCollectorBlock extends BlockContainer {
+public class TreeResinCollectorBlock extends BaseEntityBlock {
 
-    public TreeResinCollectorBlock(int id) {
-        super(Material.wood);
-        setBlockName("TreeResinCollector");
+    public TreeResinCollectorBlock() {
+        super(Properties.of().mapColor(MapColor.WOOD).noOcclusion());
     }
 
     @Override
-    public boolean isOpaqueCube() {
-        return false;
-    }
-
-    /**
-     * Returns a bounding box from the pool of bounding boxes (this means this box can change after the pool has been
-     * cleared to be reused)
-     */
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World par1World, int par2, int par3, int par4) {
-        return null;
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
     }
 
     @Override
-    public TileEntity createNewTileEntity(World world, int a) {
-        return new TreeResinCollectorTileEntity();
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        return Shapes.empty();
     }
 
-    public boolean canPlaceBlockOnSide(World world, int x, int y, int z, int side) {
-        //trololol fait chier
-        /*Side sideCS = FMLCommonHandler.instance().getEffectiveSide();
-		if (sideCS == Side.CLIENT) return true;
-    	Direction direction = Direction.fromIntMinecraftSide(side);
-    	if (direction == Direction.YN || direction == Direction.YP) return false;
-    	Coordonate coord = new Coordonate(x, y, z, world);
-    	int blockId = direction.getInverse().getBlockId(coord);
-
-    	Block block = Block.blocksList[blockID];
-    	if (blockId == Block.wood.blockID) return true;
-    	*/
-        return true;
-    }
-
+    @Nullable
     @Override
-    public int onBlockPlaced(World world, int x, int y, int z, int side, float par6, float par7, float par8, int par9) {
-        //	world.setBlockMetadataWithNotify(x, y, z, side, 0);
-        //	((TreeResinCollectorTileEntity)world.getBlockTileEntity(x, y, z)).setWoodDirection(Direction.fromIntMinecraftSide(side));
-        //return super.onBlockPlaced(world, x, y, z, side, par6, par7, par8,
-        //		par9);
-        return side;
-    }
-
-    @Override
-    public boolean onBlockActivated(World par1World, int x, int y, int z, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
-        return ((TreeResinCollectorTileEntity) par1World.getTileEntity(x, y, z)).onBlockActivated();
-    }
-
-    @Override
-    public void onNeighborBlockChange(World world, int x, int y, int z, Block b) {
-        super.onNeighborBlockChange(world, x, y, z, b);
-        if (!canPlaceBlockOnSide(world, x, y, z, world.getBlockMetadata(x, y, z))) {
-            //Utils.println("WOOOOOOD down");
-            dropBlockAsItem(world, x, y, z, new ItemStack(this));
-            world.setBlockToAir(x, y, z);
-        }
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TreeResinCollectorTileEntity(pos, state);
     }
 }

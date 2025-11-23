@@ -6,9 +6,9 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -82,23 +82,23 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
         //GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         //Glass (reflections)
-        UtilsClient.enableBlend();
+        mods.eln.misc.UtilsClient.INSTANCE.enableBlend();
         obj.bindTexture("Reflection.png");
-        float rotYaw = Minecraft.getMinecraft().thePlayer.rotationYaw / 360.f;
-        float rotPitch = Minecraft.getMinecraft().thePlayer.rotationPitch / 180.f;
-        float pos = (((float) Minecraft.getMinecraft().thePlayer.posX) - ((float) (objPosMX * 2)) + ((float) Minecraft.getMinecraft().thePlayer.posZ) - ((float) (objPosMZ * 2))) / 24.f;
+        float rotYaw = Minecraft.getInstance().player.getYRot() / 360.f;
+        float rotPitch = Minecraft.getInstance().player.getXRot() / 180.f;
+        float pos = (((float) Minecraft.getInstance().player.getX()) - ((float) (objPosMX * 2)) + ((float) Minecraft.getInstance().player.getZ()) - ((float) (objPosMZ * 2))) / 24.f;
         GL11.glColor4f(1, 1, 1, reflc);
         reflection.draw(rotYaw + pos, rotPitch * 0.857f);
-        UtilsClient.disableBlend();
+        mods.eln.misc.UtilsClient.INSTANCE.disableBlend();
 
         //Plot
         if (log != null) {
-            UtilsClient.disableLight();
+            mods.eln.misc.UtilsClient.INSTANCE.disableLight();
             // GL11.glPushMatrix();
-            UtilsClient.ledOnOffColor(true);
+            mods.eln.misc.UtilsClient.ledOnOffColor(true);
             if (led != null) led.draw();
 
-            UtilsClient.glDefaultColor();
+            mods.eln.misc.UtilsClient.glDefaultColor();
 
             GL11.glTranslatef(tx, ty, tz);
             GL11.glRotatef(ra, rx, ry, rz);
@@ -106,9 +106,9 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
             GL11.glColor4f(cr, cg, cb, 1);
             log.draw(mx, my, textColor);
 
-            UtilsClient.glDefaultColor();
+            mods.eln.misc.UtilsClient.glDefaultColor();
 
-            UtilsClient.enableLight();
+            mods.eln.misc.UtilsClient.INSTANCE.enableLight();
         }
     }
 
@@ -124,39 +124,18 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            if (main != null) main.draw();
+    public void appendHoverText(ItemStack stack, @Nullable net.minecraft.world.level.Level level, List<net.minecraft.network.chat.Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
+        super.appendHoverText(stack, level, tooltip, flag);
+        String[] lines = tr("Measures the voltage of an\nelectrical signal and plots\nthe data in real time.").split("\n");
+        for (String line : lines) {
+            tooltip.add(net.minecraft.network.chat.Component.literal(line));
         }
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-        super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Measures the voltage of an\nelectrical signal and plots\nthe data in real time.").split("\n"));
-        list.add(tr("It can store up to 256 points."));
+        tooltip.add(net.minecraft.network.chat.Component.literal(tr("It can store up to 256 points.")));
     }
 
     @Nullable
     @Override
-    public LRDU getFrontFromPlace(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public LRDU getFrontFromPlace(@NotNull Direction side, @NotNull Player player) {
         LRDU front = super.getFrontFromPlace(side, player);
         if (onFloor) {
             return front.inverse();

@@ -1,6 +1,9 @@
 package mods.eln.node
 
-import net.minecraft.world.entity.player.ServerPlayer
+import net.minecraft.server.level.ServerPlayer
+import net.minecraftforge.event.TickEvent
+import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.minecraftforge.server.ServerLifecycleHooks
 
 class NodeServer {
     fun init() {
@@ -13,21 +16,21 @@ class NodeServer {
 
     var counter = 0
     @SubscribeEvent
-    fun tick(event: ServerTickEvent) {
+    fun tick(event: TickEvent.ServerTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
-        val server = FMLCommonHandler.instance().minecraftServerInstance
+        val server = ServerLifecycleHooks.getCurrentServer()
         if (server != null) {
             for (node in NodeManager.instance!!.nodeList) {
                 if (node.needPublish) {
                     node.publishToAllPlayer()
                 }
             }
-            for (obj in server.configurationManager.playerEntityList) {
+            for (obj in server.playerList.players) {
                 val player = obj as ServerPlayer?
                 var openContainerNode: NodeBase? = null
                 var container: INodeContainer? = null
-                if (player!!.openContainer != null && player.openContainer is INodeContainer) {
-                    container = player.openContainer as INodeContainer
+                if (player!!.containerMenu != null && player.containerMenu is INodeContainer) {
+                    container = player.containerMenu as INodeContainer
                     openContainerNode = container.node
                 }
                 for (node in NodeManager.instance!!.nodeList) {
@@ -41,6 +44,6 @@ class NodeServer {
     }
 
     init {
-        FMLCommonHandler.instance().bus().register(this)
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(this)
     }
 }

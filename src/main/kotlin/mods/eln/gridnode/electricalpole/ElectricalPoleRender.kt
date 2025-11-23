@@ -7,16 +7,16 @@ import mods.eln.misc.LRDUMask
 import mods.eln.misc.SlewLimiter
 import mods.eln.misc.preserveMatrix
 import mods.eln.node.transparent.TransparentNodeDescriptor
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.sound.LoopedSound
-import net.minecraft.client.audio.ISound
-import net.minecraft.util.Vec3
+import net.minecraft.client.resources.sounds.SoundInstance
+import net.minecraft.world.phys.Vec3
 import org.lwjgl.opengl.GL11
 
 import java.io.DataInputStream
 import java.io.IOException
 
-class ElectricalPoleRender(entity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) : GridRender(entity, descriptor) {
+class ElectricalPoleRender(entity: TransparentNodeBlockEntity, descriptor: TransparentNodeDescriptor) : GridRender(entity, descriptor) {
 
     internal var cableRenderType: CableRenderType? = null
     internal var eConn = LRDUMask()
@@ -28,7 +28,7 @@ class ElectricalPoleRender(entity: TransparentNodeEntity, descriptor: Transparen
         this.descriptor = descriptor as ElectricalPoleDescriptor
 
         if (this.descriptor.includeTransformer) {
-            addLoopedSound(object : LoopedSound("eln:Transformer", coordinate(), ISound.AttenuationType.LINEAR) {
+            addLoopedSound(object : LoopedSound("eln:Transformer", coordinate(), SoundInstance.Attenuation.LINEAR) {
                 override fun getVolume(): Float {
                     if (load.position > this@ElectricalPoleRender.descriptor.minimalLoadToHum)
                         return 0.05f * (load.position - this@ElectricalPoleRender.descriptor.minimalLoadToHum) / (1 - this@ElectricalPoleRender.descriptor.minimalLoadToHum)
@@ -40,8 +40,8 @@ class ElectricalPoleRender(entity: TransparentNodeEntity, descriptor: Transparen
     }
 
     override fun draw() {
-        super.draw()
-        cableRenderType = drawCable(front!!.down(), Eln.instance.stdCableRender3200V, eConn, cableRenderType)
+        
+        cableRenderType = drawCable(front!!.down(), Eln.instance!!.stdCableRender3200V, eConn, cableRenderType)
     }
 
     override fun networkUnserialize(stream: DataInputStream) {

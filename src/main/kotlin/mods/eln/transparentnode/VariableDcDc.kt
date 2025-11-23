@@ -14,6 +14,7 @@ import mods.eln.i18n.I18N.tr
 import mods.eln.item.*
 import mods.eln.misc.*
 import mods.eln.node.*
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.*
 import mods.eln.sim.*
 import mods.eln.sim.mna.component.*
@@ -21,7 +22,7 @@ import mods.eln.sim.mna.process.*
 import mods.eln.sim.nbt.*
 import mods.eln.sim.process.destruct.*
 import mods.eln.sound.*
-import mods.eln.cable.ElectricalCableDescriptor
+import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import mods.eln.item.ConfigCopyToolDescriptor
 import mods.eln.item.FerromagneticCoreDescriptor
 import net.minecraft.client.resources.sounds.SoundInstance
@@ -379,7 +380,7 @@ class VariableDcDcProcess(val element: VariableDcDcElement): IProcess {
     }
 }
 
-class VariableDcDcRender(tileEntity: TransparentNodeEntity, val descriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, descriptor) {
+class VariableDcDcRender(tileEntity: TransparentNodeBlockEntity, val descriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, descriptor) {
     val coordinate = Coordinate(tileEntity)
 
     override val inventory = TransparentNodeElementInventory(4, 64, this)
@@ -423,7 +424,7 @@ class VariableDcDcRender(tileEntity: TransparentNodeEntity, val descriptor: Tran
         GL11.glPopMatrix()
         cableRenderType = drawCable(front!!.down(), priRender, priConn, cableRenderType)
         cableRenderType = drawCable(front!!.down(), secRender, secConn, cableRenderType)
-        cableRenderType = drawCable(front!!.down(), Eln.instance.stdCableRenderSignal, controlConn, cableRenderType)
+        cableRenderType = drawCable(front!!.down(), Eln.instance!!.stdCableRenderSignal, controlConn, cableRenderType)
     }
 
     override fun networkUnserialize(stream: DataInputStream) {

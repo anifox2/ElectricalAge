@@ -16,7 +16,7 @@ import mods.eln.node.published
 import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.sim.IProcess
 import mods.eln.sim.nbt.NbtElectricalGateInput
 import net.minecraft.world.entity.player.Player
@@ -27,6 +27,8 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import kotlin.math.cos
 import kotlin.math.pow
+
+import net.minecraft.network.chat.Component
 
 class RadialMotorDescriptor(baseName: String, obj: Obj3D) :
     SimpleShaftDescriptor(baseName, RadialMotorElement::class, RadialMotorRender::class, EntityMetaTag.Fluid) {
@@ -71,19 +73,19 @@ class RadialMotorDescriptor(baseName: String, obj: Obj3D) :
     override val obj: Obj3D = obj
 
     override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
-        list.add(tr("Converts %1$ into mechanical energy.",fluidDescription))
-        list.add(tr("Nominal usage ->"))
-        list.add("  "+ tr("%1$ input: %2$ mB/s",fluidDescription.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },fluidConsumption))
+        list.add(Component.literal(tr("Converts %1$ into mechanical energy.",fluidDescription)))
+        list.add(Component.literal(tr("Nominal usage ->")))
+        list.add(net.minecraft.network.chat.Component.literal("  "+ tr("%1$ input: %2$ mB/s",fluidDescription.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },fluidConsumption)))
         if (power.isEmpty()) {
-            list.add("  "+ tr("No valid fluids for this turbine!"))
+            list.add(net.minecraft.network.chat.Component.literal("  "+ tr("No valid fluids for this turbine!")))
         } else if (power.size == 1) {
-            list.add(Utils.plotPower(tr("  Power out: "),power[0]))
+            list.add(net.minecraft.network.chat.Component.literal(Utils.plotPower(tr("  Power out: "),power[0])))
 
         } else {
-            list.add("  "+ tr("Power out: %1$- %2$",Utils.plotPower(minFluidPower  * GAS_GUZZLER_CONSTANT),Utils.plotPower(maxFluidPower * GAS_GUZZLER_CONSTANT)))
+            list.add(net.minecraft.network.chat.Component.literal("  "+ tr("Power out: %1$- %2$",Utils.plotPower(minFluidPower  * GAS_GUZZLER_CONSTANT),Utils.plotPower(maxFluidPower * GAS_GUZZLER_CONSTANT))))
         }
-        list.add(Utils.plotRads(tr("  Optimal rads: "), optimalRads))
-        list.add(Utils.plotRads(tr("Max rads:  "),absoluteMaximumShaftSpeed))
+        list.add(net.minecraft.network.chat.Component.literal(Utils.plotRads(tr("  Optimal rads: "), optimalRads)))
+        list.add(net.minecraft.network.chat.Component.literal(Utils.plotRads(tr("Max rads:  "),absoluteMaximumShaftSpeed)))
     }
 }
 
@@ -122,7 +124,7 @@ class RadialMotorElement(node: TransparentNode, transparentNodeDescriptor: Trans
             rc.step(time.toFloat())
             fluidRate = rc.get()
 
-            val power = fluidRate * tank.heatEnergyPerMilliBucket * efficiency
+            val power = fluidRate * FuelRegistry.heatEnergyPerMilliBucket(tank.tank.fluid.fluid) * efficiency
             shaft.energy += power * time.toFloat()
 
             volume = if (fluidRate > 0.25) {
@@ -191,8 +193,8 @@ class RadialMotorElement(node: TransparentNode, transparentNodeDescriptor: Trans
 }
 
 // TODO: Particles flying out the exhaust pipe
-class RadialMotorRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
-    override val cableRender = Eln.instance.stdCableRenderSignal
+class RadialMotorRender(entity: TransparentNodeBlockEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
+    override val cableRender = Eln.instance!!.stdCableRenderSignal
 
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)

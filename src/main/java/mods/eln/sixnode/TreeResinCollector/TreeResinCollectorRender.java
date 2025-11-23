@@ -1,4 +1,4 @@
-package mods.eln.sixnode.TreeResinCollector;
+package mods.eln.sixnode.treeresincollector;
 
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;

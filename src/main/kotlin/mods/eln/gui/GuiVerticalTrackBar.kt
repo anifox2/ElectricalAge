@@ -4,6 +4,7 @@ import net.minecraft.client.gui.GuiGraphics
 
 open class GuiVerticalTrackBar(val x: Int, val y: Int, val width: Int, val height: Int, val helper: GuiHelper? = null) {
     open var value: Float = 0.0f
+    var visible: Boolean = true
     
     open fun draw(guiGraphics: GuiGraphics, x: Int, y: Int) {
         // Stub

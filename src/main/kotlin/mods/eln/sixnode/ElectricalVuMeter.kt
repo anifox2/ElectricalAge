@@ -122,14 +122,14 @@ class ElectricalVuMeterDescriptor(name: String, objName: String, var onOffOnly: 
                 objType = ObjType.Rot
                 vumeter = obj!!.getPart("Vumeter")
                 pointer = obj!!.getPart("Pointer")
-                pinDistance = floatArrayOf(Utils.getSixNodePinDistance(vumeter!!).toFloat())
+                pinDistance = Utils.getSixNodePinDistance(vumeter!!)
             }
             if (obj!!.getString("type") == "LedOnOff") {
                 objType = ObjType.LedOnOff
                 main = obj!!.getPart("main")
                 halo = obj!!.getPart("halo")
                 led = obj!!.getPart("Led")
-                pinDistance = floatArrayOf(Utils.getSixNodePinDistance(main!!).toFloat())
+                pinDistance = Utils.getSixNodePinDistance(main!!)
             }
         }
         isRGB = super.name == "Multicolor LED vuMeter"
@@ -216,7 +216,7 @@ class ElectricalVuMeterRender(tileEntity: SixNodeEntity, side: Direction, descri
         if (side == Direction.YP || side == Direction.YN) {
             front!!.right().glRotateOnX()
         }
-        descriptor.draw(if (descriptor.onOffOnly) interpolator.target else interpolator.get(), tileEntity)
+        descriptor.draw(if (descriptor.onOffOnly) interpolator.target else interpolator.get(), blockEntity)
     }
 
     override fun refresh(deltaT: Float) {
@@ -246,7 +246,7 @@ class ElectricalVuMeterRender(tileEntity: SixNodeEntity, side: Direction, descri
     }
 
     override fun getCableRender(lrdu: LRDU): CableRenderDescriptor? {
-        return Eln.instance.signalCableDescriptor.render
+        return Eln.instance!!.signalCableDescriptor?.render
     }
 }
 

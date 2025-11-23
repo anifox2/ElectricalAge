@@ -121,8 +121,10 @@ open class ShaftNetwork() : INBTTReady {
         some point, consider serializing network connectivity properly.
          */
 
+        /*
         val loadMerge = Loader.instance().loaderState == LoaderState.SERVER_ABOUT_TO_START
-        // val loadMerge = false
+        */
+        val loadMerge = false
         // Utils.println("SN.mS: state " + Loader.instance().loaderState.name)
 
         // Utils.println(String.format("SN.mS: Merging %s r=%f e=%f, %s r=%f e=%f, loading=%s", this, rads, energy, other, other.rads, other.energy, loadMerge))
@@ -277,7 +279,7 @@ open class ShaftNetwork() : INBTTReady {
             val to = NodeManager.instance!!.getTransparentNodeFromCoordinate(c)
             if (to is ShaftElement) {
                 for (dir2 in to.shaftConnectivity) {
-                    if (dir2.inverse == dir) {
+                    if (dir2.inverse() == dir) {
                         ret.add(ShaftNeighbour(
                             ShaftPart(from, dir),
                             from.getShaft(dir),
@@ -300,7 +302,7 @@ open class ShaftNetwork() : INBTTReady {
     }
 
     override fun writeToNBT(nbt: CompoundTag, str: String) {
-        nbt.setFloat(str + "rads", rads.toFloat())
+        nbt.putFloat(str + "rads", rads.toFloat())
         // Utils.println(String.format("SN.wTN: save %s r=%f", this, rads))
     }
 

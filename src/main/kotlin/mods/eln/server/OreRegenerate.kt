@@ -27,7 +27,7 @@ class OreRegenerate {
         for (idx in 0..0) {
             if (!jobs.isEmpty()) {
                 val j = jobs.pollLast()
-                if (!Eln.saveConfig.reGenOre && !Eln.instance.forceOreRegen) return
+                if (!Eln.saveConfig.reGenOre && !Eln.instance!!.forceOreRegen) return
                 
                 val server = ServerLifecycleHooks.getCurrentServer()
                 val level = server?.getLevel(Utils.getLevelKey(j.worldId)) ?: return
@@ -46,7 +46,7 @@ class OreRegenerate {
                             // chunk.getBlockState(pos) is available.
                             // We need global pos.
                             val pos = BlockPos(j.x * 16 + x, y, j.z * 16 + z)
-                            if (chunk.getBlockState(pos).block === Eln.instance.oreBlock) {
+                            if (chunk.getBlockState(pos).block === Eln.oreBlock) {
                                 return
                             }
                             x += 2
@@ -58,7 +58,7 @@ class OreRegenerate {
                 Utils.println("Regenerated! " + jobs.size)
                 // TODO: Fix ore generation logic
                 /*
-                for (d in Eln.instance.oreItem?.descriptors ?: emptyList()) {
+                for (d in Eln.instance!!.oreItem?.descriptors ?: emptyList()) {
                     d?.generate(level.random, j.x, j.z, level, null, null)
                 }
                 */

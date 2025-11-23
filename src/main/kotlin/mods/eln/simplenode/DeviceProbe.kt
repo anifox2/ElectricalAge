@@ -2,6 +2,7 @@ package mods.eln.simplenode
 
 import mods.eln.gui.GuiButtonEln
 import mods.eln.gui.GuiHelper
+import mods.eln.gui.GuiHelperContainer
 import mods.eln.gui.ScreenEln
 import mods.eln.gui.GuiTextFieldEln
 import mods.eln.misc.Direction
@@ -133,7 +134,7 @@ data class ServerPinInformation(
     var portMode: PortMode
     ): INBTTReady {
 
-    override fun readFromNBT(nbt: CompoundTag, str: String) {
+    override fun writeToNBT(nbt: CompoundTag, str: String) {
         electricalLoadPin.writeToNBT(nbt, str)
         electricalProcess.writeToNBT(nbt, str)
         if (arduinoPin != null)
@@ -142,7 +143,7 @@ data class ServerPinInformation(
         nbt.putInt("${str}portMode", portMode.id)
     }
 
-    override fun writeToNBT(nbt: CompoundTag, str: String) {
+    override fun readFromNBT(nbt: CompoundTag, str: String) {
         electricalLoadPin.readFromNBT(nbt, str)
         electricalProcess.readFromNBT(nbt, str)
         arduinoPin = if (nbt.contains("${str}arduinoPin")) {
@@ -210,7 +211,7 @@ fun intToPortMode(int: Int): PortMode {
     return PortMode.values().first { it.id == int}
 }
 
-class DeviceProbeEntity(pos: BlockPos, state: BlockState) : SimpleNodeEntity("ElnDeviceProbe", pos, state) {
+class DeviceProbeEntity(pos: BlockPos, state: BlockState) : SimpleNodeEntity(mods.eln.init.Registration.DEVICE_PROBE_BLOCK_ENTITY.get(), "ElnDeviceProbe", pos, state) {
 
     val pinInformation = mutableListOf<ClientPinInformation>()
 
@@ -251,7 +252,7 @@ class DeviceProbeGui(var render: DeviceProbeEntity): ScreenEln() {
         pin.portModeButton = newGuiButton(x + 2 + pinWidth + 2, y + 2 + 20 + 2, buttonWidth, pin.portMode.name.replace("_", " "))
         pin.arduinoPinField = newGuiTextField(x + 2, y + 16, pinWidth)
         pin.arduinoPinField!!.text = if (pin.arduinoPin == null) "" else pin.arduinoPin.toString()
-        helper.drawRect(x, y, x + 2 + pinWidth + 2 + buttonWidth + 2, 44, 255)
+        helper!!.drawRect(x, y, x + 2 + pinWidth + 2 + buttonWidth + 2, 44, 255)
     }
 
     override fun initGui() {

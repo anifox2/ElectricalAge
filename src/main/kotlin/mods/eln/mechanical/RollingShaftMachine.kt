@@ -8,9 +8,10 @@ import mods.eln.gui.SlotWithSkinAndComment
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.misc.Direction.Companion.fromIntMinecraftSide
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.*
 import mods.eln.sim.StackMachineProcess
-import net.minecraft.client.gui.Screen
+import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.Container
@@ -33,9 +34,9 @@ class RollingShaftMachineDescriptor (name: String, override val obj: Obj3D) :
         preserveMatrix {
             val bb = reverseRotating[0].boundingBox()
             val centre = bb.centre()
-            val ox = centre.xCoord
-            val oy = centre.yCoord
-            val oz = centre.zCoord
+            val ox = centre.x
+            val oy = centre.y
+            val oz = centre.z
             GL11.glTranslated(ox, oy, oz)
             GL11.glRotatef(((-angle * 360) / 2.0 / Math.PI).toFloat(), 0f, 0f, 1f)
             GL11.glTranslated(-ox, -oy, -oz)
@@ -91,14 +92,14 @@ class RollingShaftMachineElement(node: TransparentNode, desc: TransparentNodeDes
     }
 
     private val operationalProcess = StackMachineProcess(
-        inv, 0, 1, 1, Eln.instance.plateMachineRecipes, energyProcess, energyConsumer)
+        inv, 0, 1, 1, Eln.instance!!.plateMachineRecipes, energyProcess, energyConsumer)
 
     init {
         slowProcessList.add(operationalProcess)
     }
 }
 
-class RollingShaftMachineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {
+class RollingShaftMachineRender(entity: TransparentNodeBlockEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {
     val desc = desc as RollingShaftMachineDescriptor
     // change size to 4 when adding roller slots
     val inv = RollingShaftMachineInventory(2, 64, this)
@@ -114,14 +115,18 @@ const val cellOffset = 20
 class RollingShaftMachineContainer(player: Player, inv: Container) : BasicContainer(
     player, inv, arrayOf(
         SlotWithSkinAndComment(inv, 0, 8 + cellOffset, 12, SlotSkin.medium, arrayOf("Input Slot")),
-        SlotWithSkinAndComment(inv, 1, 8 + cellOffset, 12 + cellOffset * 2, SlotSkin.big, arrayOf("Output Slot"))//,
+        SlotWithSkinAndComment(inv, 1, 8 + cellOffset, 12 + cellOffset * 2, SlotSkin.large, arrayOf("Output Slot"))//,
         //SlotWithSkinAndComment(inv, 2, 8, 12 + cellOffset, SlotSkin.none, arrayOf("Roller Slot")),
         //SlotWithSkinAndComment(inv, 3, 8 + cellOffset * 2, 12 + cellOffset, SlotSkin.none, arrayOf("Roller Slot"))
     )
 )
 
-class RollingShaftMachineGui(player: Player, inv: Container, val render: RollingShaftMachineRender) : GuiContainerEln(RollingShaftMachineContainer(player, inv)) {
+class RollingShaftMachineGui(player: Player, inv: Container, val render: RollingShaftMachineRender) : GuiContainerEln<RollingShaftMachineContainer>(RollingShaftMachineContainer(player, inv), player.inventory, net.minecraft.network.chat.Component.literal("Rolling Shaft Machine")) {
     override fun newHelper() = HelperStdContainer(this)
+
+    override fun renderBg(guiGraphics: net.minecraft.client.gui.GuiGraphics, partialTick: Float, mouseX: Int, mouseY: Int) {
+        helper!!.drawBackground(guiGraphics, 176, 166)
+    }
 }
 
 class RollingShaftMachineInventory: TransparentNodeElementInventory {
@@ -133,22 +138,23 @@ class RollingShaftMachineInventory: TransparentNodeElementInventory {
 
     constructor(size: Int, stackLimit: Int, render: TransparentNodeElementRender?) : super(size, stackLimit, render)
 
-    override fun getAccessibleSlotsFromSide(side: Int): IntArray {
-        return if (transparentNodeElement == null) IntArray(0) else when (fromIntMinecraftSide(side)) {
+    override fun getSlotsForFace(side: net.minecraft.core.Direction): IntArray {
+        return if (transparentNodeElement == null) IntArray(0) else when (fromIntMinecraftSide(side.ordinal)) {
             Direction.YP -> intArrayOf(0)
             else -> intArrayOf(1)
         }
     }
 
-    override fun canInsertItem(slot: Int, stack: ItemStack?, side: Int): Boolean {
-        return when (fromIntMinecraftSide(side)) {
+    override fun canPlaceItemThroughFace(slot: Int, stack: ItemStack, side: net.minecraft.core.Direction?): Boolean {
+        if (side == null) return false
+        return when (fromIntMinecraftSide(side.ordinal)) {
             Direction.YP -> true
             else -> false
         }
     }
 
-    override fun canExtractItem(slot: Int, stack: ItemStack?, side: Int): Boolean {
-        return when (fromIntMinecraftSide(side)) {
+    override fun canTakeItemThroughFace(slot: Int, stack: ItemStack, side: net.minecraft.core.Direction): Boolean {
+        return when (fromIntMinecraftSide(side.ordinal)) {
             Direction.YP -> false
             else -> true
         }

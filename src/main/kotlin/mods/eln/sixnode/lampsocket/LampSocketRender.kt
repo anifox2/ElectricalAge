@@ -26,18 +26,26 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, descriptor: S
     var grounded = true
     var poweredByLampSupply = false
 
+    @JvmField
     var pertuVy = 0f
+    @JvmField
     var pertuPy = 0f
+    @JvmField
     var pertuVz = 0f
+    @JvmField
     var pertuPz = 0f
     var weatherAlphaZ = 0f
     var weatherAlphaY = 0f
 
     var channel: String? = null
+    @JvmField
     var lampDescriptor: LampDescriptor? = null
+    @JvmField
     var alphaZ = 0f
+    @JvmField
     var light: Byte = 0
     var oldLight: Byte = -1
+    @JvmField
     var paintColor = 15
 
     var isConnectedToLampSupply = false
@@ -49,7 +57,7 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, descriptor: S
     }
 
     override fun draw() {
-        super.draw() //Colored cable only
+         //Colored cable only
 
         GL11.glRotatef(descriptor.initialRotateDeg, 1f, 0f, 0f)
         descriptor.render.draw(this)

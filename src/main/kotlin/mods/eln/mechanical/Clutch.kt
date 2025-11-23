@@ -12,6 +12,7 @@ import mods.eln.gui.ISlotSkin
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.*
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
@@ -21,7 +22,7 @@ import mods.eln.sim.process.destruct.DelayedDestruction
 import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sound.LoopedSound
 import mods.eln.sound.SoundCommand
-import net.minecraft.client.gui.Screen
+import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.Container
 import net.minecraft.world.item.ItemStack
@@ -29,8 +30,9 @@ import net.minecraft.nbt.CompoundTag
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import mods.eln.misc.UtilsClient.setGlColorFromDye
 
-class ClutchPlateItem(
+open class ClutchPlateItem(
     name: String,
     val maxEF: Float, val minEF: Float,
     val maxDTF: Float, val minDTF: Float,
@@ -39,15 +41,13 @@ class ClutchPlateItem(
     override fun getDefaultNBT() = CompoundTag()
 
     fun setWear(stack: ItemStack, wear: Double) {
-        if (!stack.hasTagCompound()) {
-            stack.tagCompound = getDefaultNBT()
-        }
-        stack.tagCompound.setDouble("wear", wear)
+        val tag = stack.orCreateTag
+        tag.putDouble("wear", wear)
     }
 
     fun getWear(stack: ItemStack): Double {
-        if (!stack.hasTagCompound()) return 0.0
-        return stack.tagCompound.getDouble("wear")
+        if (!stack.hasTag()) return 0.0
+        return stack.tag!!.getDouble("wear")
     }
 
     fun maxStaticEnergyF(@Suppress("UNUSED_PARAMETER") stack: ItemStack): IFunction =
@@ -363,8 +363,8 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
         super.writeToNBT(nbt)
         connectedNetworks.forEach {
             var shaftTag = CompoundTag()
-            it.value.writeToNBT(shaftTag, "shaft")
-            nbt.setTag("side" + it.key.toSideValue().toString(), shaftTag)
+            it.value.save(shaftTag, "shaft")
+            nbt.put("side" + it.key.toSideValue().toString(), shaftTag)
         }
     }
 
@@ -376,7 +376,7 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
             if(str.startsWith("side")) {
                 val shaftTag = nbt.getCompoundTag(str)
                 val net = ShaftNetwork()
-                net.readFromNBT(shaftTag, "shaft")
+                net.load(shaftTag, "shaft")
                 net.rebuildNetwork()
                 connectedNetworks.put(
                     Direction.fromInt(str.substring(4).toInt()),
@@ -392,7 +392,7 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
         connectedSides.writeToNBT(nbt, "sides")
         leftShaft.writeToNBT(nbt, "leftShaft")
         rightShaft.writeToNBT(nbt, "rightShaft")
-        nbt.setBoolean("slipping", slipping)
+        nbt.putBoolean("slipping", slipping)
     }
 
     override fun readFromNBT(nbt: CompoundTag) {
@@ -443,10 +443,10 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
     override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean = false
 }
 
-class ClutchRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
+class ClutchRender(entity: TransparentNodeBlockEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
     val desc = desc_ as ClutchDescriptor
     val connectedSides = DirectionSet()
-    override val cableRender = Eln.instance.stdCableRenderSignal
+    override val cableRender = Eln.instance!!.stdCableRenderSignal
     val inv = TransparentNodeElementInventory(2, 1, this)
     override val inventory = inv
 
@@ -490,7 +490,7 @@ class ClutchRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescript
             cableRender!!.bindCableTexture();
 
             for (lrdu in LRDU.values()) {
-                Utils.setGlColorFromDye(connectionType!!.otherdry[lrdu.toInt()])
+                UtilsClient.setGlColorFromDye(connectionType!!.otherdry[lrdu.toInt()])
                 if (!eConn.get(lrdu)) continue
                 mask.set(1.shl(lrdu.ordinal))
                 CableRender.drawCable(cableRender, mask, connectionType!!)
@@ -540,11 +540,14 @@ class ClutchRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescript
 
 class ClutchContainer(player: Player, inv: Container) : BasicContainer(
     player, inv, arrayOf(
-        GenericItemUsingDamageSlot(inv, 0, 176 / 2 - 16 / 2 - 17 + 4, 42 - 16 / 2, 1, ClutchPlateItem::class.java, ISlotSkin.SlotSkin.medium, arrayOf(tr("Clutch Plate"))),
-        GenericItemUsingDamageSlot(inv, 1, 176 / 2 - 16 / 2 + 17 + 4, 42 - 16 / 2, 1, ClutchPinItem::class.java, ISlotSkin.SlotSkin.medium, arrayOf(tr("Clutch Pin")))
+        GenericItemUsingDamageSlot(inv, 0, 176 / 2 - 16 / 2 - 17 + 4, 42 - 16 / 2, 1, arrayOf(ClutchPlateItem::class.java), ISlotSkin.SlotSkin.medium, arrayOf(tr("Clutch Plate"))),
+        GenericItemUsingDamageSlot(inv, 1, 176 / 2 - 16 / 2 + 17 + 4, 42 - 16 / 2, 1, arrayOf(ClutchPinItem::class.java), ISlotSkin.SlotSkin.medium, arrayOf(tr("Clutch Pin")))
     )
 )
 
-class ClutchGui(player: Player, inv: Container, val render: ClutchRender) : GuiContainerEln(ClutchContainer(player, inv)) {
+class ClutchGui(player: Player, inv: Container, val render: ClutchRender) : GuiContainerEln<ClutchContainer>(ClutchContainer(player, inv), player.inventory, net.minecraft.network.chat.Component.literal("Clutch")) {
     override fun newHelper() = HelperStdContainer(this)
+    override fun renderBg(guiGraphics: net.minecraft.client.gui.GuiGraphics, partialTick: Float, mouseX: Int, mouseY: Int) {
+        helper!!.drawBackground(guiGraphics, 176, 166)
+    }
 }

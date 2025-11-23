@@ -14,7 +14,7 @@ open class ElementFluidHandler(capacity: Int) : IFluidHandler, INBTTReady {
 
     fun setFilter(whitelist: Array<Fluid>) {
         this.whitelist = whitelist
-        tank.validator = { fluidStack ->
+        tank.setValidator { fluidStack ->
             whitelist.contains(fluidStack.fluid)
         }
     }
@@ -31,9 +31,9 @@ open class ElementFluidHandler(capacity: Int) : IFluidHandler, INBTTReady {
     }
 
     override fun getTanks() = tank.tanks
-    override fun getFluidInTank(tank: Int) = tank.getFluidInTank(tank)
-    override fun getTankCapacity(tank: Int) = tank.getTankCapacity(tank)
-    override fun isFluidValid(tank: Int, stack: FluidStack) = tank.isFluidValid(tank, stack)
+    override fun getFluidInTank(tank: Int) = this.tank.getFluidInTank(tank)
+    override fun getTankCapacity(tank: Int) = this.tank.getTankCapacity(tank)
+    override fun isFluidValid(tank: Int, stack: FluidStack) = this.tank.isFluidValid(tank, stack)
 
     override fun fill(resource: FluidStack, action: IFluidHandler.FluidAction): Int {
         if (resource.isEmpty) return 0

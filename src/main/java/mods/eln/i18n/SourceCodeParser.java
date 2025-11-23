@@ -72,7 +72,7 @@ class SourceCodeParser {
             final I18N.Type type = I18N.Type.valueOf(forgeMatcher.group(2));
             final String text = forgeMatcher.group(3);
             final TranslationItem textToTranslate = new TranslationItem(type.getPrefix() +
-                I18N.encodeLangKey(text, type.isWhitespacesInFileReplaced()) + "." + property, text);
+                I18N.encodeLangKey(text, type.getReplaceWhitespacesInFile()) + "." + property, text);
 
             System.out.println("  " + textToTranslate.getKey());
 

@@ -53,5 +53,5 @@ class ConduitNode: SimpleNode() {
     }
 }
 
-class ConduitEntity(pos: BlockPos, state: BlockState): SimpleNodeEntity(null!!, pos, state, ConduitNode.getNodeUuidStatic()) {
+class ConduitEntity(pos: BlockPos, state: BlockState): SimpleNodeEntity(null!!, ConduitNode.getNodeUuidStatic(), pos, state) {
 }

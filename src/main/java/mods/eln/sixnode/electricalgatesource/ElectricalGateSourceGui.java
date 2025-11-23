@@ -2,19 +2,21 @@ package mods.eln.sixnode.electricalgatesource;
 
 import mods.eln.Eln;
 import mods.eln.gui.GuiHelper;
-import mods.eln.gui.GuiScreenEln;
+import mods.eln.gui.ScreenEln;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.IGuiObject;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.client.gui.GuiGraphics;
+import mods.eln.gui.GuiHelperContainer;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class ElectricalGateSourceGui extends GuiScreenEln {
+public class ElectricalGateSourceGui extends ScreenEln {
 
     ElectricalGateSourceRender render;
     GuiVerticalTrackBar voltage;
 
-    public ElectricalGateSourceGui(EntityPlayer player, ElectricalGateSourceRender render) {
+    public ElectricalGateSourceGui(Player player, ElectricalGateSourceRender render) {
         this.render = render;
     }
 
@@ -44,14 +46,14 @@ public class ElectricalGateSourceGui extends GuiScreenEln {
     }
 
     @Override
-    protected void preDraw(float f, int x, int y) {
-        super.preDraw(f, x, y);
+    public void preDraw(GuiGraphics guiGraphics, float f, int x, int y) {
+        super.preDraw(guiGraphics, f, x, y);
         if (render.voltageSyncNew) syncVoltage();
         voltage.setComment(0, tr("Output at %1$%", (int)((voltage.getValue() / Eln.SVU) * 100)));
     }
 
     @Override
-    protected GuiHelper newHelper() {
-        return new GuiHelper(this, 12 + 20, 12 + 50 + 4);
+    public GuiHelperContainer newHelper() {
+        return new GuiHelperContainer(this, 12 + 20, 12 + 50 + 4);
     }
 }

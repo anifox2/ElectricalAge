@@ -18,8 +18,10 @@ import net.minecraft.world.item.ItemStack
 import org.lwjgl.opengl.GL11
 import java.util.Collections
 import mods.eln.i18n.I18N.tr
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
+// import net.minecraftforge.client.IItemRenderer.ItemRenderType
+import net.minecraft.world.level.Level
+import net.minecraft.world.item.TooltipFlag
+import net.minecraft.network.chat.Component
 
 class DiodeDescriptor(
     name: String,
@@ -27,8 +29,8 @@ class DiodeDescriptor(
     Imax: Double,
     var stdU: Double,
     var stdI: Double,
-    var thermal: ThermalLoadInitializer,
-    var cable: ElectricalCableDescriptor,
+    @JvmField var thermal: ThermalLoadInitializer,
+    @JvmField var cable: ElectricalCableDescriptor,
     obj: Obj3D
 ) : SixNodeDescriptor(name, DiodeElement::class.java, DiodeRender::class.java) {
 
@@ -53,6 +55,7 @@ class DiodeDescriptor(
         Data.addEnergy(newItemStack())
     }
 
+    /*
     override fun shouldUseRenderHelper(type: ItemRenderType, item: ItemStack, helper: ItemRendererHelper): Boolean {
         return type != ItemRenderType.INVENTORY
     }
@@ -75,6 +78,7 @@ class DiodeDescriptor(
             draw()
         }
     }
+    */
 
     fun applyTo(load: ThermalLoad) {
         thermal.applyTo(load)
@@ -88,9 +92,11 @@ class DiodeDescriptor(
         resistorSwitch.setResistance(stdU / stdI)
     }
 
-    override fun addInformation(itemStack: ItemStack, entityPlayer: Player, list: MutableList<String>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        Collections.addAll(list, *tr("Electrical current can only\nflow through the diode\nfrom anode to cathode").split("\n").toTypedArray())
+    override fun appendHoverText(stack: ItemStack, level: Level?, tooltip: MutableList<Component>, flag: TooltipFlag) {
+        super.appendHoverText(stack, level, tooltip, flag)
+        for (s in tr("Electrical current can only\nflow through the diode\nfrom anode to cathode").split("\n")) {
+            tooltip.add(Component.literal(s))
+        }
     }
 
     override fun addRealismContext(list: MutableList<String>): RealisticEnum {

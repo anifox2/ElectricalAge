@@ -12,7 +12,14 @@ open class GenericItemBlockUsingDamageDescriptor(name: String, iconName: String?
         this.damage = damage
     }
 
-    open fun getDefaultNBT(): CompoundTag {
+    override fun getDefaultNBT(): CompoundTag {
         return CompoundTag()
+    }
+
+    companion object {
+        @JvmStatic
+        fun getDescriptor(stack: net.minecraft.world.item.ItemStack): GenericItemBlockUsingDamageDescriptor? {
+            return GenericItemUsingDamageDescriptor.getDescriptor(stack) as? GenericItemBlockUsingDamageDescriptor
+        }
     }
 }

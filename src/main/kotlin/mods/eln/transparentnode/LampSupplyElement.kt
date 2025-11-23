@@ -9,9 +9,14 @@ import mods.eln.misc.Coordinate
 class LampSupplyElement(node: TransparentNode?, descriptor: TransparentNodeDescriptor) : TransparentNodeElement(node, descriptor) {
     var range = 0.0
     var powerLoad = NbtElectricalLoad("powerLoad")
+    var RpStack = 0.0
+    
+    fun addToRp(r: Double) {
+        RpStack += 1.0 / r
+    }
     
     val coordinate: Coordinate
-        get() = transparentNode!!.coordinate
+        get() = node!!.coordinate
 
     override fun initialize() {
     }

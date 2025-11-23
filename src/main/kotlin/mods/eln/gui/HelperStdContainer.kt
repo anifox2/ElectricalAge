@@ -1,3 +1,5 @@
 package mods.eln.gui
 
-class HelperStdContainer(screen: IGuiObject) : GuiHelperContainer(screen, 176, 166)
+import net.minecraft.client.gui.screens.Screen
+
+class HelperStdContainer(screen: Screen) : GuiHelperContainer(screen, 176, 166)

@@ -1,5 +1,8 @@
 package mods.eln.client
 
+import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.event.TickEvent
+import net.minecraftforge.eventbus.api.SubscribeEvent
 import java.util.*
 
 class UuidManager {
@@ -7,7 +10,7 @@ class UuidManager {
     internal val uuids = HashMap <IUuidEntity, ArrayList<Int>>()
 
     init {
-        FMLCommonHandler.instance().bus().register(this)
+        MinecraftForge.EVENT_BUS.register(this)
     }
 
     fun add(uuid: ArrayList<Int>, e: IUuidEntity) {
@@ -19,13 +22,13 @@ class UuidManager {
 
     @SubscribeEvent
     fun tick(event: TickEvent.ClientTickEvent) {
-        if (event.phase == Phase.END) return
+        if (event.phase == TickEvent.Phase.END) return
 
         val i = entities.iterator()
 
         while (i.hasNext()) {
             val p = i.next()
-            if (!p.value.isAlive) {
+            if (!p.value.isAlive()) {
                 uuids.remove(p.value)
                 i.remove()
             }

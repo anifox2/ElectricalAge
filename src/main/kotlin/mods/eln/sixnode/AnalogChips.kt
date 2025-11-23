@@ -169,10 +169,10 @@ open class AnalogChipRender(entity: SixNodeEntity, side: Direction, descriptor: 
     }
 
     override fun getCableRender(lrdu: LRDU): CableRenderDescriptor? = when (lrdu) {
-        front -> Eln.instance.signalCableDescriptor?.render
-        front!!.inverse() -> if (descriptor.function.inputCount >= 1) Eln.instance.signalCableDescriptor?.render else null
-        front!!.left() -> if (descriptor.function.inputCount >= 2) Eln.instance.signalCableDescriptor?.render else null
-        front!!.right() -> if (descriptor.function.inputCount >= 3) Eln.instance.signalCableDescriptor?.render else null
+        front -> Eln.instance!!.signalCableDescriptor?.render
+        front!!.inverse() -> if (descriptor.function.inputCount >= 1) Eln.instance!!.signalCableDescriptor?.render else null
+        front!!.left() -> if (descriptor.function.inputCount >= 2) Eln.instance!!.signalCableDescriptor?.render else null
+        front!!.right() -> if (descriptor.function.inputCount >= 3) Eln.instance!!.signalCableDescriptor?.render else null
         else -> null
     }
 }
@@ -368,7 +368,7 @@ class PIDRegulatorGui(val render: PIDRegulatorRender) : ScreenEln() {
         KdBar?.setComment(0, KdBar?.value.toString())
     }
 
-    fun guiObjectEvent(`object`: IGuiObject?) {
+    override fun guiObjectEvent(`object`: IGuiObject) {
         try {
             val bos = ByteArrayOutputStream()
             val stream = DataOutputStream(bos)
@@ -539,7 +539,7 @@ class AmplifierGui(val render: AmplifierRender) : ScreenEln() {
         gainTF = newGuiTextField(6, 6, 50)
         gainTF?.setComment(arrayOf(tr("Gain")))
         gainTF?.value = render.gain.toString()
-        gainTF?.setObserver { _, text ->
+        gainTF?.observer = GuiTextFieldEln.GuiTextFieldElnObserver { _, text ->
             try {
                 val bos = ByteArrayOutputStream()
                 val stream = DataOutputStream(bos)
@@ -692,7 +692,7 @@ class SummingUnitGui(val render: SummingUnitRender) : ScreenEln() {
         for (i in gainTFs.indices) {
             gainTFs[i] = newGuiTextField(6, 6 + 20 * i, 50)
             gainTFs[i]?.value = render.gains[i].toString()
-            gainTFs[i]?.setObserver { _, text ->
+            gainTFs[i]?.observer = GuiTextFieldEln.GuiTextFieldElnObserver { _, text ->
                 try {
                     val bos = ByteArrayOutputStream()
                     val stream = DataOutputStream(bos)
@@ -777,7 +777,7 @@ class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDe
         CUTOFF_FREQUENCY_CHANGED(1)
     }
 
-    private var cutOffFrequency = Eln.instance.electricalFrequency / 4.0
+    private var cutOffFrequency = Eln.instance!!.electricalFrequency / 4.0
         get() = (function as Filter).feedback / (2.0 * Math.PI)
         set(value) {
             field = value
@@ -825,7 +825,7 @@ class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDe
 
 class FilterRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
     AnalogChipRender(entity, side, descriptor) {
-    internal var cutOffFrequency = Synchronizable(Eln.instance.electricalFrequency.toFloat() / 4f)
+    internal var cutOffFrequency = Synchronizable(Eln.instance!!.electricalFrequency.toFloat() / 4f)
 
     override fun newGuiDraw(side: Direction, player: Player): Screen = FilterGui(this)
 
@@ -852,9 +852,9 @@ class FilterGui(private var render: FilterRender) : ScreenEln() {
         }
     }
 
-    fun guiObjectEvent(`object`: IGuiObject) {
+    override fun guiObjectEvent(`object`: IGuiObject) {
         // super.guiObjectEvent(`object`) // super takes Int, this takes IGuiObject
-        if (`object` === freq) {
+        if ((`object` as Any) == freq) {
             render.clientSetFloat(FilterElement.Event.CUTOFF_FREQUENCY_CHANGED.value.toInt(), freq!!.value)
         }
     }
@@ -865,7 +865,7 @@ class FilterGui(private var render: FilterRender) : ScreenEln() {
             freq?.value = render.cutOffFrequency.value
         }
         freq?.setComment(0, tr("Cut-off frequency %1$ Hz",
-            String.format("%1.3f", freq?.value ?: Eln.instance.electricalFrequency / 4f)))
+            String.format("%1.3f", freq?.value ?: Eln.instance!!.electricalFrequency / 4f)))
     }
 
     override fun newHelper(): GuiHelperContainer {

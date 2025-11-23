@@ -8,8 +8,8 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,61 +36,35 @@ public class TutorialSignElement extends SixNodeElement {
         if (baliseMap == null) {
             baliseMap = new HashMap<String, String>();
 
-		/*
-			try {
-				File fXmlFile = Utils.getMapFile("EA/tutorialSign.xml");
-				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-				DocumentBuilder dBuilder;
-				dBuilder = dbFactory.newDocumentBuilder();
-				Document doc = dBuilder.parse(fXmlFile);
-				//Node root = doc.getElementById("sign");
-				Node root = doc.getChildNodes().item(0);
-				NodeList nList = root.getChildNodes();
-				for (int idx = 0; idx < nList.getLength(); idx++){
-					Node n = nList.item(idx);
-					n.getNamespaceURI();
-				}
-				int i = 0;
-			} catch (Exception e) {
-			}
-*/
-            //optional, but recommended
-            //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
-            //doc.getDocumentElement().normalize();
+            String file = Utils.readMapFile("EA/tutorialSign.txt");
+            String ret;
+            if (file.contains("\r\n"))
+                ret = "\r\n";
+            else
+                ret = "\n";
 
-            try {
-                String file = Utils.readMapFile("EA/tutorialSign.txt");
-                String ret;
-                if (file.contains("\r\n"))
-                    ret = "\r\n";
-                else
-                    ret = "\n";
+            file = file.replaceAll("#" + ret, "#");
+            file = file.replaceAll(ret + "#", "#");
 
-                file = file.replaceAll("#" + ret, "#");
-                file = file.replaceAll(ret + "#", "#");
+            String[] split = file.split("#");
 
-                String[] split = file.split("#");
+            boolean first = true;
+            int counter = 0;
+            String baliseTag = "";
 
-                boolean first = true;
-                int counter = 0;
-                String baliseTag = "";
-
-                for (String str : split) {
-                    if (first) {
-                        first = false;
-                        continue;
-                    }
-                    if (counter == 0) {
-                        baliseTag = str;
-                    }
-                    if (counter == 1) {
-                        baliseMap.put(baliseTag, str);
-                    }
-
-                    counter = (counter + 1) & 1;
+            for (String str : split) {
+                if (first) {
+                    first = false;
+                    continue;
                 }
-            } catch (IOException e) {
-                //	e.printStackTrace();
+                if (counter == 0) {
+                    baliseTag = str;
+                }
+                if (counter == 1) {
+                    baliseMap.put(baliseTag, str);
+                }
+
+                counter = (counter + 1) & 1;
             }
         }
         String text = baliseMap.get(balise);
@@ -108,7 +82,7 @@ public class TutorialSignElement extends SixNodeElement {
     }
 
     @Override
-    public void readFromNBT(@NotNull NBTTagCompound nbt) {
+    public void readFromNBT(@NotNull CompoundTag nbt) {
         super.readFromNBT(nbt);
         setBalise(nbt.getString("baliseName"));
     }
@@ -131,9 +105,9 @@ public class TutorialSignElement extends SixNodeElement {
 
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.setString("baliseName", baliseName);
+        nbt.putString("baliseName", baliseName);
     }
 
     @Override
@@ -198,7 +172,7 @@ public class TutorialSignElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
         return false;
     }
 }

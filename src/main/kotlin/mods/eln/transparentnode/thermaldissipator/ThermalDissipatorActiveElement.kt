@@ -21,7 +21,8 @@ class ThermalDissipatorActiveElement(
     descriptor: TransparentNodeDescriptor
 ) : TransparentNodeElement(node, descriptor) {
 
-    val descriptor: ThermalDissipatorActiveDescriptor = descriptor as ThermalDissipatorActiveDescriptor
+    override val descriptor: ThermalDissipatorActiveDescriptor
+        get() = transparentNodeDescriptor as ThermalDissipatorActiveDescriptor
     private val thermalLoad = NbtThermalLoad("thermalLoad")
     private val positiveLoad = NbtElectricalLoad("positiveLoad")
     val powerResistor = Resistor(positiveLoad, null)
@@ -30,15 +31,12 @@ class ThermalDissipatorActiveElement(
     
     var lastPowerFactor = 0f
 
-    override fun initialize() {
-    }
-
     init {
         thermalLoadList.add(thermalLoad)
         electricalLoadList.add(positiveLoad)
         electricalComponentList.add(powerResistor)
         slowProcessList.add(slowProcess)
-        slowProcessList.add(NodePeriodicPublishProcess(node, 4.0, 2.0))
+        slowProcessList.add(NodePeriodicPublishProcess(node!!, 4.0, 2.0))
         slowProcessList.add(thermalWatchdog)
 
         thermalWatchdog
@@ -61,8 +59,8 @@ class ThermalDissipatorActiveElement(
         descriptor.applyTo(positiveLoad)
     }
 
-    override fun writeToPublishPacket(stream: DataOutputStream) {
-        super.writeToPublishPacket(stream)
+    override fun networkSerialize(stream: DataOutputStream) {
+        super.networkSerialize(stream)
         stream.writeFloat(lastPowerFactor)
     }
 

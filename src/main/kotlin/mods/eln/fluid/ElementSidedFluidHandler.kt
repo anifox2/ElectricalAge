@@ -1,181 +1,93 @@
 package mods.eln.fluid
 
 import mods.eln.misc.INBTTReady
+import net.minecraft.core.Direction
 import net.minecraft.nbt.CompoundTag
-import net.minecraftforge.common.util.ForgeDirection
-import net.minecraftforge.fluids.*
+import net.minecraftforge.fluids.FluidStack
+import net.minecraftforge.fluids.capability.IFluidHandler
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
+import net.minecraftforge.fluids.capability.templates.FluidTank
+import net.minecraft.world.level.material.Fluid
 
-open class ElementSidedFluidHandler: net.minecraftforge.fluids.capability.IFluidHandler, INBTTReady {
+open class ElementSidedFluidHandler : INBTTReady {
 
-    protected val tanks = mutableMapOf<ForgeDirection, TankData>()
+    protected val tanks = mutableMapOf<Direction, TankData>()
 
-    /**
-     * This method allows you to create tank references for each side of a block. You can use the same reference of tank
-     * to create a block that allows access from all sides, or just a tank per ForgeDirection for machinery.
-     *
-     * @param tankData a mutable map of TankData, accessed by the ForgeDirection.
-     */
-    constructor(tankData: Map<ForgeDirection, TankData>) {
-        for (entry in tankData) {
-            tanks[entry.key] = entry.value
-        }
+    data class TankData(val tank: FluidTank, val fluidWhitelist: MutableList<Fluid>)
+
+    constructor(tankData: Map<Direction, TankData>) {
+        tanks.putAll(tankData)
+        tanks.values.forEach { updateValidator(it) }
     }
 
-    /**
-     * This method makes a single tank that can be accessed from all sides. Commonly used in Eln.
-     * @param tankSizeMb size of the tank in mB (millibuckets)
-     */
     constructor(tankSizeMb: Int) {
         val tank = TankData(FluidTank(tankSizeMb), mutableListOf())
-        ForgeDirection.VALID_DIRECTIONS.forEach {
+        Direction.values().forEach {
             tanks[it] = tank
         }
+        updateValidator(tank)
     }
 
-    fun setFluidWhitelist(direction: ForgeDirection, fluidWhitelist: List<Fluid>) {
+    fun getHandler(side: Direction?): IFluidHandler? {
+        if (side == null) return null
+        return tanks[side]?.tank
+    }
+
+    fun setFluidWhitelist(direction: Direction, fluidWhitelist: List<Fluid>) {
         val tank = tanks[direction]
         if (tank != null) {
-            // Note: The tank reference may be used in more than one side; this affects the tank more so than the side
             tank.fluidWhitelist.clear()
             tank.fluidWhitelist.addAll(fluidWhitelist)
+            updateValidator(tank)
         }
     }
 
-    fun addFluidWhitelist(direction: ForgeDirection, fluidWhitelist: Fluid) {
+    fun addFluidWhitelist(direction: Direction, fluidWhitelist: Fluid) {
         val tank = tanks[direction]
-        tank?.fluidWhitelist?.add(fluidWhitelist)
-    }
-
-    fun getFluidType(direction: ForgeDirection): Fluid? {
-        return try {
-            tanks[direction]?.tank?.fluid?.getFluid()
-        } catch (e: Exception) {
-            null
+        if (tank != null) {
+            tank.fluidWhitelist.add(fluidWhitelist)
+            updateValidator(tank)
         }
     }
 
-    fun getCapacity(direction: ForgeDirection): Int {
-        return try {
-            val tank = tanks[direction]
-            return tank?.tank?.capacity?: 0
-        } catch (e: Exception) {
-            0
+    private fun updateValidator(tankData: TankData) {
+        tankData.tank.setValidator { stack ->
+            tankData.fluidWhitelist.isEmpty() || tankData.fluidWhitelist.contains(stack.fluid)
         }
     }
 
-    fun getFluidAmount(direction: ForgeDirection): Int {
-        return try {
-            val tank = tanks[direction]
-            return tank?.tank?.fluidAmount?: 0
-        } catch (e: Exception) {
-            0
-        }
+    fun getFluidType(direction: Direction): Fluid? {
+        return tanks[direction]?.tank?.fluid?.fluid
     }
 
-    override fun fill(from: ForgeDirection?, resource: FluidStack?, doFill: Boolean): Int {
-        if (from == null || resource == null) return 0
-        val tank = tanks[from] ?: return 0
-        return if (tank.tank.fluidAmount > 0 || tank.fluidWhitelist.isEmpty()) {
-            // The fluid type won't change (or there is no whitelist) so we don't need to worry about the whitelist check
-            tank.tank.fill(resource, doFill)
-        } else {
-            // We need to make sure the new fluid is meeting the whitelist
-            val resourceId = resource.fluidID
-            tank.fluidWhitelist.forEach {
-                if (it.id == resourceId) {
-                    return tank.tank.fill(resource, doFill)
-                }
-            }
-            return 0
-        }
+    fun getCapacity(direction: Direction): Int {
+        return tanks[direction]?.tank?.capacity ?: 0
     }
 
-    override fun canFill(from: ForgeDirection?, fluid: Fluid?): Boolean {
-        if (from == null || fluid == null) return false
-        val tank = tanks[from]?: return false
-        // Check if the fluid in there is the same fluid
-        if (tank.tank.fluidAmount > 0) return tank.tank.fluid.getFluid().id == fluid.id
-        return if (tank.fluidWhitelist.size > 0) {
-            // if the fluid whitelist has elements, check the list for a compatible fluid type
-            fluid.id in tank.fluidWhitelist.map { it.id }
-        } else {
-            // there's no fluid in the tank, nor a whitelist. Accept anything.
-            true
-        }
-    }
-
-    override fun getTankInfo(from: ForgeDirection?): Array<FluidTankInfo> {
-        if (from == null) return arrayOf()
-        val tank = tanks[from]?: return arrayOf()
-        return arrayOf(tank.tank.info)
-    }
-
-    override fun drain(from: ForgeDirection?, resource: FluidStack?, doDrain: Boolean): FluidStack? {
-        if (from == null || resource == null) return null
-        val tank = tanks[from]?: return null
-        return tank.tank.drain(resource.amount, doDrain)
-    }
-
-    override fun drain(from: ForgeDirection?, maxDrain: Int, doDrain: Boolean): FluidStack? {
-        if (from == null) return null
-        val tank = tanks[from]?: return null
-        return tank.tank.drain(maxDrain, doDrain)
-    }
-
-    @Suppress("ReplaceJavaStaticMethodWithKotlinAnalog")
-    fun fractionalDrain(from: ForgeDirection, demand: Double): Double {
-        val tank = tanks[from]?: return 0.0
-        val drain = Math.ceil(demand - tank.fractionalDemandMb)
-        val drained = drain(from, drain.toInt(), true)?.amount?.toDouble() ?: 0.0
-        val available = tank.fractionalDemandMb + drained
-        val actual = Math.min(demand, available)
-        tank.fractionalDemandMb = Math.max(0.0, available - demand)
-        return actual
-    }
-
-    override fun canDrain(from: ForgeDirection?, fluid: Fluid?): Boolean {
-        if (from == null || fluid == null) return false
-        val tank = tanks[from]?: return false
-        return tank.tank.fluid.getFluid().id == fluid.id
+    fun getFluidAmount(direction: Direction): Int {
+        return tanks[direction]?.tank?.fluidAmount ?: 0
     }
 
     override fun readFromNBT(nbt: CompoundTag, str: String) {
-        val tankList = mutableListOf<TankData>()
-        val numTanks = nbt.getInteger("${str}numTanks")
-        for (idx in 0 .. numTanks) {
-            val tank = TankData(FluidTank(0), mutableListOf())
-            tank.readFromNBT(nbt, "${str}tank$idx")
-            tankList.add(tank)
-        }
-        //println("numTanks: $numTanks")
-        //println("tankList $tankList")
-        tanks.clear()
-        ForgeDirection.VALID_DIRECTIONS.forEach {
-            val tankRef = nbt.getInteger("${str}${it.name}tankRef")
-            if (tankRef != -1 && numTanks != 0) {
-                //println("$it: $tankRef")
-                tanks[it] = tankList[tankRef]
+        if (nbt.contains(str)) {
+            val tag = nbt.getCompound(str)
+            val uniqueTanks = tanks.values.map { it.tank }.distinct()
+            uniqueTanks.forEachIndexed { index, tank ->
+                if (tag.contains("tank_$index")) {
+                    tank.readFromNBT(tag.getCompound("tank_$index"))
+                }
             }
         }
-        //println("tanks: $tanks")
     }
 
     override fun writeToNBT(nbt: CompoundTag, str: String) {
-        val tanksList = mutableListOf<TankData>()
-        tanks.forEach {
-            if (it.value !in tanksList) {
-                tanksList.add(it.value)
-            }
+        val tag = CompoundTag()
+        val uniqueTanks = tanks.values.map { it.tank }.distinct()
+        uniqueTanks.forEachIndexed { index, tank ->
+            val tankTag = CompoundTag()
+            tank.writeToNBT(tankTag)
+            tag.put("tank_$index", tankTag)
         }
-        nbt.setInteger("${str}numTanks", tanksList.size)
-        tanksList.forEachIndexed {
-            idx: Int, tank: TankData ->
-            tank.writeToNBT(nbt, "${str}tank$idx")
-        }
-        ForgeDirection.VALID_DIRECTIONS.forEach {
-            val tank = tanks[it]
-            val tankRef = tanksList.indexOf(tank)
-            nbt.setInteger("${str}${it.name}tankRef", tankRef)
-        }
+        nbt.put(str, tag)
     }
 }

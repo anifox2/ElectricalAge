@@ -107,7 +107,7 @@ class ElnCablePaceCommand: IConsoleCommand {
     override val name = "cablePace"
 
     override fun runCommand(ics: CommandSourceStack, args: List<String>) {
-        cprint(ics, "The cable pace is set to ${Eln.config.cablePowerFactor}")
+        cprint(ics, "The cable pace is set to ${Eln.cablePowerFactor}")
     }
 
     override fun getManPage(ics: CommandSourceStack, args: List<String>) {
@@ -269,7 +269,7 @@ class ElnLampsKillMonstersCommand: IConsoleCommand {
     override fun runCommand(ics: CommandSourceStack, args: List<String>) {
         if (args.size == 1) {
             val killMonstersAroundLamps = getArgBool(ics, args[0])?: return
-            Eln.config.killMonstersAroundLamps = killMonstersAroundLamps
+            Eln.killMonstersAroundLamps = killMonstersAroundLamps
             cprint(ics, "Avoid monsters spawning around lamps: ${FC.DARK_GREEN}${boolToStr(killMonstersAroundLamps)}", indent = 1)
             cprint(ics, "Warning: Command effective to this game instance only, when you close the game, this config will be reverted.", indent = 1)
         } else {

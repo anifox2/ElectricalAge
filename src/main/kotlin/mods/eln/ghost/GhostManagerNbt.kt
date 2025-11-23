@@ -2,16 +2,19 @@ package mods.eln.ghost
 
 import mods.eln.Eln
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.world.level.LevelSavedData
+import net.minecraft.world.level.saveddata.SavedData
 
-class GhostManagerNbt(par1Str: String?) : WorldSavedData(par1Str) {
+class GhostManagerNbt : SavedData() {
     override fun isDirty(): Boolean {
         return true
     }
 
-    override fun readFromNBT(nbt: CompoundTag) {
-        Eln.ghostManager.loadFromNBT(nbt)
+    fun load(nbt: CompoundTag) {
+        Eln.ghostManager!!.loadFromNBT(nbt)
     }
 
-    override fun writeToNBT(nbt: CompoundTag) {}
+    override fun save(nbt: CompoundTag): CompoundTag {
+        Eln.ghostManager!!.save(nbt)
+        return nbt
+    }
 }

@@ -2,7 +2,6 @@ package mods.eln.node
 
 import mods.eln.misc.Direction
 import mods.eln.misc.Direction.Companion.fromIntMinecraftSide
-import mods.eln.misc.Utils.isRemote
 import net.minecraft.core.BlockPos
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult

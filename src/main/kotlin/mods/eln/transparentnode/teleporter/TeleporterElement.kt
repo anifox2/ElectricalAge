@@ -18,7 +18,8 @@ class TeleporterElement(
     descriptor: TransparentNodeDescriptor
 ) : TransparentNodeElement(node, descriptor), ITeleporter {
 
-    val descriptor: TeleporterDescriptor = descriptor as TeleporterDescriptor
+    override val descriptor: TeleporterDescriptor
+        get() = transparentNodeDescriptor as TeleporterDescriptor
     private val powerLoad = NbtElectricalLoad("powerLoad")
     val powerResistor = Resistor(powerLoad, null)
     private val slowProcess = TeleporterSlowProcess(this)
@@ -27,14 +28,11 @@ class TeleporterElement(
         val teleporterList = ArrayList<ITeleporter>()
     }
 
-    override fun initialize() {
-    }
-
     init {
         electricalLoadList.add(powerLoad)
         electricalComponentList.add(powerResistor)
         slowProcessList.add(slowProcess)
-        slowProcessList.add(NodePeriodicPublishProcess(node, 2.0, 2.0))
+        slowProcessList.add(NodePeriodicPublishProcess(node!!, 2.0, 2.0))
     }
 
     override fun getElectricalLoad(side: Direction, lrdu: LRDU): ElectricalLoad? {
@@ -43,7 +41,7 @@ class TeleporterElement(
     }
 
     override fun getTeleportCoordonate(): Coordinate {
-        return node.coordinate
+        return node!!.coordinate
     }
 
     override fun getName(): String {
@@ -58,8 +56,8 @@ class TeleporterElement(
         // Update state
     }
 
-    override fun onBreakFromWorld() {
-        super.onBreakFromWorld()
+    fun onBreakFromWorld() {
+        //super.onBreakFromWorld()
         teleporterList.remove(this)
     }
 
@@ -69,7 +67,36 @@ class TeleporterElement(
 
     class TeleporterSlowProcess(val teleporter: TeleporterElement) : IProcess {
         override fun process(time: Double) {
-            // Teleportation logic
+            if (teleporter.node == null) return
+            val level = teleporter.node!!.coordinate.world() ?: return
+            val pos = teleporter.node!!.coordinate.toBlockPos()
+            
+            // Check for entities in the block space
+            val aabb = net.minecraft.world.phys.AABB(pos)
+            val entities = level.getEntitiesOfClass(net.minecraft.world.entity.Entity::class.java, aabb)
+            
+            if (entities.isNotEmpty()) {
+                val dest = findDestination(teleporter)
+                if (dest != null) {
+                    val destCoord = dest.getTeleportCoordonate()
+                    for (entity in entities) {
+                        if (!entity.isPassenger && !entity.isVehicle) {
+                            // TODO: Handle dimension change if needed
+                            if (destCoord.dimension == teleporter.node!!.coordinate.dimension) {
+                                entity.teleportTo(destCoord.x + 0.5, destCoord.y + 1.0, destCoord.z + 0.5)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        fun findDestination(source: TeleporterElement): ITeleporter? {
+            val myName = source.getName()
+            for (t in TeleporterElement.teleporterList) {
+                if (t !== source && t.getName() == myName) return t
+            }
+            return null
         }
     }
 }

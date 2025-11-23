@@ -7,6 +7,7 @@ import mods.eln.cable.CableRenderType
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.*
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
@@ -135,7 +136,7 @@ class NixieTubeElement(node: TransparentNode, _descriptor: TransparentNodeDescri
         if(lrdu != LRDU.Down) return null
         return when(side) {
             front -> dotsIn
-            front.inverse -> digitIn
+            front.inverse() -> digitIn
             else ->  blankIn
         }
     }
@@ -180,7 +181,7 @@ class NixieTubeElement(node: TransparentNode, _descriptor: TransparentNodeDescri
     }
 }
 
-class NixieTubeRender(entity: TransparentNodeEntity, _descriptor: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, _descriptor) {
+class NixieTubeRender(entity: TransparentNodeBlockEntity, _descriptor: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, _descriptor) {
     val descriptor = _descriptor as NixieTubeDescriptor
 
     var digit = 0
@@ -232,6 +233,6 @@ class NixieTubeRender(entity: TransparentNodeEntity, _descriptor: TransparentNod
     }
 
     override fun getCableRenderSide(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
-        return if (connection.get(lrdu)) { Eln.instance.stdCableRenderSignal } else { null }
+        return if (connection.get(lrdu)) { Eln.instance!!.stdCableRenderSignal } else { null }
     }
 }

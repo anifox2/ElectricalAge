@@ -8,8 +8,8 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -44,17 +44,8 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
-        if (!descriptor.onFloor) {
-            if (side.isY()) {
-                GL11.glPushMatrix();
-                front.glRotateOnX();
-                drawSignalPin(LRDU.Right, new float[]{0, 5.67f, 0, 0});
-                GL11.glPopMatrix();
-            } else {
-                drawSignalPin(front.inverse(), new float[]{6.37f, 6.37f, 5.67f, 6.12f});
-            }
-        }
-        descriptor.draw(log, side, front, this.getTileEntity().xCoord, this.getTileEntity().zCoord, color);
+        if (this.blockEntity == null) return;
+        descriptor.draw(this.log, side, front, this.blockEntity.getBlockPos().getX(), this.blockEntity.getBlockPos().getZ(), color);
     }
 
 	/*
@@ -102,7 +93,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
 
     @Nullable
     @Override
-    public GuiScreen newGuiDraw(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public Screen newGuiDraw(@NotNull Direction side, @NotNull Player player) {
         return new ElectricalDataLoggerGui(player, inventory, this);
     }
 }

@@ -8,7 +8,7 @@ import mods.eln.node.NodeBase
 import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoadInitializer
@@ -82,10 +82,10 @@ class GeneratorDescriptor(
     }
 }
 
-class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
+class GeneratorRender(entity: TransparentNodeBlockEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
     val entity = entity
 
-    override val cableRender = Eln.instance.stdCableRender3200V
+    override val cableRender = Eln.instance!!.stdCableRender3200V
     val desc = desc_ as GeneratorDescriptor
 
     val ledColors: Array<Color> = arrayOf(
@@ -137,7 +137,7 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
     }
 
     override fun getCableRenderSide(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
-        if (lrdu == LRDU.Down && side == front) return Eln.instance.stdCableRender3200V
+        if (lrdu == LRDU.Down && side == front) return Eln.instance!!.stdCableRender3200V
         return null
     }
 
@@ -176,7 +176,7 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         desc.cable.applyTo(positiveLoad)
 
         desc.thermalLoadInitializer.applyTo(thermal)
-        desc.thermalLoadInitializer.applyTo(thermalLoadWatchDog)
+        thermalLoadWatchDog.setMaximumTemperature(desc.thermalLoadInitializer.maximumTemperature)
         thermal.setAsSlow()
         thermalLoadList.add(thermal)
         thermalLoadWatchDog.setDestroys(WorldExplosion(this as ShaftElement).machineExplosion())

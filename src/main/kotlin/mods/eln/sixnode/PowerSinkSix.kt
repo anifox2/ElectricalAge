@@ -166,8 +166,8 @@ class PowerSinkGui(var render: PowerSinkRender) : ScreenEln(), GuiTextFieldEln.G
         super.initGui()
         current = newGuiTextField(6, 6, 50)
         current!!.value = render.current.toString()
-        current!!.setObserver(this)
-        current!!.setComment(listOf(tr("Power sunk")))
+        current!!.observer = this
+        current!!.setComment(arrayOf(tr("Current consumed")))
     }
 
     override fun textFieldNewValue(textField: GuiTextFieldEln, value: String) {

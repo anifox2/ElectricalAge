@@ -9,8 +9,8 @@ import mods.eln.misc.Direction.Companion.fromInt
 import mods.eln.misc.INBTTReady
 import mods.eln.misc.LRDU
 import mods.eln.misc.Utils
-import mods.eln.misc.Utils.readFromNBT
-import mods.eln.misc.Utils.writeToNBT
+import mods.eln.misc.Utils.load
+import mods.eln.misc.Utils.save
 import mods.eln.node.INodeElement
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
@@ -255,7 +255,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     open fun readFromNBT(nbt: CompoundTag) {
         val inv = inventory
         if (inv != null) {
-            readFromNBT(nbt, "inv", inv)
+            load(nbt, "inv", inv)
         }
         for (electricalLoad in electricalLoadList) {
             if (electricalLoad is INBTTReady) (electricalLoad as INBTTReady).readFromNBT(nbt, "")
@@ -281,7 +281,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     open fun writeToNBT(nbt: CompoundTag) {
         val inv = inventory
         if (inv != null) {
-            writeToNBT(nbt, "inv", inv)
+            save(nbt, "inv", inv)
         }
         for (electricalLoad in electricalLoadList) {
             if (electricalLoad is INBTTReady) (electricalLoad as INBTTReady).writeToNBT(nbt, "")
@@ -337,7 +337,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     }
 
     open val level: Level
-        get() = node!!.coordinate.world()
+        get() = node!!.coordinate.world()!!
 
     open val isPlayerAround: Boolean
         get() = true // Stub
@@ -346,7 +346,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
         get() = false // Stub
 
     fun world(): Level {
-        return node!!.coordinate.world()
+        return node!!.coordinate.world()!!
     }
 
     fun coordinate(): Coordinate {

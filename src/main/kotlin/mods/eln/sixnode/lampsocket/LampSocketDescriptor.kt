@@ -8,13 +8,13 @@ import net.minecraft.world.item.ItemStack
 
 class LampSocketDescriptor(
     name: String,
-    var render: LampSocketObjRender,
-    var socketType: LampSocketType,
-    var paintable: Boolean,
-    var range: Int,
-    var alphaZMin: Float,
-    var alphaZMax: Float,
-    var alphaZBoot: Float
+    @JvmField var render: LampSocketObjRender,
+    @JvmField var socketType: LampSocketType,
+    @JvmField var paintable: Boolean,
+    @JvmField var range: Int,
+    @JvmField var alphaZMin: Float,
+    @JvmField var alphaZMax: Float,
+    @JvmField var alphaZBoot: Float
 ) : SixNodeDescriptor(name, LampSocketElement::class.java, LampSocketRender::class.java) {
 
     var cameraOpt = true

@@ -6,6 +6,8 @@ import mods.eln.misc.Utils
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 
+import net.minecraft.network.chat.Component
+
 class FuelBurnerDescriptor(name: String, val producedHeatPower: Double, val type: Int, val soundPitch: Float) :
     GenericItemUsingDamageDescriptorUpgrade(name) {
     companion object {
@@ -25,7 +27,7 @@ class FuelBurnerDescriptor(name: String, val producedHeatPower: Double, val type
 
     override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
         super.appendHoverText(itemStack, level, list, flag)
-        list.add(tr("Burn unit for the gas heat furnace."))
-        list.add(Utils.plotPower(tr("Produced heat power: "), producedHeatPower))
+        list.add(Component.literal(tr("Burn unit for the gas heat furnace.")))
+        list.add(Component.literal(Utils.plotPower(tr("Produced heat power: "), producedHeatPower)))
     }
 }

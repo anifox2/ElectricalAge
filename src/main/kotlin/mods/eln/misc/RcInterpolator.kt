@@ -25,7 +25,7 @@ class RcInterpolator(preTao: Float) : INBTTReady {
     override fun readFromNBT(nbt: CompoundTag, str: String) {
         target = nbt.getFloat(str + "factor")
         // Reverse compatibility. Leave this please.
-        factorFiltered = if (nbt.hasKey("factorFiltred")) {
+        factorFiltered = if (nbt.contains("factorFiltred")) {
             nbt.getFloat(str + "factorFiltred")
         } else {
             nbt.getFloat(str + "factorFiltered")
@@ -33,8 +33,8 @@ class RcInterpolator(preTao: Float) : INBTTReady {
     }
 
     override fun writeToNBT(nbt: CompoundTag, str: String) {
-        nbt.setFloat(str + "factor", target)
-        nbt.setFloat(str + "factorFiltered", factorFiltered)
+        nbt.putFloat(str + "factor", target)
+        nbt.putFloat(str + "factorFiltered", factorFiltered)
     }
 
     init {

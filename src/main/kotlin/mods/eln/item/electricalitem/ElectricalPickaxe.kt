@@ -5,56 +5,62 @@ import mods.eln.item.electricalitem.TreeCapitation.removeBlockWithDrops
 import mods.eln.misc.Utils
 import mods.eln.wiki.Data
 import net.minecraft.world.level.block.Block
-import net.minecraft.block.material.Material
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
-import net.minecraft.item.Item
+import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.tags.BlockTags
+import net.minecraft.core.BlockPos
+import net.minecraft.world.InteractionResultHolder
+import net.minecraft.world.InteractionHand
 
 class ElectricalPickaxe(name: String, strengthOn: Float, strengthOff: Float,
                         energyStorage: Double, energyPerBlock: Double, chargePower: Double) : ElectricalTool(name, strengthOn, strengthOff, energyStorage, energyPerBlock, chargePower) {
 
-    override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
+    override fun appendHoverText(itemStack: ItemStack, level: Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
         super.appendHoverText(itemStack, level, list, flag)
-        list.add(tr("Opens holes. Right-click to open smaller holes."))
+        list.add(net.minecraft.network.chat.Component.literal(tr("Opens holes. Right-click to open smaller holes.")))
     }
 
-    override fun setParent(item: Item?, damage: Int) {
+    /*
+    override fun setParent(item: Any?, damage: Int) {
         super.setParent(item, damage)
-        Data.addPortable(newItemStack())
+        // Data.addPortable(newItemStack())
+    }
+    */
+
+    override fun getDestroySpeed(stack: ItemStack, state: BlockState): Float {
+        if (state.`is`(BlockTags.MINEABLE_WITH_PICKAXE) || state.`is`(BlockTags.MINEABLE_WITH_SHOVEL)) {
+             return getStrength(stack)
+        }
+        if (ElectricalTool.blocksEffectiveAgainst.contains(state.block)) {
+            return getStrength(stack)
+        }
+        return super.getDestroySpeed(stack, state)
     }
 
-    override fun getStrVsBlock(stack: ItemStack, block: Block?): Float {
-        var value = when {
-            block != null && (block.material === Material.iron || block.material === Material.glass || block.material === Material.anvil || block.material === Material.rock) -> getStrength(stack)
-            else -> super.getStrVsBlock(stack, block)
+    override fun use(level: Level, player: Player, hand: InteractionHand): InteractionResultHolder<ItemStack> {
+        val stack = player.getItemInHand(hand)
+        if (!level.isClientSide) {
+            setConservative(player, stack, !getConservative(stack))
         }
-        if (blocksEffectiveAgainst.any { it == block }) {
-            value = getStrength(stack)
-        }
-        return value
-    }
-
-    override fun onItemRightClick(s: ItemStack, w: World, p: Player): ItemStack {
-        if (!w.isRemote) {
-            setConservative(p, s, !getConservative(s))
-        }
-        return s
+        return InteractionResultHolder.success(stack)
     }
 
     private fun getConservative(s: ItemStack) =
         getNbt(s).getBoolean("conservative")
 
     private fun setConservative(p: Player?, s: ItemStack, state: Boolean) {
-        getNbt(s).setBoolean("conservative", state)
+        getNbt(s).putBoolean("conservative", state)
         if (p != null) {
             Utils.addChatMessage(p, "Set land conservation to $state")
         }
     }
 
-    override fun onBlockDestroyed(stack: ItemStack, w: World, block: Block, x: Int, y: Int, z: Int, entity: LivingEntity): Boolean {
-        val ok = super.onBlockDestroyed(stack, w, block, x, y, z, entity)
+    override fun mineBlock(stack: ItemStack, world: Level, state: BlockState, pos: BlockPos, entity: LivingEntity): Boolean {
+        val ok = super.mineBlock(stack, world, state, pos, entity)
         if (entity !is Player) return ok
         if (!ok) return ok
         if (!getConservative(stack)) {
@@ -62,14 +68,20 @@ class ElectricalPickaxe(name: String, strengthOn: Float, strengthOff: Float,
                 for (b in (-1..0)) {
                     for (c in (-1..1)) {
                         if (a == 0 && b == 0 && c == 0) continue
-                        val i = x+a
-                        val j = y+b
-                        val k = z+c
-                        removeBlockWithDrops(entity, this, stack, w, i, j, k)
+                        val targetPos = pos.offset(a, b, c)
+                        TreeCapitation.removeBlockWithDrops(entity, this, stack, world, targetPos)
                     }
                 }
             }
         }
         return ok
+    }
+
+    fun getNbt(stack: ItemStack): net.minecraft.nbt.CompoundTag {
+        return stack.orCreateTag
+    }
+    
+    override fun getTransferRate(stack: ItemStack): Double {
+        return chargePower
     }
 }

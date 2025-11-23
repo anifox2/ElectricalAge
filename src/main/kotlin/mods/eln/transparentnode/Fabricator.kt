@@ -8,6 +8,7 @@ import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.INodeContainer
 import mods.eln.node.NodeBase
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.*
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
@@ -152,10 +153,10 @@ enum class FabricatorNetwork(val id: Byte) {
 
 enum class FabricatorOperation(val nid: Int, val opName: String, val outputItem: ItemStack, val perSheet: Int, val yieldPercentage: Double) {
     // Digital Chips
-    TRANSISTOR(0, "Transistor", ItemStack(Eln.transistor!!, 1), 16, 1.0),
+    TRANSISTOR(0, "Transistor", Eln.transistor!!.newItemStack(1), 16, 1.0),
     D_FLIP_FLOP(1, "D Flip Flop", Eln.findItemStack("D Flip Flop Chip", 1), 4, 1.0),
     JK_FLIP_FLOP(2, "JK Flip Flop", Eln.findItemStack("JK Flip Flop Chip", 1), 4, 1.0),
-    ALU(3, "8 Bit ALU", ItemStack(Eln.alu!!, 1), 2, 0.5),
+    ALU(3, "8 Bit ALU", Eln.alu!!.newItemStack(1), 2, 0.5),
     PAL_CHIP(4, "PAL Chip", Eln.findItemStack("PAL Chip", 1), 4, 1.0),
     OSCILLATOR_CHIP(5, "Oscillator Chip", Eln.findItemStack("Oscillator Chip", 1), 4, 1.0),
 
@@ -186,10 +187,10 @@ class FabricatorProcess(val element: FabricatorElement): IProcess {
         val siliconWaferName = "Silicon_Wafer"
         val copperPlateName = "Copper_Plate"
 
-        val canOutput = if (outputSlot != null) {
+        val canOutput = if (!outputSlot.isEmpty) {
             val stack = element.inventory.getItem(FabricatorSlots.OUTPUT.slotId)
             if (operation != null)
-                stack!!.item == operation.outputItem.item && stack.count + operation.perSheet < stack.maxStackSize
+                stack.item == operation.outputItem.item && stack.count + operation.perSheet <= stack.maxStackSize
             else
                 true
         } else {
@@ -197,8 +198,8 @@ class FabricatorProcess(val element: FabricatorElement): IProcess {
         }
 
         val hasInputs = (
-            siliconWaferSlot != null &&
-            plateCopperSlot != null &&
+            !siliconWaferSlot.isEmpty &&
+            !plateCopperSlot.isEmpty &&
             siliconWaferSlot.item === Eln.siliconWafer &&
             plateCopperSlot.item === Eln.plateCopper
         )
@@ -221,15 +222,15 @@ class FabricatorProcess(val element: FabricatorElement): IProcess {
             element.inventory.removeItem(FabricatorSlots.COPPER_PLATE.slotId, 1)
             element.inventory.removeItem(FabricatorSlots.SILICON_WAFER.slotId, 1)
             if (Math.random() <= operation.yieldPercentage) {
-                if (element.inventory.getItem(FabricatorSlots.OUTPUT.slotId) == null) {
+                if (element.inventory.getItem(FabricatorSlots.OUTPUT.slotId).isEmpty) {
                     val newStack = operation.outputItem.copy()
                     newStack.count = operation.perSheet
                     element.inventory.setItem(FabricatorSlots.OUTPUT.slotId, newStack)
                     powerConsumed -= powerRequired
                     element.needPublish()
                 } else {
-                    val stackSize = element.inventory.getItem(FabricatorSlots.OUTPUT.slotId)!!.count
-                    if (stackSize in 0..63) {
+                    val stackSize = element.inventory.getItem(FabricatorSlots.OUTPUT.slotId).count
+                    if (stackSize + operation.perSheet <= 64) {
                         val newStack = operation.outputItem.copy()
                         newStack.count = stackSize + operation.perSheet
                         element.inventory.setItem(FabricatorSlots.OUTPUT.slotId, newStack)
@@ -242,7 +243,7 @@ class FabricatorProcess(val element: FabricatorElement): IProcess {
     }
 }
 
-class FabricatorRender(entity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, descriptor) {
+class FabricatorRender(entity: TransparentNodeBlockEntity, descriptor: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, descriptor) {
 
     var operationId: Int = 0
     private var isRunning = false
@@ -280,7 +281,7 @@ class FabricatorGui(player: Player, inventory: Container, val render: Fabricator
     }
 
     override fun renderBg(guiGraphics: GuiGraphics, partialTick: Float, mouseX: Int, mouseY: Int) {
-        helper?.draw(guiGraphics, mouseX, mouseY, partialTick)
+        helper?.render(guiGraphics, leftPos, topPos)
         (render.transparentNodedescriptor as FabricatorDescriptor).draw()
     }
 }

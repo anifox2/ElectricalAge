@@ -26,7 +26,7 @@ class BatteryGuiDraw(var render: BatteryRender) : ScreenEln() {
 
     override fun preDraw(guiGraphics: GuiGraphics, f: Float, x: Int, y: Int) {
         super.preDraw(guiGraphics, f, x, y)
-        energyBar!!.setValue((render.energy / (render.descriptor.electricalStdEnergy * render.life)).toFloat())
+        energyBar!!.value = (render.energy / (render.descriptor.electricalStdEnergy * render.life)).toFloat()
         energyBar!!.setComment(0, Utils.plotPercent(tr("Energy: "), energyBar!!.value.toDouble()).replace(" ", ""))
         energyBar!!.draw(guiGraphics, leftPos, topPos)
     }

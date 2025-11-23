@@ -1,7 +1,7 @@
 package mods.eln.misc
 
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.util.Vec3
+import net.minecraft.world.phys.Vec3
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -113,24 +113,14 @@ enum class LRDU(var dir: Int) {
         }
     }
 
-    fun rotateOnXnLeft(v: Vec3) {
-        val y = v.yCoord
-        val z = v.zCoord
-        when (this) {
-            Left -> {
-            }
-            Up -> {
-                v.yCoord = -z
-                v.zCoord = y
-            }
-            Right -> {
-                v.yCoord = -y
-                v.zCoord = -z
-            }
-            Down -> {
-                v.yCoord = z
-                v.zCoord = -y
-            }
+    fun rotateOnXnLeft(v: Vec3): Vec3 {
+        val y = v.y
+        val z = v.z
+        return when (this) {
+            Left -> v
+            Up -> Vec3(v.x, -z, y)
+            Right -> Vec3(v.x, -y, -z)
+            Down -> Vec3(v.x, z, -y)
         }
     }
 
@@ -152,8 +142,8 @@ enum class LRDU(var dir: Int) {
         }
     }
 
-    fun writeToNBT(nbt: CompoundTag, name: String?) {
-        nbt.setByte(name, toInt().toByte())
+    fun save(nbt: CompoundTag, name: String?) {
+        nbt.putByte(name, toInt().toByte())
     }
 
     fun serialize(stream: DataOutputStream) {
@@ -177,7 +167,7 @@ enum class LRDU(var dir: Int) {
         }
 
         @JvmStatic
-        fun readFromNBT(nbt: CompoundTag, name: String?): LRDU {
+        fun load(nbt: CompoundTag, name: String?): LRDU {
             return fromInt(nbt.getByte(name).toInt())
         }
 

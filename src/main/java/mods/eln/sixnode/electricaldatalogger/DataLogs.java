@@ -4,8 +4,9 @@ import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.sim.PhysicalConstant;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.nbt.CompoundTag;
 import org.lwjgl.opengl.GL11;
 
 public class DataLogs implements INBTTReady {
@@ -54,7 +55,7 @@ public class DataLogs implements INBTTReady {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound nbt, String str) {
+    public void readFromNBT(CompoundTag nbt, String str) {
         byte[] cpy = nbt.getByteArray(str + "log");
         Utils.println("Datalog readnbt " + cpy.length);
         for (int idx = 0; idx < cpy.length; idx++) {
@@ -69,12 +70,12 @@ public class DataLogs implements INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        nbt.setByteArray(str + "log", copyLog());
-        nbt.setFloat(str + "samplingPeriod", samplingPeriod);
-        nbt.setFloat(str + "maxValue", maxValue);
-        nbt.setFloat(str + "minValue", minValue);
-        nbt.setByte(str + "unitType", unitType);
+    public void writeToNBT(CompoundTag nbt, String str) {
+        nbt.putByteArray(str + "log", copyLog());
+        nbt.putFloat(str + "samplingPeriod", samplingPeriod);
+        nbt.putFloat(str + "maxValue", maxValue);
+        nbt.putFloat(str + "minValue", minValue);
+        nbt.putByte(str + "unitType", unitType);
     }
 
     public byte[] copyLog() {
@@ -95,10 +96,14 @@ public class DataLogs implements INBTTReady {
     }
 
     void draw(float margeX, float margeY, String textHeader) {
-        draw(log, size, samplingPeriod, maxValue, minValue, unitType, margeX, margeY, textHeader);
+        draw(null, log, size, samplingPeriod, maxValue, minValue, unitType, margeX, margeY, textHeader);
     }
 
-    static void draw(byte[] value, int size, float samplingPeriod, float maxValue, float minValue, byte unitType, float margeX, float margeY, String textHeader) {
+    void draw(GuiGraphics guiGraphics, float margeX, float margeY, String textHeader) {
+        draw(guiGraphics, log, size, samplingPeriod, maxValue, minValue, unitType, margeX, margeY, textHeader);
+    }
+
+    static void draw(GuiGraphics guiGraphics, byte[] value, int size, float samplingPeriod, float maxValue, float minValue, byte unitType, float margeX, float margeY, String textHeader) {
         if (value == null) return;
         if (size < 2) return;
         //long startT = System.nanoTime();
@@ -168,20 +173,21 @@ public class DataLogs implements INBTTReady {
 		*/
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
-        FontRenderer fontrenderer = Minecraft.getMinecraft().fontRenderer;
-        GL11.glPushMatrix();
-        float scale = 0.01f;
-        GL11.glScalef(scale, scale, 1f);
-        //fontrenderer.drawString("Time", (int)( 0.5f / scale), (int)(0.8f / scale), 0);
+        if (guiGraphics != null) {
+            Font font = Minecraft.getInstance().font;
+            guiGraphics.pose().pushPose();
+            float scale = 0.01f;
+            guiGraphics.pose().scale(scale, scale, 1f);
 
-        fontrenderer.drawString(textHeader + " " + getYstring(1f, maxValue, minValue, unitType), (int) (margeX / scale), (int) (0f / scale), 0);
-        fontrenderer.drawString(textHeader + " " + getYstring(0.5f, maxValue, minValue, unitType), (int) (margeX / scale), (int) ((margeY / 2 - 0.05f) / scale), 0);
-        fontrenderer.drawString(textHeader + " " + getYstring(0.0f, maxValue, minValue, unitType), (int) (margeX / scale), (int) ((margeY - 0.08f) / scale), 0);
+            guiGraphics.drawString(font, textHeader + " " + getYstring(1f, maxValue, minValue, unitType), (int) (margeX / scale), (int) (0f / scale), 0, false);
+            guiGraphics.drawString(font, textHeader + " " + getYstring(0.5f, maxValue, minValue, unitType), (int) (margeX / scale), (int) ((margeY / 2 - 0.05f) / scale), 0, false);
+            guiGraphics.drawString(font, textHeader + " " + getYstring(0.0f, maxValue, minValue, unitType), (int) (margeX / scale), (int) ((margeY - 0.08f) / scale), 0, false);
 
-        fontrenderer.drawString(textHeader + Utils.plotTime(size * samplingPeriod), (int) (0f / scale), (int) ((margeY + 0.03) / scale), 0);
-        fontrenderer.drawString(textHeader + Utils.plotTime(0), (int) ((margeX - 0.05) / scale), (int) ((margeY + 0.03) / scale), 0);
-        //fontrenderer.drawString("Time", (int)(0.5f / scale), (int)(0.8f / scale), 0);
-        GL11.glPopMatrix();
+            guiGraphics.drawString(font, textHeader + Utils.plotTime(size * samplingPeriod), (int) (0f / scale), (int) ((margeY + 0.03) / scale), 0, false);
+            guiGraphics.drawString(font, textHeader + Utils.plotTime(0), (int) ((margeX - 0.05) / scale), (int) ((margeY + 0.03) / scale), 0, false);
+            
+            guiGraphics.pose().popPose();
+        }
         //startT = System.nanoTime() - startT;
         //Utils.println("startT : " + startT);
     }
@@ -215,10 +221,10 @@ public class DataLogs implements INBTTReady {
         return str;
     }
 
-    public static void draw(NBTTagCompound nbt, float margeX, float margeY, String textHeader) {
+    public static void draw(GuiGraphics guiGraphics, CompoundTag nbt, float margeX, float margeY, String textHeader) {
         if (nbt == null) return;
         byte[] data = nbt.getByteArray("log");
         if (data == null) return;
-        draw(data, data.length, nbt.getFloat("samplingPeriod"), nbt.getFloat("maxValue"), nbt.getFloat("minValue"), nbt.getByte("unitType"), margeX, margeY, textHeader);
+        draw(guiGraphics, data, data.length, nbt.getFloat("samplingPeriod"), nbt.getFloat("maxValue"), nbt.getFloat("minValue"), nbt.getByte("unitType"), margeX, margeY, textHeader);
     }
 }

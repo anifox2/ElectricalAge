@@ -11,6 +11,7 @@ import mods.eln.item.IRegulatorDescriptor
 import mods.eln.item.RegulatorSlot
 import mods.eln.item.FuelBurnerDescriptor
 import mods.eln.misc.*
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.*
 import mods.eln.node.NodeBase
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop
@@ -259,7 +260,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     override fun newContainer(side: Direction, player: Player) = FuelHeatFurnaceContainer(node, player, inventory)
 }
 
-class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) :
+class FuelHeatFurnaceRender(tileEntity: TransparentNodeBlockEntity, descriptor: TransparentNodeDescriptor) :
     TransparentNodeElementRender(tileEntity, descriptor) {
     override val inventory = TransparentNodeElementInventory(2, 1, this)
 

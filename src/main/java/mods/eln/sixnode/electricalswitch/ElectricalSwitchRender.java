@@ -9,6 +9,7 @@ import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -43,7 +44,13 @@ public class ElectricalSwitchRender extends SixNodeElementRender {
             drawPowerPin(LRDU.Left, descriptor.pinDistance);
             drawPowerPin(LRDU.Right, descriptor.pinDistance);
         }
-        descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(this.getTileEntity()), getTileEntity());
+        
+        BlockEntity te = blockEntity;
+        float distance = 0f;
+        if (te != null && te.getLevel() != null) {
+             distance = UtilsClient.distanceFromClientPlayer(te.getLevel(), te.getBlockPos().getX(), te.getBlockPos().getY(), te.getBlockPos().getZ());
+        }
+        descriptor.draw(interpol.get(), distance, te);
     }
 
     @Override

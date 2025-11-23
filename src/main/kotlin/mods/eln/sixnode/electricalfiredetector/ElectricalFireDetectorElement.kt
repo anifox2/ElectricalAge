@@ -80,7 +80,7 @@ class ElectricalFireDetectorElement(_sixNode: SixNode, side: Direction, descript
     override fun getWaila(): Map<String, String> {
         val map = HashMap<String, String>()
         if (fireDescriptor.batteryPowered) {
-            map[tr("Battery")] = Utils.plotPercent(slowProcess.getBatteryLevel())
+            map[tr("Battery")] = Utils.plotPercent("Battery", slowProcess.getBatteryLevel())
             map[tr("Fire detected")] = firePresent.toString()
         } else {
             map[tr("Fire detected")] = (outputGate!!.voltage > 25.0).toString()

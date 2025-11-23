@@ -33,9 +33,10 @@ import java.util.HashMap
 // ...existing code...
 class LampSocketElement(_sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor) : SixNodeElement(_sixNode, side, descriptor), IConfigurable {
 
+    override var inventory: Container? = null
     var socketDescriptor: LampSocketDescriptor = descriptor as LampSocketDescriptor
 
-    var monsterPopFreeProcess = MonsterPopFreeProcess(_sixNode.coordinate!!, Eln.instance.killMonstersAroundLampsRange)
+    var monsterPopFreeProcess = MonsterPopFreeProcess(_sixNode.coordinate!!.world()!!, _sixNode.coordinate!!, Eln.killMonstersAroundLampsRange)
 // ...existing code...
 
     var positiveLoad = NbtElectricalLoad("positiveLoad")
@@ -61,7 +62,7 @@ class LampSocketElement(_sixNode: SixNode, side: Direction, descriptor: SixNodeD
             .acceptIfEmpty(0, LampDescriptor::class.java)
             .acceptIfEmpty(1, ElectricalCableDescriptor::class.java)
 
-        lampProcess.alphaZ = this.socketDescriptor.alphaZBoot
+        lampProcess.alphaZ = this.socketDescriptor.alphaZBoot.toDouble()
         slowProcessList.add(lampProcess)
         slowProcessList.add(monsterPopFreeProcess)
     }
@@ -72,7 +73,7 @@ class LampSocketElement(_sixNode: SixNode, side: Direction, descriptor: SixNodeD
         front = LRDU.fromInt((value shr 0) and 0x3)
         grounded = (value and 4) != 0
 
-        setPoweredByLampSupply(nbt.getBoolean("poweredByLampSupply"))
+        poweredByLampSupply = nbt.getBoolean("poweredByLampSupply")
         channel = nbt.getString("channel")
 
         val b = nbt.getByte("color").toInt()
@@ -104,7 +105,7 @@ class LampSocketElement(_sixNode: SixNode, side: Direction, descriptor: SixNodeD
                     needPublish()
                 }
                 tooglePowerSupplyType -> {
-                    setPoweredByLampSupply(!poweredByLampSupply)
+                    poweredByLampSupply = !poweredByLampSupply
                     reconnect()
                 }
                 setChannel -> {
@@ -114,12 +115,7 @@ class LampSocketElement(_sixNode: SixNode, side: Direction, descriptor: SixNodeD
                 }
             }
         } catch (e: IOException) {
-            e.printStackTrace()
         }
-    }
-
-    private fun setPoweredByLampSupply(b: Boolean) {
-        poweredByLampSupply = b
     }
 
     override fun disconnectJob() {
@@ -200,8 +196,8 @@ class LampSocketElement(_sixNode: SixNode, side: Direction, descriptor: SixNodeD
         return info
     }
 
-    override fun thermoMeterString(): String? {
-        return null
+    override fun thermoMeterString(): String {
+        return ""
     }
 
     override fun networkSerialize(stream: DataOutputStream) {
@@ -248,9 +244,9 @@ class LampSocketElement(_sixNode: SixNode, side: Direction, descriptor: SixNodeD
 
     override fun onBlockActivated(entityPlayer: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            front = front!!.nextClockwise()
+            front = front!!.nextClockwise
             if (socketDescriptor.rotateOnlyBy180Deg)
-                front = front!!.nextClockwise()
+                front = front!!.nextClockwise
             reconnect()
             return true
         }

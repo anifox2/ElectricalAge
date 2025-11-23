@@ -17,10 +17,10 @@ class PowerSocketGui(private val render: PowerSocketRender, player: Player?, inv
 
         // ...existing code...
         device = newGuiTextField(8, 8, 138)
-        device?.setText(render.channel ?: "")
+        device?.text = render.channel ?: ""
         device?.setComment(arrayOf(tr("Specify the power channel")))
         // ...existing code...
-        device?.setResponder { text ->
+        device?.observer = GuiTextFieldEln.GuiTextFieldElnObserver { _, text ->
             render.clientSetString(PowerSocketElement.setChannelId, text)
         }
     }

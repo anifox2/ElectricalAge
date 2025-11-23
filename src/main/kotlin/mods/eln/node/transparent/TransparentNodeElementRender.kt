@@ -10,23 +10,25 @@ import mods.eln.misc.Direction
 import mods.eln.misc.Direction.Companion.fromInt
 import mods.eln.misc.LRDU
 import mods.eln.misc.LRDUMask
-import mods.eln.misc.Utils.setGlColorFromDye
 import mods.eln.misc.Utils.unserializeItemStackToItemEntity
+import mods.eln.misc.UtilsClient.setGlColorFromDye
 import mods.eln.misc.UtilsClient
 import mods.eln.sound.LoopedSound
 import mods.eln.sound.LoopedSoundManager
 import mods.eln.sound.SoundCommand
-import net.minecraft.client.gui.Screen
+import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.Container
+import net.minecraftforge.api.distmarker.Dist
+import net.minecraftforge.api.distmarker.OnlyIn
 import org.lwjgl.opengl.GL11
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
-abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeEntity, var transparentNodedescriptor: TransparentNodeDescriptor) {
+abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeBlockEntity, var transparentNodedescriptor: TransparentNodeDescriptor) {
     @JvmField
     var front: Direction? = null
     var grounded = false
@@ -40,7 +42,8 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeEntit
     }
 
     fun glCableTransform(inverse: Direction) {
-        inverse.glTranslate(0.5f)
+        val vec = inverse.toMCDirection().normal
+        GL11.glTranslatef(vec.x * 0.5f, vec.y * 0.5f, vec.z * 0.5f)
         inverse.glRotateXnRef()
     }
 
@@ -171,7 +174,7 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeEntit
     open fun notifyNeighborSpawn() {}
     open fun serverPacketUnserialize(stream: DataInputStream?) {}
     protected fun coordinate(): Coordinate {
-        return Coordinate(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, tileEntity.level)
+        return Coordinate(tileEntity)
     }
 
     private var uuid = 0
@@ -193,7 +196,7 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeEntit
     }
 
     private val loopedSoundManager = LoopedSoundManager()
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     protected fun addLoopedSound(loopedSound: LoopedSound?) {
         loopedSoundManager.add(loopedSound)
     }

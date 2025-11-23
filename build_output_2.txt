@@ -1,0 +1,414 @@
+
+> Configure project :
+Java: 21.0.9 JVM: 21.0.9+10-LTS (Eclipse Adoptium) Arch: aarch64
+
+> Task :checkKotlinGradlePluginConfigurationErrors
+> Task :processResources UP-TO-DATE
+
+> Task :compileKotlin FAILED
+e: Supertypes of the following classes cannot be resolved. Please make sure you have the required dependencies in the classpath:
+    class mods.eln.sixnode.electricalmath.ElectricalMathDescriptor, unresolved supertypes: IPlugIn
+Adding -Xextended-compiler-checks argument might provide additional information.
+
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sim/process/heater/ElectricalLoadHeatThermalLoad.kt:8:7 Redeclaration: ElectricalLoadHeatThermalLoad
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/currentrelay/CurrentRelay.kt:375:5 'tileEntity' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/java/mods/eln/sixnode/currentrelay/CurrentRelay.kt:423:70 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ElectricalCableDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/cable/CableRenderDescriptor.kt:4:27 Unresolved reference: ResourceLocation
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/cable/CableRenderDescriptor.kt:11:24 Unresolved reference: ResourceLocation
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/cable/CopperCableDescriptor.kt:7:45 This type is final, so it cannot be inherited from
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/cable/CopperCableDescriptor.kt:14:9 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public final var electricalRp: Double defined in mods.eln.cable.CopperCableDescriptor
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/cable/CopperCableDescriptor.kt:15:9 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public final var electricalMaximalPower: Double defined in mods.eln.cable.CopperCableDescriptor
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/cable/ElectricalCableDescriptor.kt:82:51 None of the following functions can be called with the arguments supplied: 
+public final fun fromCable(descriptor: CurrentCableDescriptor?): VoltageLevelColor defined in mods.eln.misc.VoltageLevelColor.Companion
+public final fun fromCable(descriptor: ElectricalCableDescriptor?): VoltageLevelColor defined in mods.eln.misc.VoltageLevelColor.Companion
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/cable/ElectricalCableDescriptor.kt:108:5 'addRealismContext' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/cable/ElectricalCableDescriptor.kt:117:5 'addInformation' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/cable/ElectricalCableDescriptor.kt:118:15 Unresolved reference: addInformation
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/client/ClientKeyHandler.kt:7:34 Unresolved reference: clientOpenGui
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/client/ClientKeyHandler.kt:9:22 Unresolved reference: Root
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/client/ClientKeyHandler.kt:54:17 Unresolved reference: clientOpenGui
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/client/ClientKeyHandler.kt:54:31 Unresolved reference: Root
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/client/UuidManager.kt:10:9 Unresolved reference: FMLCommonHandler
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/client/UuidManager.kt:20:6 Unresolved reference: SubscribeEvent
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/client/UuidManager.kt:21:21 Unresolved reference: TickEvent
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/client/UuidManager.kt:22:28 Unresolved reference: Phase
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/client/UuidManager.kt:28:26 Function invocation 'isAlive()' expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/config/ConfigHandler.kt:171:9 Val cannot be reassigned
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/FluidRegistration.kt:108:27 Type mismatch: inferred type is RegistryObject<`<no name provided>`!>! but RegistryObject<FluidType> was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/FuelRegistry.kt:80:58 Unresolved reference: path
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/PreciseElementFluidHandler.kt:16:13 Unresolved reference: setDouble
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/TankData.kt:6:34 Unresolved reference: Fluid
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/TankData.kt:7:34 Unresolved reference: FluidRegistry
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/TankData.kt:8:34 Unresolved reference: FluidTank
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/TankData.kt:11:31 Unresolved reference: FluidTank
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/TankData.kt:11:74 Unresolved reference: Fluid
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/TankData.kt:15:30 Unresolved reference: getCompoundTag
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/TankData.kt:20:36 Unresolved reference: FluidRegistry
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/TankData.kt:26:14 Variable expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/TankData.kt:26:29 Unresolved reference: getInteger
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/TankData.kt:32:13 Unresolved reference: setTag
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/TankData.kt:33:13 Unresolved reference: setString
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/TankData.kt:34:13 Unresolved reference: setDouble
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/fluid/TankData.kt:35:13 Unresolved reference: setInteger
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/generic/GenericItemBlockUsingDamageDescriptor.kt:15:14 'getDefaultNBT' hides member of supertype 'GenericItemUsingDamageDescriptor' and needs 'override' modifier
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/generic/GenericItemUsingDamageDescriptorWithComment.kt:4:35 Unresolved reference: TextComponent
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/generic/GenericItemUsingDamageDescriptorWithComment.kt:18:29 Unresolved reference: TextComponent
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/generic/GenericItemUsingDamageSlot.kt:14:51 Unresolved reference: Medium
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostBlock.kt:131:89 Expecting ','
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostBlock.kt:131:101 Expecting an element
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostBlock.kt:113:5 'getCloneItemStack' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostBlock.kt:131:85 Type mismatch: inferred type is Direction! but Int was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostBlock.kt:131:91 Unresolved reference: DDataValue
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostBlock.kt:131:91 Unsupported [literal prefixes and suffixes]
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostElement.kt:24:25 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GhostManager?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostElement.kt:25:40 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GhostManager?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostElement.kt:30:40 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GhostManager?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostElement.kt:37:20 Unresolved reference: getInteger
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostElement.kt:43:13 Unresolved reference: setInteger
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostGroup.kt:17:79 Unresolved reference: tCube
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostGroup.kt:59:28 Unresolved reference: World
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostGroup.kt:61:34 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GhostManager?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostGroup.kt:69:47 Unresolved reference: newWithOffset
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostGroup.kt:70:29 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GhostManager?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostGroup.kt:76:25 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GhostManager?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostGroup.kt:80:25 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GhostManager?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostGroup.kt:85:29 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GhostManager?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostGroup.kt:85:61 Unresolved reference: newWithOffset
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostManager.kt:6:28 Unresolved reference: getTags
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostManager.kt:103:19 Unresolved reference: getTags
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostManagerNbt.kt:5:34 Unresolved reference: LevelSavedData
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostManagerNbt.kt:7:43 Unresolved reference: WorldSavedData
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostManagerNbt.kt:8:5 'isDirty' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostManagerNbt.kt:12:5 'readFromNBT' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostManagerNbt.kt:13:26 Unresolved reference: loadFromNBT
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ghost/GhostManagerNbt.kt:16:5 'writeToNBT' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridDescriptor.kt:9:27 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridDescriptor.kt:21:23 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridDescriptor.kt:21:30 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridElement.kt:12:42 Unresolved reference: ServerPlayer
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridElement.kt:87:56 Type mismatch: inferred type is String? but String was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridLink.kt:138:27 Unresolved reference: loadItemStackFromNBT
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridLink.kt:146:13 Unresolved reference: setDouble
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridLink.kt:147:15 Unresolved reference: writeToNBT
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:7:27 Unresolved reference: ResourceLocation
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:8:27 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:18:31 Unresolved reference: ResourceLocation
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:25:24 Unresolved reference: ResourceLocation
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:44:51 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:45:16 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:91:33 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:91:44 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:94:31 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:134:41 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:134:58 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:156:44 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:156:58 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:156:71 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:157:26 Not enough information to infer type variable R
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:157:42 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:160:31 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:160:40 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:160:53 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:180:31 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:180:38 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:184:34 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:184:52 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:185:20 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:193:50 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:193:61 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:193:74 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:212:47 Overload resolution ambiguity: 
+public final operator fun plus(other: Byte): Double defined in kotlin.Double
+public final operator fun plus(other: Double): Double defined in kotlin.Double
+public final operator fun plus(other: Float): Double defined in kotlin.Double
+public final operator fun plus(other: Int): Double defined in kotlin.Double
+public final operator fun plus(other: Long): Double defined in kotlin.Double
+public final operator fun plus(other: Short): Double defined in kotlin.Double
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:212:58 Overload resolution ambiguity: 
+public final operator fun minus(other: Byte): Double defined in kotlin.Double
+public final operator fun minus(other: Double): Double defined in kotlin.Double
+public final operator fun minus(other: Float): Double defined in kotlin.Double
+public final operator fun minus(other: Int): Double defined in kotlin.Double
+public final operator fun minus(other: Long): Double defined in kotlin.Double
+public final operator fun minus(other: Short): Double defined in kotlin.Double
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:219:80 Overload resolution ambiguity: 
+public final operator fun plus(other: Byte): Double defined in kotlin.Double
+public final operator fun plus(other: Double): Double defined in kotlin.Double
+public final operator fun plus(other: Float): Double defined in kotlin.Double
+public final operator fun plus(other: Int): Double defined in kotlin.Double
+public final operator fun plus(other: Long): Double defined in kotlin.Double
+public final operator fun plus(other: Short): Double defined in kotlin.Double
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridRender.kt:220:17 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridSwitch.kt:36:5 Type mismatch: inferred type is ElectricalCableDescriptor? but ElectricalCableDescriptor was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridSwitch.kt:44:61 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ElectricalCableDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridSwitch.kt:158:50 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ElectricalCableDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridSwitch.kt:244:32 No value passed for parameter 'level'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridSwitch.kt:250:34 No value passed for parameter 'level'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridSwitch.kt:272:23 Cannot access 'boundingBox': it is private in 'Obj3DPart'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/GridSwitch.kt:272:35 Unresolved reference: center
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/electricalpole/ElectricalPoleElement.kt:152:99 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ElectricalCableDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/electricalpole/ElectricalPoleRender.kt:12:29 Unresolved reference: audio
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/electricalpole/ElectricalPoleRender.kt:13:27 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/electricalpole/ElectricalPoleRender.kt:31:82 Unresolved reference: ISound
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/transformer/GridTransformerElement.kt:20:27 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/transformer/GridTransformerElement.kt:99:65 Unresolved reference: Vec3
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/transformer/GridTransformerRender.kt:8:29 Unresolved reference: audio
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gridnode/transformer/GridTransformerRender.kt:16:78 Unresolved reference: ISound
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gui/HelperStdContainer.kt:3:67 Type mismatch: inferred type is IGuiObject but Screen? was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gui/SlotWithSkinAndComment.kt:19:15 Unresolved reference: ISlotWithComment
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/gui/SlotWithSkinAndComment.kt:24:5 'getComment' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/BrushDescriptor.kt:10:22 Unresolved reference: item
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/BrushDescriptor.kt:24:5 'getName' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/BrushDescriptor.kt:28:100 Unresolved reference: getName
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/BrushDescriptor.kt:28:127 Unresolved reference: getName
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/BrushDescriptor.kt:57:38 Unresolved reference: getMinecraft
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/BrushDescriptor.kt:58:22 Type mismatch: inferred type is String but Component was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/BrushDescriptor.kt:58:89 Unresolved reference: tagCompound
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/BrushDescriptor.kt:64:37 Cannot access 'capabilities': it is invisible (private in a supertype) in 'Player'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/BrushDescriptor.kt:64:50 Unresolved reference: isCreativeMode
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/BrushDescriptor.kt:65:26 Unresolved reference: tagCompound
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/BrushDescriptor.kt:69:23 Unresolved reference: tagCompound
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/CaseItemDescriptor.kt:10:18 Type mismatch: inferred type is String but Component was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:8:22 Unresolved reference: item
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:10:34 Unresolved reference: IItemRenderer
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:27:13 Unresolved reference: voltageLevelColor
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:30:13 Unresolved reference: voltageLevelColor
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:34:5 'shouldUseRenderHelper' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:34:46 Unresolved reference: IItemRenderer
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:35:48 Unresolved reference: IItemRenderer
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:35:93 Unresolved reference: IItemRenderer
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:37:5 'renderItem' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:37:35 Unresolved reference: IItemRenderer
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:39:13 Unresolved reference: IItemRenderer
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:39:61 Unresolved reference: renderItem
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:46:25 Unresolved reference: voltageLevelColor
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ElectricalFuseDescriptor.kt:59:34 Unresolved reference: Item
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/FuelBurnerDescriptor.kt:28:18 Type mismatch: inferred type is String but Component was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/FuelBurnerDescriptor.kt:29:18 Type mismatch: inferred type is String but Component was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/GenericItemUsingDamageDescriptorResource.kt:8:5 'setParent' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/HeatingCorpElement.kt:3:25 Unresolved reference: GenericItemUsingDamageDescriptorUpgrade
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/LampDescriptor.kt:133:29 Type mismatch: inferred type is VoltageLevelColor but Int was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ThermalIsolatorElement.kt:12:18 Type mismatch: inferred type is String but Component was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ThermalIsolatorElement.kt:13:18 Type mismatch: inferred type is String but Component was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ThermalIsolatorElement.kt:14:18 Type mismatch: inferred type is String but Component was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/ThermalIsolatorElement.kt:15:18 Type mismatch: inferred type is String but Component was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalArmor.kt:28:9 This type is final, so it cannot be inherited from
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalArmor.kt:46:5 'getIsRepairable' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalArmor.kt:50:5 'hasColor' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalAxe.kt:38:26 Expecting an element
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalAxe.kt:38:54 Expecting an element
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalAxe.kt:38:84 Expecting an element
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalAxe.kt:38:114 Expecting an element
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalAxe.kt:148:40 Expecting an element
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalAxe.kt:149:40 Expecting an element
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalAxe.kt:27:5 'setParent' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalLampItem.kt:36:5 'setParent' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalPickaxe.kt:33:19 Expecting an element
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalPickaxe.kt:33:64 Expecting an element
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalPickaxe.kt:69:50 Unresolved reference: i
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalPickaxe.kt:69:53 Unresolved reference: j
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/ElectricalPickaxe.kt:69:56 Unresolved reference: k
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/LampItem.kt:5:36 Unresolved reference: LightBlockEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/item/electricalitem/LampItem.kt:6:22 Unresolved reference: entity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/mechanical/Clutch.kt:78:37 This type is final, so it cannot be inherited from
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/mechanical/Clutch.kt:445:28 Unresolved reference: TransparentNodeBlockEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/mechanical/RadialMotor.kt:74:18 Type mismatch: inferred type is String but Component was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/mechanical/RadialMotor.kt:75:18 Type mismatch: inferred type is String but Component was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/mechanical/RollingShaftMachine.kt:101:41 Unresolved reference: TransparentNodeBlockEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/mechanical/RollingShaftMachine.kt:117:86 Unresolved reference: big
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/mechanical/RollingShaftMachine.kt:123:149 No value passed for parameter 'inventory'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/mechanical/RollingShaftMachine.kt:123:149 No value passed for parameter 'title'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/mechanical/RollingShaftMachine.kt:147:5 'canPlaceItemThroughFace' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/misc/Utils.kt:208:43 Unresolved reference: Ec
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/misc/Utils.kt:208:52 Unresolved reference: Rs
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/node/NodeBase.kt:174:25 Unresolved reference: portableOreScannerElement
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ore/OreDescriptor.kt:14:43 Type mismatch: inferred type is String? but String was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ore/OreDescriptor.kt:25:14 Unresolved reference: addOre
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/ore/OreItem.kt:8:5 'addDescriptor' in 'GenericItemBlockUsingDamage' is final and cannot be overridden
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/packets/AchievePacketHandler.kt:11:44 Unresolved reference: triggerAchievement
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/packets/AchievePacketHandler.kt:11:76 Unresolved reference: openGuide
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/packets/AchievePacketHandler.kt:13:44 Unresolved reference: triggerAchievement
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/packets/AchievePacketHandler.kt:13:76 Unresolved reference: craft50VMacerator
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SingleNodeRegistration.kt:38:24 Unresolved reference: addMapping
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SingleNodeRegistration.kt:52:24 Unresolved reference: addMapping
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SingleNodeRegistration.kt:65:17 Smart cast to 'EnergyConverterElnToOtherBlock' is impossible, because 'Eln.instance.elnToOtherBlockConverter' is a complex expression
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SingleNodeRegistration.kt:66:44 Smart cast to 'EnergyConverterElnToOtherBlock' is impossible, because 'Eln.instance.elnToOtherBlockConverter' is a complex expression
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/SixNodeRegistration.kt:73:17 Unresolved reference: isDevelopmentRun
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/registration/TransparentNodeRegistration.kt:1004:63 Unresolved reference: tFloor
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/server/OreRegenerate.kt:49:81 Unresolved reference: oreBlock
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sim/nbt/NbtBatteryProcess.kt:28:13 Unresolved reference: setDouble
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sim/nbt/NbtBatteryProcess.kt:29:13 Unresolved reference: setDouble
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sim/process/destruct/ValueWatchdog.kt:33:44 Unresolved reference: rand
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sim/process/destruct/ValueWatchdog.kt:40:17 Too many arguments for public final fun println(message: Any?): Unit defined in mods.eln.misc.Utils
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sim/process/destruct/ValueWatchdog.kt:41:17 Too many arguments for public final fun println(message: Any?): Unit defined in mods.eln.misc.Utils
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sim/process/heater/ElectricalLoadHeatThermalLoad.kt:8:7 Redeclaration: ElectricalLoadHeatThermalLoad
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/DeviceProbe.kt:214:78 Type mismatch: inferred type is String but BlockEntityType<*> was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/DeviceProbe.kt:214:96 Type mismatch: inferred type is BlockPos but String was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/DeviceProbe.kt:214:101 Type mismatch: inferred type is BlockState but BlockPos was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/DeviceProbe.kt:214:101 No value passed for parameter 'state'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherEntity.kt:30:92 Type mismatch: inferred type is String but BlockEntityType<*> was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherEntity.kt:30:106 Type mismatch: inferred type is BlockPos but String was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherEntity.kt:30:111 Type mismatch: inferred type is BlockState but BlockPos was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherEntity.kt:30:111 No value passed for parameter 'state'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherFireWallIc2.kt:25:56 Unresolved reference: isClient
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/AnalogChips.kt:857:13 Operator '===' cannot be applied to 'IGuiObject' and 'GuiVerticalCustomValuesBar?'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/CurrentSourceSix.kt:158:31 Return type of 'newHelper' is not a subtype of the return type of the overridden member 'public open fun newHelper(): GuiHelperContainer defined in mods.eln.gui.ScreenEln'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/CurrentSourceSix.kt:166:31 Type mismatch: inferred type is CurrentSourceGui but GuiTextFieldEln.GuiTextFieldElnObserver was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/CurrentSourceSix.kt:167:30 Type mismatch: inferred type is List<String> but Array<String> was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/CurrentSourceSix.kt:170:5 'textFieldNewValue' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/ElectricalFuse.kt:49:78 Unresolved reference: ElectricalCableDescriptor
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/ElectricalFuse.kt:220:72 Type mismatch: inferred type is ItemStack? but ItemStack was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/ElectricalVuMeter.kt:219:96 Unresolved reference: tileEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/ElectricalVuMeter.kt:249:50 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ElectricalCableDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/EmergencyLamp.kt:291:5 'guiObjectEvent' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/PortableNaN.kt:28:9 Val cannot be reassigned
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/PowerSinkSix.kt:170:30 Type mismatch: inferred type is List<String> but Array<String> was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/PowerSourceSix.kt:165:30 Type mismatch: inferred type is List<String> but Array<String> was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/Scanner.kt:76:28 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/Scanner.kt:213:105 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ElectricalCableDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/currentcable/CurrentCable.kt:235:45 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/currentcable/CurrentCable.kt:243:53 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:21:34 Unresolved reference: IItemRenderer
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:22:34 Unresolved reference: IItemRenderer
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:56:5 'shouldUseRenderHelper' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:56:46 Unresolved reference: ItemRenderType
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:56:87 Unresolved reference: ItemRendererHelper
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:57:24 Unresolved reference: ItemRenderType
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:60:5 'handleRenderType' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:60:58 Unresolved reference: ItemRenderType
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:64:5 'shouldUseRenderHelperEln' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:64:49 Unresolved reference: ItemRenderType
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:64:90 Unresolved reference: ItemRendererHelper
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:65:24 Unresolved reference: ItemRenderType
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:68:5 'renderItem' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:68:35 Unresolved reference: ItemRenderType
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:69:21 Unresolved reference: ItemRenderType
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:70:19 Unresolved reference: renderItem
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:74:32 Unresolved reference: f
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:74:37 Unresolved reference: f
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:74:42 Unresolved reference: f
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:74:47 Unresolved reference: f
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:91:5 'addInformation' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:92:15 Unresolved reference: addInformation
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:96:5 'addRealismContext' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/diode/DiodeDescriptor.kt:97:15 Unresolved reference: addRealismContext
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalcable/ElectricalCableElement.kt:71:5 'load' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalcable/ElectricalCableElement.kt:72:15 Unresolved reference: load
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalcable/ElectricalCableElement.kt:78:5 'saveAdditional' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalcable/ElectricalCableElement.kt:79:15 Unresolved reference: saveAdditional
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorElement.kt:83:52 Type mismatch: inferred type is Double but String was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorElement.kt:83:52 No value passed for parameter 'value'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorRender.kt:76:81 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ElectricalCableDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorSlowProcess.kt:28:55 Unresolved reference: getEnergyMax
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorSlowProcess.kt:61:83 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorSlowProcess.kt:61:135 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorSlowProcess.kt:61:187 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorSlowProcess.kt:61:239 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorSlowProcess.kt:74:99 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type SixNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketContainer.kt:4:22 Unresolved reference: LampSlot
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketContainer.kt:14:5 Unresolved reference: LampSlot
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketElement.kt:18:21 Unresolved reference: MonsterPopFreeProcess
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketElement.kt:38:33 Unresolved reference: MonsterPopFreeProcess
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketElement.kt:38:91 Unresolved reference: killMonstersAroundLampsRange
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketElement.kt:59:9 Val cannot be reassigned
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketElement.kt:64:30 Type mismatch: inferred type is Float but Double was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketElement.kt:203:39 Return type of 'thermoMeterString' is not a subtype of the return type of the overridden member 'public open fun thermoMeterString(): String defined in mods.eln.node.six.SixNodeElement'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketElement.kt:251:29 Expression 'nextClockwise' of type 'LRDU' cannot be invoked as a function. The function 'invoke()' is not found
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketElement.kt:253:33 Expression 'nextClockwise' of type 'LRDU' cannot be invoked as a function. The function 'invoke()' is not found
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:30:32 Unresolved reference: newGuiButton
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:31:23 Unresolved reference: newGuiTextField
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:33:32 Unresolved reference: newGuiButton
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:34:23 Unresolved reference: newGuiTextField
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:37:26 Unresolved reference: newGuiButton
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:39:30 Type mismatch: inferred type is List<String> but Array<String> was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:42:18 Unresolved reference: newGuiVerticalTrackBar
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:48:22 Unresolved reference: visible
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:52:5 'guiObjectEvent' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt:53:30 Type mismatch: inferred type is IGuiObject but Int was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketProcess.kt:43:36 Unresolved reference: sixNode
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketProcess.kt:207:44 Unresolved reference: addToRp
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/powersocket/PowerSocketElement.kt:5:22 Unresolved reference: IConfigurable
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/powersocket/PowerSocketElement.kt:27:16 Conflicting import, imported name 'DataOutputStream' is ambiguous
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/powersocket/PowerSocketElement.kt:28:16 Conflicting import, imported name 'IOException' is ambiguous
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/powersocket/PowerSocketElement.kt:31:16 Conflicting import, imported name 'DataOutputStream' is ambiguous
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/powersocket/PowerSocketElement.kt:32:16 Conflicting import, imported name 'IOException' is ambiguous
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/powersocket/PowerSocketElement.kt:36:4 Unresolved reference: IConfigurable
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/powersocket/PowerSocketElement.kt:175:5 'readConfigTool' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/sixnode/powersocket/PowerSocketElement.kt:185:5 'writeConfigTool' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/ArcFurnace.kt:108:36 Unresolved reference: TransparentNodeBlockEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/ArcFurnace.kt:162:17 Unresolved reference: draw
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/DcDc.kt:520:17 Unresolved reference: draw
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/Fabricator.kt:155:33 None of the following functions can be called with the arguments supplied: 
+public constructor ItemStack(p0: Holder<Item!>!, p1: Int) defined in net.minecraft.world.item.ItemStack
+public constructor ItemStack(p0: ItemLike!, p1: Int) defined in net.minecraft.world.item.ItemStack
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/Fabricator.kt:158:25 None of the following functions can be called with the arguments supplied: 
+public constructor ItemStack(p0: Holder<Item!>!, p1: Int) defined in net.minecraft.world.item.ItemStack
+public constructor ItemStack(p0: ItemLike!, p1: Int) defined in net.minecraft.world.item.ItemStack
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/Fabricator.kt:245:32 Unresolved reference: TransparentNodeBlockEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/Fabricator.kt:283:17 Unresolved reference: draw
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/Floodlight.kt:97:41 'name' hides member of supertype 'TransparentNodeDescriptor' and needs 'override' modifier
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/FuelGenerator.kt:146:20 Cannot access 'level': it is invisible (private in a supertype) in 'Player'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/FuelGenerator.kt:167:42 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GenericItemUsingDamageDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/FuelGenerator.kt:168:43 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GenericItemUsingDamageDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/FuelGenerator.kt:169:40 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type GenericItemUsingDamageDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/FuelGenerator.kt:208:39 Unresolved reference: TransparentNodeBlockEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/FuelHeatFurnace.kt:262:41 Unresolved reference: TransparentNodeBlockEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/LampSupplyElement.kt:14:17 Unresolved reference: transparentNode
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/LargeRheostat.kt:24:33 Unresolved reference: thermaldissipatorpassive
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/LargeRheostat.kt:38:61 Unresolved reference: ThermalDissipatorPassiveDescriptor
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/LargeRheostat.kt:205:35 Unresolved reference: TransparentNodeBlockEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/NixieTube.kt:138:19 Function invocation 'inverse()' expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/NixieTube.kt:183:31 Unresolved reference: TransparentNodeBlockEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/NixieTube.kt:212:27 Unresolved reference: setGlColorFromDye
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/StreetLightWall.kt:141:41 Unresolved reference: TransparentNodeBlockEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/ThermalHeatExchanger.kt:111:24 None of the following functions can be called with the arguments supplied: 
+public constructor ElementSidedFluidHandler(tankSizeMb: Int) defined in mods.eln.fluid.ElementSidedFluidHandler
+public constructor ElementSidedFluidHandler(tankData: Map<Direction, ElementSidedFluidHandler.TankData>) defined in mods.eln.fluid.ElementSidedFluidHandler
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/VariableDcDc.kt:382:38 Unresolved reference: TransparentNodeBlockEntity
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/VariableDcDc.kt:383:22 Overload resolution ambiguity: 
+public constructor Coordinate(other: Coordinate) defined in mods.eln.misc.Coordinate
+public constructor Coordinate(tileEntity: BlockEntity) defined in mods.eln.misc.Coordinate
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/autominer/AutoMinerRender.kt:5:46 No value passed for parameter 'context'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxRender.kt:5:56 No value passed for parameter 'context'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxRender.kt:5:56 No value passed for parameter 'context'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/electricalmachine/MagnetizerDescriptor.kt:75:21 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ElectricalCableDescriptor?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/festive/FestiveElement.kt:101:64 Unresolved reference: u
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/festive/FestiveElement.kt:103:25 Assignment operators ambiguity: 
+public open fun `<Error function>`(): [Error type: Return type for function cannot be resolved] defined in root package
+public open fun `<Error function>`(): [Error type: Return type for function cannot be resolved] defined in root package
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/solarpanel/SolarPanelRender.kt:5:47 No value passed for parameter 'context'
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/teleporter/TeleporterElement.kt:35:56 Type mismatch: inferred type is TransparentNode? but NodeBase was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/teleporter/TeleporterElement.kt:44:20 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type TransparentNode?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/teleporter/TeleporterElement.kt:59:5 'onBreakFromWorld' overrides nothing
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/teleporter/TeleporterElement.kt:60:15 Unresolved reference: onBreakFromWorld
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/teleporter/TeleporterRender.kt:24:26 Unresolved reference: setMaxSpeed
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/teleporter/TeleporterRender.kt:29:14 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type Direction?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/thermaldissipator/ThermalDissipatorActiveDescriptor.kt:64:14 Unresolved reference: setRs
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/thermaldissipator/ThermalDissipatorActiveElement.kt:39:56 Type mismatch: inferred type is TransparentNode? but NodeBase was expected
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/thermaldissipator/ThermalDissipatorActiveRender.kt:21:14 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type Direction?
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/thermaldissipator/ThermalDissipatorActiveRender.kt:26:12 Unresolved reference: setTarget
+e: file:///Users/aiw.robson/Documents/Projects/ElectricalAge2/src/main/kotlin/mods/eln/transparentnode/thermaldissipator/ThermalDissipatorPassiveRender.kt:16:14 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type Direction?
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.5/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 23s
+3 actionable tasks: 2 executed, 1 up-to-date

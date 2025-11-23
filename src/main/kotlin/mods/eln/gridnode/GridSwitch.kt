@@ -6,7 +6,7 @@ import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
 import mods.eln.sim.mna.component.Resistor
@@ -16,8 +16,10 @@ import mods.eln.sim.process.destruct.VoltageStateWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sound.LoopedSound
 import net.minecraft.world.item.ItemStack
-import net.minecraft.util.Vec3
-import net.minecraftforge.client.IItemRenderer
+import net.minecraft.world.phys.Vec3
+import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
+// import net.minecraftforge.client.IItemRenderer
+
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -31,7 +33,7 @@ class GridSwitchDescriptor(
     GridSwitchElement::class.java,
     GridSwitchRender::class.java,
     "textures/wire.png",
-    Eln.instance.highVoltageCableDescriptor,
+    Eln.instance!!.highVoltageCableDescriptor!!,
     12
 ) {
     var rebound: Double = 0.0  // coef. of restitution
@@ -39,7 +41,7 @@ class GridSwitchDescriptor(
     var damping: Double = 4.0
     var drag: Double = 0.2  // 1/s
     var nominalU: Double = Eln.MVU
-    val resistance = Eln.instance.highVoltageCableDescriptor.electricalRs
+    val resistance = Eln.instance!!.highVoltageCableDescriptor!!.electricalRs
     var sinkMin = 20  // Essentially: full load
     var sinkMax = 1000  // Essentially: leakage
     var arcSound = "eln:arc"
@@ -50,7 +52,7 @@ class GridSwitchDescriptor(
     var maxVolume = 5.0
     var nominalGridP = 8000
     init {
-        renderOffset = Vec3.createVectorHelper(2.5, -0.5, 1.5)
+        renderOffset = Vec3(2.5, -0.5, 1.5)
     }
     companion object {
         // val QUARTER_TURN = PI / 2  // WHY does OpenGL use degrees?!
@@ -66,12 +68,12 @@ class GridSwitchDescriptor(
     ).map { obj.getPart(it) }
 
     val rotors = mapOf(  // Name to Pair(Origin,cw?)
-        "Contact_M1_ContactMMesh_1" to Pair(Vec3.createVectorHelper(4.5, 1.75, 0.5), true),
-        "Contact_M2_ContactMMesh_2.001" to Pair(Vec3.createVectorHelper(4.5, 1.75, 2.5), false),
-        "Contact_F1_ContactFMesh_1" to Pair(Vec3.createVectorHelper(0.5, 1.75, 0.5), false),
-        "Contact_F2_ContactFMesh_2" to Pair(Vec3.createVectorHelper(0.5, 1.75, 2.5), true),
-        "Belt_pulley_1_BeltPulleyMesh_1" to Pair(Vec3.createVectorHelper(4.0, 1.75, 0.5), false),
-        "Belt_pulley_2_BeltPulleyMesh_2" to Pair(Vec3.createVectorHelper(4.0, 1.75, 2.5), true)
+        "Contact_M1_ContactMMesh_1" to Pair(Vec3(4.5, 1.75, 0.5), true),
+        "Contact_M2_ContactMMesh_2.001" to Pair(Vec3(4.5, 1.75, 2.5), false),
+        "Contact_F1_ContactFMesh_1" to Pair(Vec3(0.5, 1.75, 0.5), false),
+        "Contact_F2_ContactFMesh_2" to Pair(Vec3(0.5, 1.75, 2.5), true),
+        "Belt_pulley_1_BeltPulleyMesh_1" to Pair(Vec3(4.0, 1.75, 0.5), false),
+        "Belt_pulley_2_BeltPulleyMesh_2" to Pair(Vec3(4.0, 1.75, 2.5), true)
     ).mapKeys { obj.getPart(it.key) }
 
     init {
@@ -95,9 +97,9 @@ class GridSwitchDescriptor(
         if (!isInventory) {
             GL11.glRotated(90.0, 0.0, 1.0, 0.0)
             GL11.glTranslated(
-                renderOffset.xCoord,
-                renderOffset.yCoord,
-                renderOffset.zCoord
+                renderOffset.x,
+                renderOffset.y,
+                renderOffset.z
             )
         } else {
             // what a darn hack this is. Would love to figure out what is *actually* going on here.
@@ -107,21 +109,21 @@ class GridSwitchDescriptor(
         objectList.forEach {
             it.draw()
         }
-        rotors.forEach {
-            val part = it.key
-            val origin = it.value.first
-            val cw = it.value.second
+        rotors.forEach { entry ->
+            val part = entry.key
+            val origin = entry.value.first
+            val cw = entry.value.second
 
             preserveMatrix {
                 // Strictly speaking, since our rotations are only on Y, we only need to translate to/from that axis.
                 // But we might as well do the whole thing since it's all in one call anyway.
-                GL11.glTranslated(-origin.xCoord, -origin.yCoord, -origin.zCoord)
+                GL11.glTranslated(-origin.x, -origin.y, -origin.z)
                 GL11.glRotated(if (cw) {
                     -angle
                 } else {
                     angle
                 }, 0.0, 1.0, 0.0)
-                GL11.glTranslated(origin.xCoord, origin.yCoord, origin.zCoord)
+                GL11.glTranslated(origin.x, origin.y, origin.z)
                 part.draw()
             }
         }
@@ -131,11 +133,14 @@ class GridSwitchDescriptor(
 
     override fun hasCustomIcon() = false
 
+    /*
     override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
 
     override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
         draw(0.0, true)
     }
+    */
+
 }
 
 class GridSwitchElement(node: TransparentNode, descriptor: TransparentNodeDescriptor): GridElement(node, descriptor, 12) {
@@ -150,7 +155,7 @@ class GridSwitchElement(node: TransparentNode, descriptor: TransparentNodeDescri
 
     val control = NbtElectricalGateInput("control")
     val power = NbtElectricalLoad("power").apply {
-        Eln.instance.meduimVoltageCableDescriptor.applyTo(this)
+        Eln.instance!!.meduimVoltageCableDescriptor?.applyTo(this)
     }
     val powerSink = Resistor(power, null).apply { resistance = desc.sinkMax.toDouble() }
 
@@ -236,13 +241,13 @@ class GridSwitchElement(node: TransparentNode, descriptor: TransparentNodeDescri
             Coordinate(-1, 0, -1, 0),
             power, NodeBase.maskElectricalPower
         )
-        ghostPower!!.initialize()
+        ghostPower!!.initialize(node!!.level!!)
         ghostControl = GhostPowerNode(
             node!!.coordinate, front,
             Coordinate(-1, 0, 0, 0),
             control, NodeBase.maskElectricalGate
         )
-        ghostControl!!.initialize()
+        ghostControl!!.initialize(node!!.level!!)
         Utils.println("GS.i: ghost power at ${ghostPower!!.coord}, control at ${ghostControl!!.coord}")
         super.initialize()
     }
@@ -264,12 +269,16 @@ class GridSwitchElement(node: TransparentNode, descriptor: TransparentNodeDescri
         }
         val part = (if(i == 0) { desc.plus } else { desc.gnd })[idx]
         val ro = desc.renderOffset
-        val pt = part.boundingBox().centre().addVector(
-            ro.xCoord, ro.yCoord, ro.zCoord
+        val pt = Vec3(
+            (part.xMin + part.xMax) / 2.0,
+            (part.yMin + part.yMax) / 2.0,
+            (part.zMin + part.zMax) / 2.0
+        ).add(
+            ro.x, ro.y, ro.z
         )
         // Rotate this point by a quarter turn around y to correspond to our rendering offset
-        return Vec3.createVectorHelper(
-            pt.zCoord, pt.yCoord, -pt.xCoord
+        return Vec3(
+            pt.z, pt.y, -pt.x
         )
     }
 
@@ -298,7 +307,7 @@ class GridSwitchElement(node: TransparentNode, descriptor: TransparentNodeDescri
     }
 }
 
-class GridSwitchRender(entity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) : GridRender(entity, descriptor) {
+class GridSwitchRender(entity: TransparentNodeBlockEntity, descriptor: TransparentNodeDescriptor) : GridRender(entity, descriptor) {
     init {
         this.transparentNodedescriptor = descriptor as GridSwitchDescriptor
     }

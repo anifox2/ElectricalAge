@@ -8,8 +8,8 @@ open class GuiHelper(val screen: Screen?, val width: Int, val height: Int, backg
     val objectList = ArrayList<IGuiObject>()
     val drawables = ArrayList<(net.minecraft.client.gui.GuiGraphics, Int, Int) -> Unit>()
     var background: ResourceLocation? = null
-    var xSize = width
-    var ySize = height
+    @JvmField var xSize = width
+    @JvmField var ySize = height
 
     init {
         if (backgroundName != null) {

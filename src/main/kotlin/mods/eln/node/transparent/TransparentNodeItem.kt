@@ -16,9 +16,10 @@ import net.minecraft.world.item.context.UseOnContext
 import net.minecraft.world.InteractionResult
 import net.minecraft.core.BlockPos
 
-class TransparentNodeItem(b: Block?) : GenericItemBlockUsingDamage<TransparentNodeDescriptor?>(b) {
+class TransparentNodeItem(b: Block?) : GenericItemBlockUsingDamage<TransparentNodeDescriptor>(b!!) {
     
     override fun useOn(context: UseOnContext): InteractionResult {
+        /*
         val world = context.level
         val player = context.player ?: return InteractionResult.FAIL
         val pos = context.clickedPos
@@ -48,6 +49,7 @@ class TransparentNodeItem(b: Block?) : GenericItemBlockUsingDamage<TransparentNo
         
         val coord = Coordinate(x, y, z, 0) // TODO: Dimension
         var error: String? = null
+        
         if (descriptor.checkCanPlace(coord, front, world).also { error = it } != null) {
             addChatMessage(player, error!!)
             return InteractionResult.FAIL
@@ -75,7 +77,7 @@ class TransparentNodeItem(b: Block?) : GenericItemBlockUsingDamage<TransparentNo
              // ...
              return InteractionResult.SUCCESS
         }
-        
+        */
         return InteractionResult.FAIL
     }
 

@@ -4,10 +4,13 @@ import mods.eln.Eln;
 import mods.eln.misc.*;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.IItemRenderer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -16,10 +19,12 @@ import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
+import mods.eln.sim.IResistorDescriptor;
+
 /**
  * Created by svein on 05/08/15.
  */
-public class ResistorDescriptor extends SixNodeDescriptor {
+public class ResistorDescriptor extends SixNodeDescriptor implements IResistorDescriptor {
 
     public final boolean isRheostat;
     public double thermalCoolLimit = -100;
@@ -31,6 +36,16 @@ public class ResistorDescriptor extends SixNodeDescriptor {
     Obj3D.Obj3DPart ResistorBaseExtension, ResistorCore, ResistorTrack, ResistorWiper, Base, Cables;
     IFunction series;
     private Obj3D obj;
+
+    @Override
+    public double getTempCoef() {
+        return tempCoef;
+    }
+
+    @Override
+    public boolean isRheostat() {
+        return isRheostat;
+    }
 
 
     public ResistorDescriptor(String name,
@@ -54,15 +69,15 @@ public class ResistorDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
-    public double getRsValue(IInventory inventory) {
-        ItemStack core = inventory.getStackInSlot(ResistorContainer.coreId);
+    public double getRsValue(Container inventory) {
+        ItemStack core = inventory.getItem(ResistorContainer.coreId);
 
-        if (core == null) return series.getValue(0);
-        return series.getValue(core.stackSize);
+        if (core.isEmpty()) return series.getValue(0);
+        return series.getValue(core.getCount());
     }
 
     @Override
-    public void setParent(net.minecraft.item.Item item, int damage) {
+    public void setParent(Item item, int damage) {
         super.setParent(item, damage);
         Data.addEnergy(newItemStack());
     }
@@ -88,39 +103,17 @@ public class ResistorDescriptor extends SixNodeDescriptor {
         }
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(IItemRenderer.ItemRenderType type, ItemStack item, IItemRenderer.ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, IItemRenderer.ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public void renderItem(IItemRenderer.ItemRenderType type, ItemStack item, Object... data) {
-        if (type != ItemRenderType.INVENTORY) {
-            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
-            GL11.glScalef(1.25f, 1.25f, 1.25f);
-            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
-            draw(0);
-        } else {
-            super.renderItem(type, item, data);
-        }
-    }
-
     @Nullable
     @Override
-    public LRDU getFrontFromPlace(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public LRDU getFrontFromPlace(@NotNull Direction side, @NotNull Player player) {
         return super.getFrontFromPlace(side, player).left();
     }
 
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List<String> list, boolean par4) {
-        super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("It's a resistor"));
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, level, tooltip, flag);
+        tooltip.add(Component.translatable("It's a resistor"));
     }
 
     @Override

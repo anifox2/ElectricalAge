@@ -16,10 +16,10 @@ import net.minecraft.world.phys.shapes.VoxelShape
 import net.minecraft.world.phys.shapes.Shapes
 import net.minecraft.world.phys.HitResult
 
-class TransparentNodeBlock(properties: Properties) : NodeBlock(properties, { pos, state -> TransparentNodeEntity(Registration.TRANSPARENT_NODE_BLOCK_ENTITY.get(), pos, state) }, 0) {
+class TransparentNodeBlock(properties: Properties) : NodeBlock(properties, { pos, state -> TransparentNodeBlockEntity(pos, state) }, 0) {
 
     override fun getCloneItemStack(state: BlockState, target: HitResult, level: BlockGetter, pos: BlockPos, player: Player): ItemStack {
-        val entity = level.getBlockEntity(pos) as? TransparentNodeEntity
+        val entity = level.getBlockEntity(pos) as? TransparentNodeBlockEntity
         if (entity != null) {
              val stack = ItemStack(this)
              stack.damageValue = entity.elementRenderId.toInt()
@@ -29,7 +29,7 @@ class TransparentNodeBlock(properties: Properties) : NodeBlock(properties, { pos
     }
 
     override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape {
-        // TODO: Implement custom shapes based on TransparentNodeEntity descriptor
+        // TODO: Implement custom shapes based on TransparentNodeBlockEntity descriptor
         return Shapes.block()
     }
 
@@ -39,7 +39,7 @@ class TransparentNodeBlock(properties: Properties) : NodeBlock(properties, { pos
             if (entity != null) {
                 val nodeBase: NodeBase? = entity.node
                 if (nodeBase is TransparentNode) {
-                    nodeBase.removedByPlayer = player
+                    nodeBase.removedByPlayer = player as? net.minecraft.server.level.ServerPlayer
                 }
             }
         }

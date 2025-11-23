@@ -7,11 +7,13 @@ import mods.eln.misc.UtilsClient
 import mods.eln.wiki.Data
 import net.minecraft.client.Minecraft
 import net.minecraft.world.entity.player.Player
-import net.minecraft.item.Item
+import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.util.ResourceLocation
-import net.minecraftforge.client.IItemRenderer
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.network.chat.Component
+// import net.minecraftforge.client.IItemRenderer
+
 import org.lwjgl.opengl.GL11
 
 class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
@@ -19,32 +21,32 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
     private val ricon = ResourceLocation("eln", "textures/items/" + name.lowercase().replace(" ", "") + ".png")
 
 
-    override fun getName(stack: ItemStack): String {
-        val creative = Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode
+    override fun getName(stack: ItemStack): Component {
+        val creative = Minecraft.getInstance().player?.isCreative() ?: false
         val color = getColor(stack)
         val life = getLife(stack)
-        return if (!creative && color == 15 && life == 0) "Empty " + super.getName(stack) else super.getName(stack)?: ""
+        return if (!creative && color == 15 && life == 0) Component.literal("Empty ").append(super.getName(stack)) else super.getName(stack)
     }
 
-    override fun setParent(item: Item?, damage: Int) {
-        super.setParent(item, damage)
+    override fun setParent(registry: Any?, id: Int) {
+        super.setParent(registry, id)
         Data.addWiring(newItemStack())
     }
 
-    fun getColor(stack: ItemStack) = stack.itemDamage and 0xF
+    fun getColor(stack: ItemStack) = stack.damageValue and 0xF
 
-    private fun getLife(stack: ItemStack?) = if (stack == null || stack.tagCompound == null)
+    private fun getLife(stack: ItemStack?) = if (stack == null || stack.tag == null)
         32
     else
-        stack.tagCompound.getInteger("life")
+        stack.tag!!.getInt("life")
 
     fun setLife(stack: ItemStack, life: Int) {
-        stack.tagCompound.setInteger("life", life)
+        stack.getOrCreateTag().putInt("life", life)
     }
 
     override fun getDefaultNBT(): CompoundTag? {
         val nbt = CompoundTag()
-        nbt.setInteger("life", 32)
+        nbt.putInt("life", 32)
         return nbt
     }
 
@@ -52,19 +54,20 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
         super.appendHoverText(itemStack, level, list, flag)
 
         if (itemStack != null) {
-            val creative = Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode
-            list.add(tr("Can paint %1$ blocks", if (creative) "infinite" else itemStack.tagCompound.getInteger("life")))
+            val creative = Minecraft.getInstance().player?.isCreative() ?: false
+            val text = tr("Can paint %1$ blocks", if (creative) "infinite" else itemStack.tag?.getInt("life") ?: 32)
+            list.add(Component.literal(text))
         }
     }
 
     fun use(stack: ItemStack, entityPlayer: Player): Boolean {
 
-        val creative = entityPlayer.capabilities.isCreativeMode
-        var life = stack.tagCompound.getInteger("life")
+        val creative = entityPlayer.isCreative()
+        var life = stack.tag?.getInt("life") ?: 32
         return if (creative || life != 0) {
             if (!creative) {
                 --life
-                stack.tagCompound.setInteger("life", life)
+                stack.getOrCreateTag().putInt("life", life)
             }
             true
         } else {
@@ -73,6 +76,7 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
         }
     }
 
+    /*
     override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?) = type == IItemRenderer.ItemRenderType.INVENTORY
 
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?, helper: IItemRenderer.ItemRendererHelper?) =
@@ -80,7 +84,7 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
 
     override fun renderItem(type: IItemRenderer.ItemRenderType?, item: ItemStack?, vararg data: Any?) {
         if (type == IItemRenderer.ItemRenderType.INVENTORY) {
-            val creative = Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode
+            val creative = Minecraft.getInstance().player.capabilities.isCreativeMode
             UtilsClient.drawIcon(type, ricon)
             if (!creative) {
                 GL11.glColor4f(1f, 1f, 1f, 0.75f - 0.75f * getLife(item) / 32f)
@@ -91,6 +95,8 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
             super.renderItem(type, item, *data)
         }
     }
+    */
+
 
     companion object {
         private val dryOverlay = ResourceLocation("eln", "textures/items/brushdryoverlay.png")

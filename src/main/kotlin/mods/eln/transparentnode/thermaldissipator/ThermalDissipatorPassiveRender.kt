@@ -2,18 +2,18 @@ package mods.eln.transparentnode.thermaldissipator
 
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeElementRender
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 
 class ThermalDissipatorPassiveRender(
-    entity: TransparentNodeEntity,
+    entity: TransparentNodeBlockEntity,
     descriptor: TransparentNodeDescriptor
 ) : TransparentNodeElementRender(entity, descriptor) {
 
     private val descriptor: ThermalDissipatorPassiveDescriptor = descriptor as ThermalDissipatorPassiveDescriptor
 
     override fun draw() {
-        super.draw()
-        front.glRotateXnRef()
+        
+        front!!.glRotateXnRef()
         descriptor.draw()
     }
 }

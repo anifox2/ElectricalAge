@@ -4,14 +4,14 @@ import mods.eln.gui.ISlotSkin
 import mods.eln.gui.SlotWithSkin
 import net.minecraft.world.Container
 
-class GenericItemUsingDamageSlot(
+open class GenericItemUsingDamageSlot(
     inventory: Container,
     index: Int,
     x: Int,
     y: Int,
     val stackLimit: Int,
     val allowedClasses: Array<Class<*>>,
-    skin: ISlotSkin.SlotSkin = ISlotSkin.SlotSkin.Medium,
+    skin: ISlotSkin.SlotSkin = ISlotSkin.SlotSkin.medium,
     val tooltip: Array<String>? = null
 ) : SlotWithSkin(inventory, index, x, y, skin) {
     

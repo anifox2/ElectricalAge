@@ -6,7 +6,7 @@ import mods.eln.misc.*
 import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
 import net.minecraft.world.entity.LivingEntity
@@ -34,9 +34,9 @@ class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(b
         assert(rotatingOnAllSides.size > 0)
         val bb = rotatingOnAllSides[0].boundingBox()
         val centre = bb.centre()
-        val ox = centre.xCoord
-        val oy = centre.yCoord
-        val oz = centre.zCoord
+        val ox = centre.x
+        val oy = centre.y
+        val oz = centre.z
         var direction = front;
         for (i in 0..3) {
             if (connectedSides.contains(direction)) {
@@ -106,7 +106,7 @@ class JointHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     }
 }
 
-class JointHubRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
+class JointHubRender(entity: TransparentNodeBlockEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
     override val cableRender: CableRenderDescriptor? = null
     val desc = desc as JointHubDescriptor
     val connectedSides = DirectionSet()

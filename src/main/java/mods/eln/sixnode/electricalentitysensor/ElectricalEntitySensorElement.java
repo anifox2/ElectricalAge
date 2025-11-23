@@ -16,9 +16,8 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -96,9 +95,9 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
-        return inventory.take(entityPlayer.getCurrentEquippedItem());
+        return inventory.take(entityPlayer.getInventory().getSelected());
     }
 
     @Override
@@ -107,7 +106,7 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
     }
 
     @Override
-    public IInventory getInventory() {
+    public Container getInventory() {
         if (inventory != null)
             return inventory.getInventory();
         else
@@ -116,7 +115,7 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
 
     @Nullable
     @Override
-    public Container newContainer(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public net.minecraft.world.inventory.AbstractContainerMenu newContainer(@NotNull Direction side, @NotNull Player player) {
         return new ElectricalEntitySensorContainer(player, inventory.getInventory());
     }
 
@@ -131,7 +130,7 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeBoolean(slowProcess.state);
-            Utils.serialiseItemStack(stream, getInventory().getStackInSlot(ElectricalEntitySensorContainer.filterId));
+            Utils.serialiseItemStack(stream, getInventory().getItem(ElectricalEntitySensorContainer.filterId));
         } catch (IOException e) {
 
             e.printStackTrace();

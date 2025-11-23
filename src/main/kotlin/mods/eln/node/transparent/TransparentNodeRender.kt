@@ -6,8 +6,8 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 import org.lwjgl.opengl.GL11
 
-open class TransparentNodeRender(context: BlockEntityRendererProvider.Context) : BlockEntityRenderer<TransparentNodeEntity> {
-    override fun render(entity: TransparentNodeEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+open class TransparentNodeRender(context: BlockEntityRendererProvider.Context) : BlockEntityRenderer<TransparentNodeBlockEntity> {
+    override fun render(entity: TransparentNodeBlockEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         if (entity.elementRender == null) return
         
         poseStack.pushPose()

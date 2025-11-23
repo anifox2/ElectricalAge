@@ -38,7 +38,7 @@ class ElectricalFireDetectorRender(tileEntity: SixNodeEntity, side: Direction, d
     }
 
     override fun draw() {
-        super.draw()
+        
 
         if (!descriptor.batteryPowered) {
             drawSignalPin(front!!.right(), descriptor.pinDistance)
@@ -73,7 +73,7 @@ class ElectricalFireDetectorRender(tileEntity: SixNodeEntity, side: Direction, d
         }
     }
 
-    override fun getCableRender(lrdu: LRDU) = Eln.instance.signalCableDescriptor.render!!
+    override fun getCableRender(lrdu: LRDU) = Eln.instance!!.signalCableDescriptor!!.render!!
 
     override fun newGuiDraw(side: Direction, player: Player) = if (inventory != null)
         ElectricalFireDetectorGui(player, inventory, this) else null

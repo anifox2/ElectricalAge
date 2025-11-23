@@ -4,6 +4,8 @@ import mods.eln.Eln
 import mods.eln.i18n.I18N
 import mods.eln.misc.Version.simpleVersionName
 import net.minecraft.client.Minecraft
+import net.minecraftforge.api.distmarker.Dist
+import net.minecraftforge.fml.loading.FMLEnvironment
 import org.apache.http.HttpStatus
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClientBuilder
@@ -59,7 +61,7 @@ object AnalyticsHandler {
             val version = simpleVersionName.replace("\\s+".toRegex(), "")
             val lang = I18N.getCurrentLanguage()
 
-            if (Eln.analyticsPlayerUUIDOptIn && FMLCommonHandler.instance().effectiveSide == Side.CLIENT) {
+            if (Eln.analyticsPlayerUUIDOptIn && FMLEnvironment.dist == Dist.CLIENT) {
                 // PLAYER HAS OPTED INTO SENDING THEIR UUID (and is not a server)
                 val formatUrl = "%s?version=%s&lang=%s&uuid=%s&name=%s"
                 url = String.format(
@@ -67,8 +69,8 @@ object AnalyticsHandler {
                     Eln.analyticsURL,
                     version,
                     lang,
-                    Minecraft.getMinecraft().session.func_148256_e().id.toString(),
-                    Minecraft.getMinecraft().session.playerID
+                    Minecraft.getInstance().user.gameProfile.id.toString(),
+                    Minecraft.getInstance().user.gameProfile.name
                 )
             } else {
                 // PLAYER HAS NOT OPTED INTO SENDING THEIR UUID

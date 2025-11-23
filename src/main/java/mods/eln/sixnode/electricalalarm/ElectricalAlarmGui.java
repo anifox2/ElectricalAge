@@ -1,48 +1,43 @@
 package mods.eln.sixnode.electricalalarm;
 
-import mods.eln.gui.GuiHelper;
-import mods.eln.gui.GuiScreenEln;
-import mods.eln.gui.IGuiObject;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.entity.player.EntityPlayer;
+import mods.eln.gui.GuiButtonEln;
+import mods.eln.gui.GuiHelperContainer;
+import mods.eln.gui.ScreenEln;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.entity.player.Player;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class ElectricalAlarmGui extends GuiScreenEln {
+public class ElectricalAlarmGui extends ScreenEln {
 
-    GuiButton toogleDefaultOutput;
+    GuiButtonEln toogleDefaultOutput;
     ElectricalAlarmRender render;
 
-    public ElectricalAlarmGui(EntityPlayer player, ElectricalAlarmRender render) {
+    public ElectricalAlarmGui(Player player, ElectricalAlarmRender render) {
         this.render = render;
     }
 
     @Override
-    public void initGui() {
-        super.initGui();
+    public void init() {
+        super.init();
 
-        toogleDefaultOutput = newGuiButton(6, 32 / 2 - 10, 115, tr("Toggle switch"));
-    }
-
-    @Override
-    public void guiObjectEvent(IGuiObject object) {
-        super.guiObjectEvent(object);
-        if (object == toogleDefaultOutput) {
+        toogleDefaultOutput = new GuiButtonEln(leftPos + 6, topPos + 32 / 2 - 10, 115, 20, tr("Toggle switch"), (b) -> {
             render.clientSend(ElectricalAlarmElement.clientSoundToggle);
-        }
+        });
+        addRenderableWidget(toogleDefaultOutput);
     }
 
     @Override
-    protected void preDraw(float f, int x, int y) {
-        super.preDraw(f, x, y);
+    public void preDraw(GuiGraphics guiGraphics, float f, int x, int y) {
+        super.preDraw(guiGraphics, f, x, y);
         if (!render.mute)
-            toogleDefaultOutput.displayString = tr("Sound is not muted");
+            toogleDefaultOutput.setMessage(net.minecraft.network.chat.Component.literal(tr("Sound is not muted")));
         else
-            toogleDefaultOutput.displayString = tr("Sound is muted");
+            toogleDefaultOutput.setMessage(net.minecraft.network.chat.Component.literal(tr("Sound is muted")));
     }
 
     @Override
-    protected GuiHelper newHelper() {
-        return new GuiHelper(this, 128, 32);
+    public GuiHelperContainer newHelper() {
+        return new GuiHelperContainer(this, 128, 32);
     }
 }

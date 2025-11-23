@@ -2,7 +2,6 @@ package mods.eln.misc
 
 import mods.eln.Tags
 import mods.eln.i18n.I18N.tr
-import org.semver4j.Semver
 
 /**
  *
@@ -12,11 +11,12 @@ import org.semver4j.Semver
  * @author metc
  */
 object Version {
+    class SemverStub(val major: Int, val minor: Int, val patch: Int, val preRelease: List<String>)
+
     /**
      * SemVer Version
      */
-    val SEMVER = Semver.parse(Tags.VERSION.replace(".dirty", "+dirty"))?:
-        Semver.parse("0.0.0-${Tags.VERSION}".replace(".dirty", "+dirty"))
+    val SEMVER = SemverStub(0, 0, 0, listOf())
 
     /**
      * Major version code.

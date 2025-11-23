@@ -6,7 +6,7 @@ import mods.eln.sixnode.genericcable.GenericCableDescriptor
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.Resistor
-import mods.eln.sim.mna.MnaConst
+import mods.eln.sim.mna.misc.MnaConst
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.network.chat.Component
@@ -14,7 +14,7 @@ import mods.eln.i18n.I18N.tr
 import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.Level
 
-class ElectricalCableDescriptor(
+open class ElectricalCableDescriptor(
     name: String,
     render: CableRenderDescriptor,
     var description: String,

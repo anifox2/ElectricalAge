@@ -3,7 +3,7 @@ package mods.eln.node.simple
 import mods.eln.Eln
 import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
-import mods.eln.misc.Direction.Companion.fromInt
+import mods.eln.misc.Direction.Companion.fromIntMinecraftSide
 import mods.eln.misc.Utils.fatal
 import mods.eln.misc.Utils.println
 import mods.eln.node.INodeEntity
@@ -11,30 +11,31 @@ import mods.eln.node.NodeEntityClientSender
 import mods.eln.node.NodeManager
 import mods.eln.node.simple.DescriptorManager.get
 import mods.eln.server.DelayedBlockRemove.Companion.add
-import net.minecraft.client.gui.Screen
+import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
-import net.minecraft.network.Packet
-import net.minecraft.network.play.server.S3FPacketCustomPayload
-import net.minecraft.tileentity.TileEntity
-import java.io.DataInputStream
-import java.io.IOException
+import net.minecraft.network.protocol.Packet
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.block.entity.BlockEntityType
+import net.minecraft.nbt.CompoundTag
+import java.io.DataInputStream
+import java.io.IOException
 
-abstract class SimpleNodeEntity(override val nodeUuid: String, pos: BlockPos, state: BlockState) : BlockEntity(null!!, pos, state), INodeEntity {
+abstract class SimpleNodeEntity(type: BlockEntityType<*>, override val nodeUuid: String, pos: BlockPos, state: BlockState) : BlockEntity(type, pos, state), INodeEntity {
     open var node: SimpleNode? = null
         get() {
             if (level!!.isClientSide) {
-                fatal()
+                fatal("SimpleNodeEntity client side access")
                 return null
             }
             if (level == null) return null
             if (field == null) {
-                field = NodeManager.instance!!.getNodeFromCoordonate(Coordinate(blockPos.x, blockPos.y, blockPos.z, level!!)) as SimpleNode?
+                field = NodeManager.instance!!.getNodeFromCoordonate(Coordinate(this)) as SimpleNode?
                 if (field == null) {
-                    add(Coordinate(blockPos.x, blockPos.y, blockPos.z, level!!))
+                    add(Coordinate(this))
                     return null
                 }
             }
@@ -48,56 +49,70 @@ abstract class SimpleNodeEntity(override val nodeUuid: String, pos: BlockPos, st
 	}
 */
     fun onBlockAdded() {
-        /*if (!level.isRemote){
-			if (getNode() == null) {
-				level.setBlockToAir(xCoord, yCoord, zCoord);
-			}
-		}*/
+        if (!level!!.isClientSide && node == null) {
+            level!!.removeBlock(worldPosition, false)
+        }
     }
 
     fun onBreakBlock() {
-        if (!level.isRemote) {
+        if (!level!!.isClientSide) {
             if (node == null) return
             node!!.onBreakBlock()
         }
     }
 
-    override fun onChunkUnload() {
-        super.onChunkUnload()
-        if (level.isRemote) {
-            destructor()
+    override fun onChunkUnloaded() {
+        if (!level!!.isClientSide) {
+            node?.onChunkUnload()
         }
     }
 
-    // client only
-    fun destructor() {}
-    override fun invalidate() {
-        if (level.isRemote) {
-            destructor()
+    override fun setRemoved() {
+        if (!level!!.isClientSide) {
+            node?.onBreakBlock()
         }
-        super.invalidate()
+        super.setRemoved()
     }
 
-    fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
-        if (!level.isRemote) {
-            if (node == null) return false
-            node!!.onBlockActivated(entityPlayer!!, side!!, vx, vy, vz)
-            return true
-        }
-        return true
+    override fun getUpdatePacket(): Packet<net.minecraft.network.protocol.game.ClientGamePacketListener>? {
+        return ClientboundBlockEntityDataPacket.create(this)
     }
+
+    override fun getUpdateTag(): CompoundTag {
+        val tag = super.getUpdateTag()
+        val node = node
+        if (node != null && node.publishPacket != null) {
+             tag.putByteArray("elnData", node!!.publishPacket!!.toByteArray())
+        }
+        return tag
+    }
+
+    override fun onDataPacket(net: net.minecraft.network.Connection, pkt: ClientboundBlockEntityDataPacket) {
+        val tag = pkt.tag
+        if (tag != null && tag.contains("elnData")) {
+            val data = tag.getByteArray("elnData")
+            val stream = DataInputStream(java.io.ByteArrayInputStream(data))
+            serverPublishUnserialize(stream)
+        }
+    }
+    
+    // ... rest of the file ...
 
     fun onNeighborBlockChange() {
-        if (!level.isRemote) {
+        if (!level!!.isClientSide) {
             if (node == null) return
             node!!.onNeighborBlockChange()
         }
     }
 
+    fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+        return node?.onBlockActivated(player, side, vx, vy, vz) ?: false
+    }
+
     //***************** Descriptor **************************
     val descriptor: Any?
         get() {
-            val b = getBlockType() as SimpleNodeBlock
+            val b = blockState.block as SimpleNodeBlock
             return get<Any>(b.descriptorKey)
         }
 
@@ -105,8 +120,10 @@ abstract class SimpleNodeEntity(override val nodeUuid: String, pos: BlockPos, st
     var front: Direction? = null
     override fun serverPublishUnserialize(stream: DataInputStream) {
         try {
-            if (front !== fromInt(stream.readByte().toInt()).also { front = it }) {
-                level.markBlockForUpdate(xCoord, yCoord, zCoord)
+            val newFront = fromIntMinecraftSide(stream.readByte().toInt())
+            if (front != newFront) {
+                front = newFront
+                level!!.sendBlockUpdated(worldPosition, blockState, blockState, 3)
             }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -114,14 +131,8 @@ abstract class SimpleNodeEntity(override val nodeUuid: String, pos: BlockPos, st
     }
 
     override fun serverPacketUnserialize(stream: DataInputStream) {}
-    override fun getDescriptionPacket(): Packet? {
-        val node = node
-        if (node == null) {
-            println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity")
-            return null
-        }
-        return S3FPacketCustomPayload(Eln.channelName, node.publishPacket!!.toByteArray())
-    }
+    
+    // getDescriptionPacket replaced by getUpdatePacket
 
     open lateinit var sender: NodeEntityClientSender
 
@@ -135,7 +146,7 @@ abstract class SimpleNodeEntity(override val nodeUuid: String, pos: BlockPos, st
         return null
     }
 
-    @SideOnly(Side.CLIENT)
+    // @OnlyIn(Dist.CLIENT)
     override fun newGuiDraw(side: Direction, player: Player): Screen? {
         return null
     }

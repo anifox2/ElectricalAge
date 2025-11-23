@@ -11,6 +11,34 @@ import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.Level
+import net.minecraft.core.BlockPos
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.phys.Vec3
+import net.minecraft.world.level.LightLayer
+
+// Type aliases for easy migration
+typealias TileEntity = BlockEntity
+typealias ChunkCoordinates = BlockPos
+// typealias World = Level // Avoid conflict with net.minecraft.world.World if imported
+
+object LegacyShims {
+    fun getBlockEntity(level: Level, pos: BlockPos): BlockEntity? {
+        return level.getBlockEntity(pos)
+    }
+
+    fun spawnEntity(level: Level, entity: Entity): Boolean {
+        return level.addFreshEntity(entity)
+    }
+
+    fun getBlockLight(level: Level, pos: BlockPos): Int {
+        return level.getBrightness(LightLayer.BLOCK, pos)
+    }
+
+    fun getSkyLight(level: Level, pos: BlockPos): Int {
+        return level.getBrightness(LightLayer.SKY, pos)
+    }
+}
 
 object GameRegistry {
     fun registerItem(item: Item, name: String) {
@@ -28,7 +56,7 @@ object GameRegistry {
     }
 }
 
-object TileEntity {
+object TileEntityShim {
     fun addMapping(clazz: Class<out BlockEntity>, name: String) {
         // In 1.20.1, BlockEntities are registered via DeferredRegister<BlockEntityType<?>>
         // This shim can't easily do that without more context.

@@ -4,7 +4,7 @@ import mods.eln.misc.*
 import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
 import net.minecraft.world.entity.LivingEntity
@@ -37,9 +37,9 @@ class VerticalHubDescriptor(baseName: String, obj: Obj3D):
     fun draw(angle: Double, connectedSides: DirectionSet, standingSides: DirectionSet) {
         val bb = rotatingOnConnectedSides[0].boundingBox()
         val center = bb.centre()
-        val ox = center.xCoord
-        val oy = center.yCoord
-        val oz = center.zCoord
+        val ox = center.x
+        val oy = center.y
+        val oz = center.z
 
         var renderCowl = true
 
@@ -118,7 +118,7 @@ class VerticalHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor
         for(dir in Direction.all) {
             if(connectedSides.contains(dir)) continue
             val test = coordinate().moved(dir)
-            if(test.block.isOpaqueCube)
+            if(test.world()!!.getBlockState(test.toBlockPos()).canOcclude())
                 standingSides.add(dir)
         }
     }
@@ -158,7 +158,7 @@ class VerticalHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor
     }
 }
 
-class VerticalHubRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor):
+class VerticalHubRender(entity: TransparentNodeBlockEntity, desc: TransparentNodeDescriptor):
     ShaftRender(entity, desc)
 {
     val desc = desc as VerticalHubDescriptor

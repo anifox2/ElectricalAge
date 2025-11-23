@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack
 import java.util.*
 
 class OreDescriptor(
-    name: String?, var metadata: Int,
+    name: String, var metadata: Int,
     var spawnRate: Int, var spawnSizeMin: Int, var spawnSizeMax: Int, var spawnHeightMin: Int, var spawnHeightMax: Int
 ) : GenericItemBlockUsingDamageDescriptor(name) {
 
@@ -22,7 +22,7 @@ class OreDescriptor(
 
     override fun setParent(item: Item, damage: Int) {
         super.setParent(item, damage)
-        Data.addOre(newItemStack())
+        Data.addResource(newItemStack())
     }
 
     fun getBlockDropped(fortune: Int): ArrayList<ItemStack> {
@@ -30,7 +30,7 @@ class OreDescriptor(
         // ItemStack no longer supports metadata in constructor. 
         // If this is for variants, we need to handle it differently (e.g. separate items or NBT)
         // For now, just creating the item.
-        val stack = ItemStack(Eln.oreItem, 1)
+        val stack = Eln.oreItem!!.newItemStack(1)
         // stack.damageValue = metadata // Only if it's durability damage
         list.add(stack)
         return list

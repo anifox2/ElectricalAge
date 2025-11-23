@@ -4,12 +4,12 @@ import mods.eln.cable.CableRender
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.cable.CableRenderType
 import mods.eln.misc.*
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.*
 import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sound.LoopedSound
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraftforge.client.IItemRenderer
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -41,9 +41,9 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
                 assert(rotating.isNotEmpty())
                 val bb = rotating[0].boundingBox()
                 val centre = bb.centre()
-                val ox = centre.xCoord
-                val oy = centre.yCoord
-                val oz = centre.zCoord
+                val ox = centre.x
+                val oy = centre.y
+                val oz = centre.z
                 GL11.glTranslated(ox, oy, oz)
                 GL11.glRotatef(((angle * 360) / 2.0 / Math.PI).toFloat(), 0f, 0f, 1f)
                 GL11.glTranslated(-ox, -oy, -oz)
@@ -53,27 +53,9 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
             }
         }
     }
-
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
-        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, *data)
-        } else {
-            objItemScale(obj)
-            preserveMatrix {
-                Direction.ZN.glRotateXnRef()
-                GL11.glTranslatef(0f, -1f, 0f)
-                GL11.glScalef(0.6f, 0.6f, 0.6f)
-                draw(0.0)
-            }
-        }
-    }
-
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) =
-        type != IItemRenderer.ItemRenderType.INVENTORY
 }
 
-open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, desc) {
+open class ShaftRender(entity: TransparentNodeBlockEntity, desc: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, desc) {
     private val desc = desc as SimpleShaftDescriptor
     var rads = 0.0
     var logRads = 0.0
@@ -166,7 +148,7 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
                 cableRender!!.bindCableTexture()
 
                 for (lrdu in LRDU.values()) {
-                    Utils.setGlColorFromDye(connectionType!!.otherdry[lrdu.toInt()])
+                    UtilsClient.setGlColorFromDye(connectionType!!.otherdry[lrdu.toInt()])
                     if (!eConn.get(lrdu)) continue
                     if (lrdu != front!!.down().getLRDUGoingTo(front!!) && lrdu.inverse() != front!!.down().getLRDUGoingTo(front!!)) continue
                     mask.set(1.shl(lrdu.ordinal))

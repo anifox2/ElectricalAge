@@ -2,19 +2,20 @@ package mods.eln.node
 
 import mods.eln.Eln
 import mods.eln.misc.UtilsClient
-import net.minecraft.tileentity.TileEntity
+import net.minecraft.world.level.block.entity.BlockEntity
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.io.IOException
+import mods.eln.misc.Utils
 
-class NodeEntityClientSender(private val e: TileEntity, private val nodeUuid: String) {
+class NodeEntityClientSender(private val e: BlockEntity, private val nodeUuid: String) {
     fun preparePacketForServer(stream: DataOutputStream) {
         try {
             stream.writeByte(Eln.packetPublishForNode.toInt())
-            stream.writeInt(e.xCoord)
-            stream.writeInt(e.yCoord)
-            stream.writeInt(e.zCoord)
-            stream.writeByte(e.level.provider.dimensionId)
+            stream.writeInt(e.blockPos.x)
+            stream.writeInt(e.blockPos.y)
+            stream.writeInt(e.blockPos.z)
+            stream.writeByte(Utils.getDimensionId(e.level!!))
             stream.writeUTF(nodeUuid)
         } catch (e: IOException) {
             e.printStackTrace()

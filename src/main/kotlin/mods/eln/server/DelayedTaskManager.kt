@@ -1,6 +1,8 @@
 package mods.eln.server
 
 import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.event.TickEvent
+import net.minecraftforge.eventbus.api.SubscribeEvent
 import java.util.*
 
 class DelayedTaskManager {
@@ -10,7 +12,7 @@ class DelayedTaskManager {
     }
 
     @SubscribeEvent
-    fun tick(event: ServerTickEvent) {
+    fun tick(event: TickEvent.ServerTickEvent) {
         if (event.phase != TickEvent.Phase.END) return
         val cpy: List<ITask> = ArrayList(tasks)
         tasks.clear()
@@ -29,6 +31,5 @@ class DelayedTaskManager {
 
     init {
         MinecraftForge.EVENT_BUS.register(this)
-        FMLCommonHandler.instance().bus().register(this)
     }
 }

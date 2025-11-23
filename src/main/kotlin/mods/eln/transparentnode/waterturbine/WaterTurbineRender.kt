@@ -5,10 +5,10 @@ import mods.eln.misc.RcInterpolator
 import mods.eln.misc.Utils
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeElementRender
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 
 class WaterTurbineRender(
-    entity: TransparentNodeEntity,
+    entity: TransparentNodeBlockEntity,
     descriptor: TransparentNodeDescriptor
 ) : TransparentNodeElementRender(entity, descriptor) {
 

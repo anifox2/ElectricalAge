@@ -1,17 +1,33 @@
 package mods.eln.misc
 
 import mods.eln.Eln
+import mods.eln.misc.Coordinate
+import mods.eln.misc.Direction
+import java.io.DataInputStream
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.util.AABB
+import net.minecraft.world.phys.AABB
 import net.minecraft.world.level.Level
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.phys.Vec3
+import org.lwjgl.opengl.GL11
 
 object Utils {
     @JvmStatic
+    fun println(message: String, vararg args: Any?) {
+        Eln.LOGGER.info(String.format(message, *args))
+    }
+
+    @JvmStatic
     fun println(message: Any?) {
         Eln.LOGGER.info(message.toString())
+    }
+
+    @JvmStatic
+    fun rand(min: Double, max: Double): Double {
+        return min + Math.random() * (max - min)
     }
 
     @JvmStatic
@@ -19,24 +35,30 @@ object Utils {
         get() = field++
         private set
 
-    @JvmStatic
-    fun plotVolt(prefix: String, value: Double): String {
-        return "$prefix${String.format("%.2f", value)}V"
-    }
 
     @JvmStatic
     fun plotVolt(value: Double): String {
-        return plotValue(value, "V")
+        return plotValue(value, "V  ")
     }
 
     @JvmStatic
-    fun plotAmpere(prefix: String, value: Double): String {
-        return "$prefix${String.format("%.2f", value)}A"
+    fun plotVolt(header: String, value: Double): String {
+        var header = header
+        if (header != "") header += " "
+        return header + plotVolt(value)
     }
+
 
     @JvmStatic
     fun plotAmpere(value: Double): String {
-        return plotValue(value, "A")
+        return plotValue(value, "A  ")
+    }
+
+    @JvmStatic
+    fun plotAmpere(header: String, value: Double): String {
+        var header = header
+        if (header != "") header += " "
+        return header + plotAmpere(value)
     }
 
     @JvmStatic
@@ -47,6 +69,14 @@ object Utils {
     @JvmStatic
     fun limit(value: Double, min: Double, max: Double): Double {
         return value.coerceIn(min, max)
+    }
+
+    @JvmStatic
+    fun getOrCreateCompound(nbt: CompoundTag, key: String): CompoundTag {
+        if (!nbt.contains(key, 10)) { // 10 is TAG_COMPOUND
+            nbt.put(key, CompoundTag())
+        }
+        return nbt.getCompound(key)
     }
 
     @JvmStatic
@@ -62,14 +92,14 @@ object Utils {
     }
 
     @JvmStatic
-    fun readFromNBT(nbt: net.minecraft.nbt.CompoundTag, key: String, obj: Any?) {
+    fun load(nbt: net.minecraft.nbt.CompoundTag, key: String, obj: Any?) {
         if (obj is INBTTReady) {
             obj.readFromNBT(nbt, key)
         }
     }
 
     @JvmStatic
-    fun writeToNBT(nbt: net.minecraft.nbt.CompoundTag, key: String, obj: Any?) {
+    fun save(nbt: net.minecraft.nbt.CompoundTag, key: String, obj: Any?) {
         if (obj is INBTTReady) {
             obj.writeToNBT(nbt, key)
         }
@@ -86,23 +116,52 @@ object Utils {
     }
 
     @JvmStatic
-    fun plotValue(value: Double): String {
-        return String.format("%.2f", value)
-    }
-
-    @JvmStatic
     fun plotValue(value: Double, unit: String): String {
-        return "${String.format("%.2f", value)}$unit"
+        if (Math.abs(value) < 1e-9) return "0.00 $unit"
+        if (Math.abs(value) < 1e-6) return String.format("%.2fn%s", value * 1e9, unit)
+        if (Math.abs(value) < 1e-3) return String.format("%.2fu%s", value * 1e6, unit)
+        if (Math.abs(value) < 1.0) return String.format("%.2fm%s", value * 1e3, unit)
+        if (Math.abs(value) < 1e3) return String.format("%.2f %s", value, unit)
+        if (Math.abs(value) < 1e6) return String.format("%.2fk%s", value / 1e3, unit)
+        if (Math.abs(value) < 1e9) return String.format("%.2fM%s", value / 1e6, unit)
+        return String.format("%.2fG%s", value / 1e9, unit)
+    }
+    
+    @JvmStatic
+    fun plotValue(value: Double): String {
+        return plotValue(value, "")
+    }
+
+
+
+    @JvmStatic
+    fun modbusToShort(v: Float, part: Int): Short {
+        val i = java.lang.Float.floatToIntBits(v)
+        return if (part == 0) (i and 0xFFFF).toShort() else ((i ushr 16) and 0xFFFF).toShort()
     }
 
     @JvmStatic
-    fun plotPercent(value: Double): String {
-        return "${String.format("%.0f", value * 100)}%"
+    fun modbusToFloat(low: Short, high: Short): Float {
+        val i = (low.toInt() and 0xFFFF) or ((high.toInt() and 0xFFFF) shl 16)
+        return java.lang.Float.intBitsToFloat(i)
+    }
+    
+
+
+    @JvmStatic
+    fun plotCelsius(header: String, value: Double): String {
+        var header = header
+        var value = value
+        value += mods.eln.sim.PhysicalConstant.ambientTemperatureKelvin - mods.eln.sim.PhysicalConstant.zeroCelsiusInKelvin
+        if (header != "") header += " "
+        return header + plotValue(value, "\u00B0C ")
     }
 
     @JvmStatic
-    fun plotPercent(prefix: String, value: Double): String {
-        return "$prefix${plotPercent(value)}"
+    fun plotPercent(header: String, value: Double): String {
+        var header = header
+        if (header != "") header += " "
+        return if (value >= 1.0) header + String.format("%3.0f", value * 100.0) + "%   " else header + String.format("%3.1f", value * 100.0) + "%   "
     }
 
     @JvmStatic
@@ -121,18 +180,25 @@ object Utils {
     }
 
     @JvmStatic
+    fun plotUIPDetailed(voltage: Double, current: Double): String {
+        return "U: ${plotVolt(voltage)} I: ${plotAmpere(current)} P: ${plotValue(voltage * current, "W")}"
+    }
+
+    @JvmStatic
     fun plotUIP(U: Double, I: Double, R: Double): String {
         return "${plotValue(U, "V")} ${plotValue(I, "A")} ${plotValue(R, "Ω")}"
     }
 
     @JvmStatic
-    fun plotEnergy(prefix: String, value: Double): String {
-        return "$prefix${plotValue(value, "J")}"
+    fun plotEnergy(value: Double): String {
+        return plotValue(value, "J  ")
     }
 
     @JvmStatic
-    fun plotEnergy(value: Double): String {
-        return plotValue(value, "J")
+    fun plotEnergy(header: String, value: Double): String {
+        var header = header
+        if (header != "") header += " "
+        return header + plotEnergy(value)
     }
 
     @JvmStatic
@@ -146,9 +212,22 @@ object Utils {
     }
 
     @JvmStatic
-    fun plotCelsius(prefix: String, value: Double): String {
-        return "$prefix${plotValue(value, "°C")}"
+    fun plotRads(header: String, value: Double): String {
+        var header = header
+        if (header != "") header += " "
+        return header + plotValue(value, "rad/s ")
     }
+
+    @JvmStatic
+    fun plotER(E: Double, R: Double): String {
+        return plotEnergy("E", E) + plotRads("R", R)
+    }
+    
+    @JvmStatic
+    fun plotER(header: String, load: mods.eln.sim.ElectricalLoad): String {
+        return header + " " + plotVolt("U", load.getVoltage()) + " " + plotOhm("R", load.getSerialResistance())
+    }
+
 
     @JvmStatic
     fun plotCelsius(value: Double): String {
@@ -176,15 +255,15 @@ object Utils {
     }
 
     @JvmStatic
-    fun renderDoubleSubsystemWaila(s1: mods.eln.sim.SubSystem?, s2: mods.eln.sim.SubSystem?): String {
-        val size1 = s1?.matrix?.size ?: 0
-        val size2 = s2?.matrix?.size ?: 0
+    fun renderDoubleSubsystemWaila(s1: mods.eln.sim.mna.SubSystem?, s2: mods.eln.sim.mna.SubSystem?): String {
+        val size1 = s1?.states?.size ?: 0
+        val size2 = s2?.states?.size ?: 0
         return "$size1 / $size2"
     }
 
     @JvmStatic
-    fun renderSubSystemWaila(subSystem: mods.eln.sim.SubSystem?): String {
-        val size = subSystem?.matrix?.size ?: 0
+    fun renderSubSystemWaila(subSystem: mods.eln.sim.mna.SubSystem?): String {
+        val size = subSystem?.states?.size ?: 0
         return "$size"
     }
 
@@ -200,8 +279,8 @@ object Utils {
     }
 
     @JvmStatic
-    fun getSixNodePinDistance(part: Obj3D.Obj3DPart?): Double {
-        return 0.0 // Stub
+    fun getSixNodePinDistance(part: Obj3D.Obj3DPart?): FloatArray {
+        return FloatArray(6) { 0f } // Stub
     }
 
     @JvmStatic
@@ -226,6 +305,12 @@ object Utils {
     }
 
     @JvmStatic
+    fun unserializeItemStackToItemEntity(stream: java.io.DataInputStream, old: net.minecraft.world.entity.item.ItemEntity?, tileEntity: net.minecraft.world.level.block.entity.BlockEntity): net.minecraft.world.entity.item.ItemEntity? {
+        // Stub
+        return null
+    }
+
+    @JvmStatic
     fun getVec05(c: Coordinate): net.minecraft.world.phys.Vec3 {
         return net.minecraft.world.phys.Vec3(c.x + 0.5, c.y + 0.5, c.z + 0.5)
     }
@@ -239,8 +324,11 @@ object Utils {
 
     @JvmStatic
     fun traceRay(world: Level, x1: Double, y1: Double, z1: Double, x2: Double, y2: Double, z2: Double, weight: TraceRayWeightOpaque): Float {
-        // TODO: Implement ray tracing for sound occlusion
-        return 0f
+        val start = Vec3(x1, y1, z1)
+        val end = Vec3(x2, y2, z2)
+        val context = net.minecraft.world.level.ClipContext(start, end, net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, null)
+        val result = world.clip(context)
+        return if (result.type == net.minecraft.world.phys.HitResult.Type.MISS) 1.0f else 0.0f
     }
 
     @JvmStatic
@@ -262,20 +350,11 @@ object Utils {
 
     @JvmStatic
     fun getDimensionId(level: Level): Int {
-        val key = level.dimension()
-        return when(key) {
+        return when (level.dimension()) {
             Level.OVERWORLD -> 0
             Level.NETHER -> -1
             Level.END -> 1
-            else -> {
-                // Try to parse "dim_X"
-                val path = key.location().path
-                if (path.startsWith("dim_")) {
-                    path.substring(4).toIntOrNull() ?: 0
-                } else {
-                    0 // Fallback
-                }
-            }
+            else -> 0
         }
     }
 
@@ -288,12 +367,155 @@ object Utils {
 
     @JvmStatic
     fun entityLivingViewDirection(entity: LivingEntity): Direction {
-        return Direction.fromMCDirection(net.minecraft.core.Direction.orderedByNearest(entity)[0])
+        return Direction.fromIntMinecraftSide(net.minecraft.core.Direction.orderedByNearest(entity)[0].ordinal)
     }
 
     @JvmStatic
     fun entityLivingHorizontalViewDirection(entity: LivingEntity): Direction {
         return Direction.fromMCDirection(entity.direction)
+    }
+
+    @JvmStatic
+    fun mustDropItem(player: net.minecraft.server.level.ServerPlayer?): Boolean {
+        return player == null || !player.isCreative
+    }
+
+    @JvmStatic
+    val minecraftDay = 24000.0
+
+    @JvmStatic
+    fun newNbtTagCompund(nbt: CompoundTag?, string: String): CompoundTag {
+        val tag = CompoundTag()
+        nbt?.put(string, tag)
+        return tag
+    }
+
+    @JvmStatic
+    fun updateAllLightTypes(level: Level, pos: net.minecraft.core.BlockPos) {
+        // Stub
+    }
+
+    @JvmStatic
+    fun updateSkylight(level: Level, pos: net.minecraft.core.BlockPos) {
+        // Stub
+    }
+
+    @JvmStatic
+    fun fatal(message: String) {
+        Eln.LOGGER.error(message)
+        throw RuntimeException(message)
+    }
+
+    @JvmStatic
+    fun isRemote(level: Level): Boolean {
+        return level.isClientSide
+    }
+
+    @JvmStatic
+    fun notifyNeighbor(level: Level, x: Int, y: Int, z: Int) {
+        val pos = net.minecraft.core.BlockPos(x, y, z)
+        val state = level.getBlockState(pos)
+        level.updateNeighborsAt(pos, state.block)
+    }
+
+    @JvmStatic
+    fun getItemObject(stack: ItemStack): Any? {
+        return mods.eln.generic.GenericItemUsingDamageDescriptor.getDescriptor(stack)
+    }
+
+    @JvmStatic
+    fun setGlColorFromDye(damage: Int) {
+        setGlColorFromDye(damage, 1.0f)
+    }
+
+    @JvmStatic
+    fun setGlColorFromDye(damage: Int, gain: Float) {
+        setGlColorFromDye(damage, gain, 0f)
+    }
+
+    @JvmStatic
+    fun setGlColorFromDye(damage: Int, gain: Float, bias: Float) {
+        when (damage) {
+            0 -> GL11.glColor3f(0.2f * gain + bias, 0.2f * gain + bias, 0.2f * gain + bias)
+            1 -> GL11.glColor3f(1.0f * gain + bias, 0.05f * gain + bias, 0.05f * gain + bias)
+            2 -> GL11.glColor3f(0.2f * gain + bias, 0.5f * gain + bias, 0.1f * gain + bias)
+            3 -> GL11.glColor3f(0.3f * gain + bias, 0.2f * gain + bias, 0.1f * gain + bias)
+            4 -> GL11.glColor3f(0.2f * gain + bias, 0.2f * gain + bias, 1.0f * gain + bias)
+            5 -> GL11.glColor3f(0.7f * gain + bias, 0.05f * gain + bias, 1.0f * gain + bias)
+            6 -> GL11.glColor3f(0.2f * gain + bias, 0.7f * gain + bias, 0.9f * gain + bias)
+            7 -> GL11.glColor3f(0.7f * gain + bias, 0.7f * gain + bias, 0.7f * gain + bias)
+            8 -> GL11.glColor3f(0.4f * gain + bias, 0.4f * gain + bias, 0.4f * gain + bias)
+            9 -> GL11.glColor3f(1.0f * gain + bias, 0.5f * gain + bias, 0.5f * gain + bias)
+            10 -> GL11.glColor3f(0.05f * gain + bias, 1.0f * gain + bias, 0.05f * gain + bias)
+            11 -> GL11.glColor3f(0.9f * gain + bias, 0.8f * gain + bias, 0.1f * gain + bias)
+            12 -> GL11.glColor3f(0.4f * gain + bias, 0.5f * gain + bias, 1.0f * gain + bias)
+            13 -> GL11.glColor3f(0.9f * gain + bias, 0.3f * gain + bias, 0.9f * gain + bias)
+            14 -> GL11.glColor3f(1.0f * gain + bias, 0.6f * gain + bias, 0.3f * gain + bias)
+            15 -> GL11.glColor3f(1.0f * gain + bias, 1.0f * gain + bias, 1.0f * gain + bias)
+            else -> GL11.glColor3f(0.05f * gain + bias, 0.05f * gain + bias, 0.05f * gain + bias)
+        }
+    }
+
+    @JvmStatic
+    fun getWind(dimension: Int, y: Int): Double {
+        return 0.0 // Stub
+    }
+
+    @JvmStatic
+    fun getSixNodePinDistance(direction: Direction): FloatArray {
+        return floatArrayOf(0f, 0f) // Stub
+    }
+
+    @JvmStatic
+    fun getLength(x1: Double, y1: Double, z1: Double, x2: Double, y2: Double, z2: Double): Double {
+        val dx = x1 - x2
+        val dy = y1 - y2
+        val dz = z1 - z2
+        return Math.sqrt(dx * dx + dy * dy + dz * dz)
+    }
+
+    @JvmStatic
+    fun playerHasMeter(player: net.minecraft.world.entity.player.Player): Boolean {
+        return false // Stub
+    }
+
+    @JvmStatic
+    fun dropItem(stack: ItemStack, x: Int, y: Int, z: Int, level: Level) {
+        // Stub
+    }
+
+    @JvmStatic
+    fun setGlColorFromLamp(color: Int) {
+        // Stub
+    }
+
+    @JvmStatic
+    fun readMapFile(path: String): String {
+        val sb = StringBuilder()
+        try {
+            val stream = Utils::class.java.getResourceAsStream("/assets/eln/map/$path")
+            if (stream != null) {
+                val reader = BufferedReader(InputStreamReader(stream))
+                var line: String?
+                while (reader.readLine().also { line = it } != null) {
+                    sb.append(line).append("\n")
+                }
+                reader.close()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return sb.toString()
+    }
+
+    @JvmStatic
+    fun getRedstoneLevelAround(coord: Coordinate, side: Direction): Int {
+        return 0
+    }
+
+    @JvmStatic
+    fun unserializeItemStack(stream: DataInputStream): ItemStack {
+        return ItemStack.EMPTY
     }
 }
 

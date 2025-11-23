@@ -25,7 +25,7 @@ class NbtBatteryProcess(
     }
 
     override fun writeToNBT(nbt: CompoundTag, str: String) {
-        nbt.setDouble(str + "NBP" + "Q", Q)
-        nbt.setDouble(str + "NBP" + "life", life)
+        nbt.putDouble(str + "NBP" + "Q", Q)
+        nbt.putDouble(str + "NBP" + "life", life)
     }
 }

@@ -2,18 +2,23 @@ package mods.eln.sixnode.batterycharger;
 
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Coordinate;
-import mods.eln.misc.Direction;
+import net.minecraft.core.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import com.mojang.blaze3d.vertex.PoseStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -31,12 +36,12 @@ public class BatteryChargerRender extends SixNodeElementRender {
 
     float alpha = 0;
 
-    EntityItem[] b = new EntityItem[4];
+    ItemStack[] stacks = new ItemStack[4];
     boolean powerOn;
     private float voltage;
 
     public BatteryChargerRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-        super(tileEntity, side, descriptor);
+        super(tileEntity, mods.eln.misc.Direction.fromMCDirection(side), descriptor);
         this.descriptor = (BatteryChargerDescriptor) descriptor;
 
         coord = new Coordinate(tileEntity);
@@ -52,10 +57,10 @@ public class BatteryChargerRender extends SixNodeElementRender {
             front.right().glRotateOnX();
         }
 
-        drawEntityItem(b[0], 0.1875, 0.15625, 0.15625, alpha, 0.2f);
-        drawEntityItem(b[1], 0.1875, 0.15625, -0.15625, alpha, 0.2f);
-        drawEntityItem(b[2], 0.1875, -0.15625, 0.15625, alpha, 0.2f);
-        drawEntityItem(b[3], 0.1875, -0.15625, -0.15625, alpha, 0.2f);
+        drawItemStack(stacks[0], 0.1875, 0.15625, 0.15625, alpha, 0.2f);
+        drawItemStack(stacks[1], 0.1875, 0.15625, -0.15625, alpha, 0.2f);
+        drawItemStack(stacks[2], 0.1875, -0.15625, 0.15625, alpha, 0.2f);
+        drawItemStack(stacks[3], 0.1875, -0.15625, -0.15625, alpha, 0.2f);
 
         descriptor.draw(batteryPresence, charged);
     }
@@ -66,24 +71,18 @@ public class BatteryChargerRender extends SixNodeElementRender {
         if (alpha > 360) alpha -= 360;
     }
 
-    public void drawEntityItem(EntityItem entityItem, double x, double y, double z, float roty, float scale) {
-        if (entityItem == null) return;
+    public void drawItemStack(ItemStack stack, double x, double y, double z, float roty, float scale) {
+        if (stack == null || stack.isEmpty()) return;
 
-        entityItem.hoverStart = 0.0f;
-        entityItem.rotationYaw = 0.0f;
-        entityItem.motionX = 0.0;
-        entityItem.motionY = 0.0;
-        entityItem.motionZ = 0.0;
-        //scale *= 10;
-        Render var10;
-        var10 = RenderManager.instance.getEntityRenderObject(entityItem);
         GL11.glPushMatrix();
         GL11.glTranslatef((float) x, (float) y, (float) z);
         GL11.glRotatef(90, 0f, 1f, 0f);
         GL11.glRotatef(roty, 0, 1, 0);
         GL11.glScalef(scale, scale, scale);
         GL11.glTranslatef(0.0f, -0.25f, 0.0f);
-        var10.doRender(entityItem, 0, 0, 0, 0, 0);
+        
+        Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.FIXED, 0xF000F0, OverlayTexture.NO_OVERLAY, new PoseStack(), Minecraft.getInstance().renderBuffers().bufferSource(), blockEntity.getLevel(), 0);
+        
         GL11.glPopMatrix();
     }
 
@@ -95,7 +94,7 @@ public class BatteryChargerRender extends SixNodeElementRender {
 
     @Nullable
     @Override
-    public GuiScreen newGuiDraw(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public Screen newGuiDraw(@NotNull mods.eln.misc.Direction side, @NotNull Player player) {
         return new BatteryChargerGui(this, player, inventory);
     }
 
@@ -107,7 +106,7 @@ public class BatteryChargerRender extends SixNodeElementRender {
             voltage = stream.readFloat();
 
             for (int idx = 0; idx < 4; idx++) {
-                b[idx] = Utils.unserializeItemStackToEntityItem(stream, b[idx], getTileEntity());
+                stacks[idx] = Utils.unserializeItemStack(stream);
             }
 
             byte temp = stream.readByte();

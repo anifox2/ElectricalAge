@@ -3,7 +3,9 @@ package mods.eln.sim.nbt;
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
 
-public class NbtElectricalGateInput extends NbtElectricalLoad {
+import mods.eln.sim.IResistorElement;
+
+public class NbtElectricalGateInput extends NbtElectricalLoad implements IResistorElement.IResistorControl {
 
     public NbtElectricalGateInput(String name) {
         super(name);

@@ -6,12 +6,12 @@ import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 import mods.eln.misc.INBTTReady
 import mods.eln.misc.LRDU
-import mods.eln.misc.LRDU.Companion.readFromNBT
+import mods.eln.misc.LRDU.Companion.load
 import mods.eln.misc.Utils
 import mods.eln.misc.Utils.isPlayerUsingWrench
 import mods.eln.misc.Utils.mustDropItem
-import mods.eln.misc.Utils.readFromNBT
-import mods.eln.misc.Utils.writeToNBT
+import mods.eln.misc.Utils.load
+import mods.eln.misc.Utils.save
 import mods.eln.node.INodeElement
 import mods.eln.node.NodeConnection
 import mods.eln.sim.ElectricalLoad
@@ -24,7 +24,7 @@ import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sound.IPlayer
 import mods.eln.sound.SoundCommand
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.entity.player.ServerPlayer
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.Container
 import net.minecraft.world.item.ItemStack
@@ -77,7 +77,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     override val ghostObserverCoordonate: Coordinate?
         get() = coordinate
 
-    protected fun onBlockActivatedRotate(entityPlayer: Player?): Boolean {
+    protected fun onBlockActivatedRotate(entityPlayer: Player): Boolean {
         if (isPlayerUsingWrench(entityPlayer)) {
             front = front.nextClockwise
             sixNode!!.reconnect()
@@ -176,7 +176,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
             stop(uuid)
         }
         if (sixNodeElementDescriptor.hasGhostGroup()) {
-            Eln.ghostManager.removeObserver(sixNode!!.coordinate)
+            Eln.ghostManager?.removeObserver(sixNode!!.coordinate)
             sixNodeElementDescriptor.getGhostGroup(side, front)!!.erase(sixNode!!.coordinate)
         }
         sixNode!!.dropInventory(inventory)
@@ -197,13 +197,14 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     }
 
     val dropItemStack: ItemStack
-        get() = ItemStack(Eln.sixNodeBlock, 1, itemStackDamageId) //sixNode.sideElementIdList[side.getInt()]
+        get() = sixNodeElementDescriptor.newItemStack()
 
     open fun readFromNBT(nbt: CompoundTag) {
-        front = readFromNBT(nbt, "sixFront")
+        val frontIdx = nbt.getInt("sixFront")
+        front = if (frontIdx in 0 until LRDU.values().size) LRDU.values()[frontIdx] else LRDU.Up
         val inv = inventory
         if (inv != null) {
-            readFromNBT(nbt, "inv", inv)
+            load(nbt, "inv", inv)
         }
         for (electricalLoad in electricalLoadList) {
             electricalLoad.readFromNBT(nbt, "")
@@ -227,10 +228,10 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     }
 
     open fun writeToNBT(nbt: CompoundTag) {
-        front.writeToNBT(nbt, "sixFront")
+        nbt.putInt("sixFront", front.toInt())
         val inv = inventory
         if (inv != null) {
-            writeToNBT(nbt, "inv", inv)
+            save(nbt, "inv", inv)
         }
         for (electricalLoad in electricalLoadList) {
             electricalLoad.writeToNBT(nbt, "")
@@ -319,6 +320,6 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
 
     init {
         itemStackDamageId = sixNode.sideElementIdList[side.int]
-        if (descriptor.hasGhostGroup()) Eln.ghostManager.addObserver(this)
+        if (descriptor.hasGhostGroup()) Eln.ghostManager?.addObserver(this)
     }
 }

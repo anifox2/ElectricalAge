@@ -2,8 +2,10 @@ package mods.eln.sixnode.energymeter;
 
 import mods.eln.gui.*;
 import mods.eln.sixnode.energymeter.EnergyMeterElement.Mod;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -20,8 +22,8 @@ public class EnergyMeterGui extends GuiContainerEln {
 
     boolean isLogged;
 
-    public EnergyMeterGui(EntityPlayer player, IInventory inventory, EnergyMeterRender render) {
-        super(new EnergyMeterContainer(player, inventory));
+    public EnergyMeterGui(Player player, Container inventory, EnergyMeterRender render) {
+        super(new EnergyMeterContainer(player, inventory), player.getInventory(), Component.literal("Energy Meter"));
         this.render = render;
     }
 
@@ -63,8 +65,8 @@ public class EnergyMeterGui extends GuiContainerEln {
         x = 6;
 
         if (render.descriptor.timeNumberWheel.length == 0) {
-            energyUnitBt.enabled = false;
-            timeUnitBt.enabled = false;
+            energyUnitBt.setEnabled(false);
+            timeUnitBt.setEnabled(false);
         }
     }
 
@@ -119,21 +121,21 @@ public class EnergyMeterGui extends GuiContainerEln {
     }
 
     @Override
-    protected void preDraw(float f, int x, int y) {
-        super.preDraw(f, x, y);
+    public void preDraw(GuiGraphics guiGraphics, float f, int x, int y) {
+        super.preDraw(guiGraphics, f, x, y);
         if (!render.switchState)
-            stateBt.displayString = tr("is off");
+            stateBt.setMessage(Component.literal(tr("is off")));
         else
-            stateBt.displayString = tr("is on");
+            stateBt.setMessage(Component.literal(tr("is on")));
 
         if (isLogged)
-            passwordBt.displayString = tr("Change password");
+            passwordBt.setMessage(Component.literal(tr("Change password")));
         else
-            passwordBt.displayString = tr("Try password");
+            passwordBt.setMessage(Component.literal(tr("Try password")));
 
         switch (render.mod) {
             case ModCounter:
-                modBt.displayString = tr("Counter Mode");
+                modBt.setMessage(Component.literal(tr("Counter Mode")));
 
                 modBt.clearComment();
                 int lineNumber = 0;
@@ -141,7 +143,7 @@ public class EnergyMeterGui extends GuiContainerEln {
                     modBt.setComment(lineNumber++, line);
                 break;
             case ModPrepay:
-                modBt.displayString = tr("Prepay Mode");
+                modBt.setMessage(Component.literal(tr("Prepay Mode")));
 
                 modBt.clearComment();
                 lineNumber = 0;
@@ -157,58 +159,58 @@ public class EnergyMeterGui extends GuiContainerEln {
         if (energyUnitBt != null)
             switch (render.energyUnit) {
                 case 0:
-                    energyUnitBt.displayString = "J";
+                    energyUnitBt.setMessage(Component.literal("J"));
                     break;
                 case 1:
-                    energyUnitBt.displayString = "KJ";
+                    energyUnitBt.setMessage(Component.literal("KJ"));
                     break;
                 case 2:
-                    energyUnitBt.displayString = "MJ";
+                    energyUnitBt.setMessage(Component.literal("MJ"));
                     break;
                 case 3:
-                    energyUnitBt.displayString = "GJ";
+                    energyUnitBt.setMessage(Component.literal("GJ"));
                     break;
                 default:
-                    energyUnitBt.displayString = "??";
+                    energyUnitBt.setMessage(Component.literal("??"));
                     break;
             }
 
         if (timeUnitBt != null)
             switch (render.timeUnit) {
                 case 0:
-                    timeUnitBt.displayString = "H";
+                    timeUnitBt.setMessage(Component.literal("H"));
                     break;
                 case 1:
-                    timeUnitBt.displayString = "D";
+                    timeUnitBt.setMessage(Component.literal("D"));
                     break;
                 default:
-                    timeUnitBt.displayString = "??";
+                    timeUnitBt.setMessage(Component.literal("??"));
                     break;
             }
-        modBt.enabled = isLogged;
-        stateBt.enabled = isLogged;
-        resetTimeBt.enabled = isLogged;
-        setEnergyBt.enabled = isLogged;
-        energyUnitBt.enabled = isLogged && render.descriptor.timeNumberWheel.length != 0;
-        timeUnitBt.enabled = isLogged && render.descriptor.timeNumberWheel.length != 0;
+        modBt.active = isLogged;
+        stateBt.active = isLogged;
+        resetTimeBt.active = isLogged;
+        setEnergyBt.active = isLogged;
+        energyUnitBt.active = isLogged && render.descriptor.timeNumberWheel.length != 0;
+        timeUnitBt.active = isLogged && render.descriptor.timeNumberWheel.length != 0;
     }
 
     @Override
-    protected void postDraw(float f, int x, int y) {
-        super.postDraw(f, x, y);
+    public void postDraw(GuiGraphics guiGraphics, float f, int x, int y) {
+        super.postDraw(guiGraphics, f, x, y);
         helper.drawRect(6, 29, helper.xSize - 6, 29 + 1, 0xff404040);
 
         y = 101;
         helper.drawRect(6, y, helper.xSize - 6, y + 1, 0xff404040);
 
         y += 3;
-        helper.drawString(6 + 16 / 2, y, 0xff000000, tr("Energy counter: %1$J", (int) (render.energyStack)));
+        helper.drawString(guiGraphics, 6 + 16 / 2, y, tr("Energy counter: %1$J", (int) (render.energyStack)), 0xff000000);
         y += 10;
-        helper.drawString(6 + 16 / 2, y, 0xff000000, tr("Time counter:", (int) (render.timerCouter)));
+        helper.drawString(guiGraphics, 6 + 16 / 2, y, tr("Time counter:", (int) (render.timerCouter)), 0xff000000);
     }
 
     @Override
-    protected GuiHelperContainer newHelper() {
+    public GuiHelperContainer newHelper() {
         return new GuiHelperContainer(this, 176 + 16, 42 + 166, 8 + 16 / 2, 42 + 84);
     }
 }

@@ -1,9 +1,10 @@
 package mods.eln.packets
 
-import mods.eln.Achievements
+// import mods.eln.Achievements
 
-class AchievePacketHandler : IMessageHandler<AchievePacket?, IMessage?> {
+class AchievePacketHandler /*: IMessageHandler<AchievePacket?, IMessage?>*/ {
 
+    /*
     override fun onMessage(message: AchievePacket?, ctx: MessageContext?): IMessage? {
         if (message == null || ctx == null) return null
         //System.out.println("Got message: " + message.text);
@@ -16,4 +17,5 @@ class AchievePacketHandler : IMessageHandler<AchievePacket?, IMessage?> {
         }
         return null
     }
+    */
 }

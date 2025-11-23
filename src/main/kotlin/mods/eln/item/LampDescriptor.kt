@@ -9,12 +9,13 @@ import mods.eln.sim.mna.component.Resistor
 import mods.eln.sixnode.lampsocket.LampSocketType
 import mods.eln.wiki.Data
 import net.minecraft.world.entity.player.Player
-import net.minecraft.item.Item
+import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
+import net.minecraft.network.chat.Component
 
 class LampDescriptor(
     name: String, iconName: String,
@@ -39,29 +40,30 @@ class LampDescriptor(
     var stableTime = 0.0
     var vegetableGrowRate: Double
     var serverNominalLife = 0.0
-    override fun setParent(item: Item?, damage: Int) {
-        super.setParent(item, damage)
-        Data.addLight(newItemStack())
+    var voltageLevelColor: Int = 0
+
+    override fun setParent(registry: Any?, id: Int) {
+        super.setParent(registry, id)
+        //Data.addLight(newItemStack())
     }
 
     val r: Double
         get() = nominalU * nominalU / nominalP
 
     fun getLifeInTag(stack: ItemStack): Double {
-        if (!stack.hasTagCompound()) stack.tagCompound = getDefaultNBT()
-        return if (stack.tagCompound.hasKey("life")) stack.tagCompound.getDouble("life") else {
+        val tag = stack.orCreateTag
+        return if (tag.contains("life")) tag.getDouble("life") else {
             32.0 * 60.0 * 60.0 * 20.0
         } // 32 hours * 60 * 60 seconds/hour * 20 ticks/second
     }
 
     fun setLifeInTag(stack: ItemStack, life: Double) {
-        if (!stack.hasTagCompound()) stack.tagCompound = getDefaultNBT()
-        stack.tagCompound.setDouble("life", life)
+        stack.orCreateTag.putDouble("life", life)
     }
 
     override fun getDefaultNBT(): CompoundTag {
         val tag = CompoundTag()
-        tag.setDouble("life", nominalLifeHours)
+        tag.putDouble("life", nominalLifeHours)
         return tag
     }
 
@@ -75,25 +77,26 @@ class LampDescriptor(
 
     override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
         super.appendHoverText(itemStack, level, list, flag)
-        list.add(tr("Technology: %1$", type))
-        list.add(tr("Range: %1$ blocks", (nominalLight * 15).toInt()))
-        list.add(tr("Power: %1\$W", Utils.plotValue(nominalP)))
-        list.add(tr("Resistance: %1$\u2126", Utils.plotValue(r)))
-        list.add(tr("Nominal lifetime: %1\$h", serverNominalLife))
+        list.add(Component.literal(tr("Technology: %1$", type)))
+        list.add(Component.literal(tr("Range: %1$ blocks", (nominalLight * 15).toInt())))
+        list.add(Component.literal(tr("Power: %1\$W", Utils.plotValue(nominalP))))
+        list.add(Component.literal(tr("Resistance: %1$\u2126", Utils.plotValue(r))))
+        list.add(Component.literal(tr("Nominal lifetime: %1\$h", serverNominalLife)))
         if (itemStack != null) {
-            if (!itemStack.hasTagCompound() || !itemStack.tagCompound.hasKey("life")) {
-                list.add(tr("Condition:") + " " + tr("New"))
+            val tag = itemStack.tag
+            if (tag == null || !tag.contains("life")) {
+                list.add(Component.literal(tr("Condition:") + " " + tr("New")))
             } else if (getLifeInTag(itemStack) > 0.5) {
-                list.add(tr("Condition:") + " " + tr("Good"))
+                list.add(Component.literal(tr("Condition:") + " " + tr("Good")))
             } else if (getLifeInTag(itemStack) > 0.2) {
-                list.add(tr("Condition:") + " " + tr("Used"))
+                list.add(Component.literal(tr("Condition:") + " " + tr("Used")))
             } else if (getLifeInTag(itemStack) > 0.1) {
-                list.add(tr("Condition:") + " " + tr("End of life"))
+                list.add(Component.literal(tr("Condition:") + " " + tr("End of life")))
             } else {
-                list.add(tr("Condition:") + " " + tr("Bad"))
+                list.add(Component.literal(tr("Condition:") + " " + tr("Bad")))
             }
             if (Eln.debugEnabled)
-                list.add("Life: ${getLifeInTag(itemStack)}")
+                list.add(Component.literal("Life: ${getLifeInTag(itemStack)}"))
         }
     }
 
@@ -126,7 +129,7 @@ class LampDescriptor(
             }
             Type.LED -> minimalU = nominalU * 0.75
         }
-        Eln.instance.configShared.add(this)
-        voltageLevelColor = VoltageLevelColor.fromVoltage(nominalU)
+        Eln.instance!!.configShared.add(this)
+        voltageLevelColor = VoltageLevelColor.fromVoltage(nominalU).ordinal
     }
 }

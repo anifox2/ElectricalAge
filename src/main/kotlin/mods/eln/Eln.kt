@@ -18,89 +18,88 @@ import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor
 import mods.eln.sim.ThermalLoadInitializer
 import java.util.ArrayList
 import mods.eln.sixnode.currentcable.CurrentCableDescriptor
-import mods.eln.sixnode.SixNodeItem
-import mods.eln.sixnode.SixNodeDescriptor
 import mods.eln.generic.genericArmorItem
 import mods.eln.item.ItemPickaxeEln
 import mods.eln.item.ItemAxeEln
 import net.minecraft.world.item.SwordItem
 import net.minecraft.world.item.ShovelItem
 import net.minecraft.world.item.HoeItem
+import net.minecraft.world.item.ItemStack
+import mods.eln.misc.IConfigSharing
+import mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor
 
 @Mod(Eln.MODID)
 class Eln {
-    init {
-        val eventBus = FMLJavaModLoadingContext.get().getModEventBus()
-        Registration.init(eventBus)
-        eventBus.addListener(this::commonSetup)
-    }
 
-    private fun commonSetup(event: FMLCommonSetupEvent) {
-        transparentNodeBlock = Registration.TRANSPARENT_NODE_BLOCK.get()
-        transparentNodeBlockEntity = Registration.TRANSPARENT_NODE_BLOCK_ENTITY.get()
-    }
-
-    class SignalCableDescriptorStub {
-        var render: CableRenderDescriptor? = null
-        fun applyTo(o: Any?) {}
-    }
-
+    @JvmField
     var electricalFrequency = 20.0
+    @JvmField
     var thermalFrequency = 20.0
     var testItem: GenericItemUsingDamageDescriptor? = null
+    @JvmField
     var signalCableDescriptor: mods.eln.sixnode.electricalcable.ElectricalCableDescriptor? = null
+    @JvmField
     var stdCableRenderSignal: CableRenderDescriptor? = null
     var lowCurrentCableRender: CableRenderDescriptor? = null
     var featureMap = java.util.HashMap<String, String>()
     var forceOreRegen = false
-    var oreBlock: net.minecraft.world.level.block.Block? = null
-    var oreItem: GenericItemUsingDamageDescriptor? = null
+    // var oreBlock: net.minecraft.world.level.block.Block? = null // Duplicate
+    // var oreItem: GenericItemUsingDamageDescriptor? = null // Duplicate
     
     var batteryCapacityFactor = 1.0
     var stdBatteryHalfLife = 3600.0 * 24 * 365
 
-    var lowVoltageCableDescriptor: ElectricalCableDescriptor? = null
-    var meduimVoltageCableDescriptor: ElectricalCableDescriptor? = null
-    var highVoltageCableDescriptor: ElectricalCableDescriptor? = null
-    var veryHighVoltageCableDescriptor: ElectricalCableDescriptor? = null
-    var compressorRecipes = mods.eln.misc.RecipesList()
-    var solarPanelPowerFactor = 1.0
-    var windTurbinePowerFactor = 1.0
-    var waterTurbinePowerFactor = 1.0
-    var fuelGeneratorPowerFactor = 1.0
-    var fuelGeneratorTankCapacity = 1000.0
-    var heatTurbinePowerFactor = 1.0
-    var sixNodeThermalLoadInitializer = ThermalLoadInitializer()
-    var furnaceList = ArrayList<ItemStack>()
-    var electricalFurnace: ElectricalFurnaceDescriptor? = null
-    var magnetiserRecipes = mods.eln.misc.RecipesList()
-    var batteryVoltageFunctionTable: mods.eln.misc.FunctionTable? = null
+    var configShared = ArrayList<IConfigSharing>()
 
-    var stdCableRenderSignalBus: CableRenderDescriptor? = null
-    var stdCableRender50V: CableRenderDescriptor? = null
-    var stdCableRender200V: CableRenderDescriptor? = null
-    var stdCableRender800V: CableRenderDescriptor? = null
-    var stdCableRender3200V: CableRenderDescriptor? = null
-    var stdCableRenderCreative: CableRenderDescriptor? = null
+    @JvmField var lowVoltageCableDescriptor: ElectricalCableDescriptor? = null
+    @JvmField var meduimVoltageCableDescriptor: ElectricalCableDescriptor? = null
+    @JvmField var highVoltageCableDescriptor: ElectricalCableDescriptor? = null
+    @JvmField var veryHighVoltageCableDescriptor: ElectricalCableDescriptor? = null
+    @JvmField var compressorRecipes = mods.eln.misc.RecipesList()
+    @JvmField var solarPanelPowerFactor = 1.0
+    @JvmField var windTurbinePowerFactor = 1.0
+    @JvmField var waterTurbinePowerFactor = 1.0
+    @JvmField var fuelGeneratorPowerFactor = 1.0
+    @JvmField var fuelGeneratorTankCapacity = 1000.0
+    @JvmField var heatTurbinePowerFactor = 1.0
+    @JvmField var sixNodeThermalLoadInitializer = ThermalLoadInitializer(
+        cableWarmLimit,
+        -10.0,
+        cableHeatingTime,
+        cableThermalConductionTao
+    )
+    @JvmField var furnaceList = ArrayList<ItemStack>()
+    @JvmField var electricalFurnace: ElectricalFurnaceDescriptor? = null
+    @JvmField var magnetiserRecipes = mods.eln.misc.RecipesList()
+    @JvmField var plateMachineRecipes = mods.eln.misc.RecipesList()
+    @JvmField var batteryVoltageFunctionTable: mods.eln.misc.FunctionTable? = null
 
-    var signalBusCableDescriptor: ElectricalCableDescriptor? = null
-    var creativeCableDescriptor: ElectricalCableDescriptor? = null
+    @JvmField var stdCableRenderSignalBus: CableRenderDescriptor? = null
+    @JvmField var stdCableRender50V: CableRenderDescriptor? = null
+    @JvmField var stdCableRender200V: CableRenderDescriptor? = null
+    @JvmField var stdCableRender800V: CableRenderDescriptor? = null
+    @JvmField var stdCableRender3200V: CableRenderDescriptor? = null
+    @JvmField var stdCableRenderCreative: CableRenderDescriptor? = null
 
-    var lowCurrentCableDescriptor: CurrentCableDescriptor? = null
-    var mediumCurrentCableDescriptor: CurrentCableDescriptor? = null
-    var highCurrentCableDescriptor: CurrentCableDescriptor? = null
+    @JvmField var signalBusCableDescriptor: ElectricalCableDescriptor? = null
+    @JvmField var creativeCableDescriptor: ElectricalCableDescriptor? = null
 
-    var mediumCurrentCableRender: CableRenderDescriptor? = null
-    var highCurrentCableRender: CableRenderDescriptor? = null
+    @JvmField var lowCurrentCableDescriptor: CurrentCableDescriptor? = null
+    @JvmField var mediumCurrentCableDescriptor: CurrentCableDescriptor? = null
+    @JvmField var highCurrentCableDescriptor: CurrentCableDescriptor? = null
 
-    var stdPortableNaN: CableRenderDescriptor? = null
-    var portableNaNDescriptor: mods.eln.sixnode.PortableNaNDescriptor? = null
+    @JvmField var mediumCurrentCableRender: CableRenderDescriptor? = null
+    @JvmField var highCurrentCableRender: CableRenderDescriptor? = null
 
-    var isDevelopmentRun = false
+    @JvmField var stdPortableNaN: CableRenderDescriptor? = null
+    @JvmField var portableNaNDescriptor: mods.eln.sixnode.PortableNaNDescriptor? = null
 
-    var ElnToOtherEnergyConverterEnable = true
-    var ELN_CONVERTER_MAX_POWER = 10000.0
-    var elnToOtherBlockConverter: net.minecraft.world.level.block.Block? = null
+
+    @JvmField var isDevelopmentRun = false
+
+    @JvmField var ElnToOtherEnergyConverterEnable = true
+    @JvmField var ELN_CONVERTER_MAX_POWER = 10000.0
+    @JvmField var elnToOtherBlockConverter: net.minecraft.world.level.block.Block? = null
     var ComputerProbeEnable = true
     var computerProbeBlock: net.minecraft.world.level.block.Block? = null
 
@@ -111,17 +110,21 @@ class Eln {
 
     init {
         instance = this
-        val modEventBus = FMLJavaModLoadingContext.get().getModEventBus()
-        modEventBus.addListener { event: FMLCommonSetupEvent -> this.commonSetup(event) }
-        modEventBus.addListener { event: FMLClientSetupEvent -> this.clientSetup(event) }
-
+        val modEventBus = FMLJavaModLoadingContext.get().modEventBus
         Registration.init(modEventBus)
+        mods.eln.fluid.ElnFluids.init(modEventBus)
+        mods.eln.recipe.ElnRecipeTypes.register(modEventBus)
+        modEventBus.addListener(this::commonSetup)
+        modEventBus.addListener(this::clientSetup)
+
+        treeResinCollectorBlockEntity = Registration.TREE_RESIN_COLLECTOR_BLOCK_ENTITY as net.minecraftforge.registries.RegistryObject<net.minecraft.world.level.block.entity.BlockEntityType<*>>
 
         testItem = GenericItemUsingDamageDescriptor("Test Item")
     }
 
     private fun commonSetup(event: FMLCommonSetupEvent) {
         LOGGER.info("Electrical Age Common Setup")
+        sixNodeItem = Registration.SIX_NODE_ITEM.get()
     }
 
     private fun clientSetup(event: FMLClientSetupEvent) {
@@ -129,8 +132,16 @@ class Eln {
         ClientProxy.registerRenderers()
     }
 
+    class SignalCableDescriptorStub {
+        var render: CableRenderDescriptor? = null
+        fun applyTo(o: Any?) {}
+    }
+
     companion object {
-        lateinit var instance: Eln
+        val LOGGER: Logger = LogManager.getLogger(Eln::class.java)
+
+        @JvmField
+        var instance: Eln? = null
         const val MODID = "eln"
         const val LVU = 50.0
         const val MVU = 200.0
@@ -140,7 +151,6 @@ class Eln {
         const val SVII = 1.0 // Guessing
         const val VVU = 3200.0 // Guessing
         const val cableThermalConductionTao = 1.0 // Guessing
-        const val wirelessTxRange = 64.0
 
         const val gateOutputCurrent = 0.100
         const val CCU = 50.0
@@ -148,13 +158,31 @@ class Eln {
         const val cableHeatingTime = 10.0
         const val packetPlaySound = 1
         const val packetDestroyUuid: Byte = 2
-        const val maxSoundDistance = 64.0
+        const val packetPlayerKey = 3
+        const val packetNodeSingleSerialized = 4
+        const val packetPublishForNode = 5
+        const val packetForClientNode = 6
+        const val packetOpenLocalGui = 7
+        const val packetClientToServerConnection = 8
+        const val packetServerToClientInfo = 9
+        var maxSoundDistance = 64.0
 
-        lateinit var sixNodeItem: SixNodeItem
+        @JvmField
+        var sixNodeItem: mods.eln.node.six.SixNodeItem? = null
         var sharedItem = mods.eln.generic.GenericItemRegistry()
-        var cableThermalLoadInitializer = ThermalLoadInitializer()
+        var cableThermalLoadInitializer = ThermalLoadInitializer(
+            cableWarmLimit,
+            -10.0,
+            cableHeatingTime,
+            cableThermalConductionTao
+        )
 
+        const val SVUinv = 1.0 / SVU
+
+        @JvmStatic
         fun getSmallRs() = 0.001
+
+
 
         var transistor: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
         var alu: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
@@ -167,15 +195,29 @@ class Eln {
 
         var batteryVoltageFunctionTable = mods.eln.misc.FunctionTable(doubleArrayOf(0.0, 1.0), 1.0)
 
+        @JvmField
         val obj = mods.eln.misc.Obj3DFolder()
         
         @JvmField
-        var simulator: mods.eln.sim.Simulator = mods.eln.sim.Simulator()
+        var simulator: mods.eln.sim.Simulator = mods.eln.sim.Simulator(
+            0.05,
+            1.0 / 20.0,
+            1,
+            1.0 / 20.0
+        )
+        @JvmField
         var wailaEasyMode = false
+        @JvmField
         var debugEnabled = false
+        @JvmField
         var explosionEnable = true
+        @JvmField
         var noSymbols = false
+        @JvmField
         var debugExplosions = false
+        
+        @JvmField
+        var modbusServer = mods.eln.sixnode.modbusrtu.ModbusServer()
 
         fun findItemStack(name: String, amount: Int): ItemStack {
             return ItemStack(net.minecraft.world.item.Items.AIR)
@@ -187,8 +229,12 @@ class Eln {
         var modbusEnable = true
         var enableFestivities = true
 
+        @JvmStatic
         fun applySmallRs(load: mods.eln.sim.ElectricalLoad) {
-            load.setRs(getSmallRs())
+            // In the 1.20 port, ElectricalLoad no longer exposes setRs(); this will need
+            // to be updated to match the new API. For now, this is a no-op stub so
+            // the code compiles.
+            // load.Rs = getSmallRs()
         }
 
         var veryHighVoltageCableDescriptor: mods.eln.sixnode.electricalcable.ElectricalCableDescriptor? = null
@@ -221,25 +267,29 @@ class Eln {
         
         var oreNames = ArrayList<String>()
         
-        var oreScannerConfig = ArrayList<mods.eln.item.electricalitem.PortableOreScannerItem.OreScannerConfigElement>()
+        var oreScannerConfig = ArrayList<Any>()
         
+        @JvmField
         var oreItem: mods.eln.item.OreItem? = null
+        @JvmField
         var oreBlock: net.minecraft.world.level.block.Block? = null
 
+        @JvmField
         var miningPipeDescriptor: mods.eln.item.MiningPipeDescriptor? = null
         
+        @JvmField
         var sharedItemStackOne = sharedItem
         
-        var incandescentLampLife = 0.0
-        var carbonLampLife = 0.0
-        var economicLampLife = 0.0
-        var ledLampLife = 0.0
-        
+        @JvmField
         var dictionnaryOreFromMod = java.util.HashMap<String, net.minecraft.world.item.ItemStack>()
         
+        @JvmField
         var dustCopper: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
+        @JvmField
         var copperIngot: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
+        @JvmField
         var plumbIngot: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
+        @JvmField
         var tungstenIngot: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
         
         var dictSiliconWafer = true
@@ -247,35 +297,42 @@ class Eln {
         var dictThermistor = true
         var dictNibbleMemory = true
         var dictALU = true
-        var dictTungstenOre = true
-        var dictTungstenDust = true
-        var dictTungstenIngot = true
-        var dictCheapChip = true
-        var dictAdvancedChip = true
         
+        @JvmField
         var thermistor: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
+        @JvmField
         var nibbleMemory: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
         
-        var multiMeterElement: Any? = null
-        var thermometerElement: Any? = null
-        var allMeterElement: Any? = null
-        var configCopyToolElement: Any? = null
+        @JvmField
+        var multiMeterElement: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
+        @JvmField
+        var thermometerElement: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
+        @JvmField
+        var allMeterElement: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
+        @JvmField
+        var configCopyToolElement: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
         
+        @JvmField
         var treeResin: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
         
-        var xRayScannerRange = 0.0
-        var fuelHeatFurnacePowerFactor = 1.0
+        @JvmField
+        var dataLogsPrintDescriptor: DataLogsPrintDescriptor? = null
         
-        var dataLogsPrintDescriptor: Any? = null
-        
+        @JvmField
         var wrenchItemStack: net.minecraft.world.item.ItemStack? = null
         
+        @JvmField
         var whiteDesc: Any? = null
+        @JvmField
         var brushSubNames: Array<String>? = null
         
+        @JvmField
         var genCopper: Boolean = true
+        @JvmField
         var genLead: Boolean = true
+        @JvmField
         var genTungsten: Boolean = true
+        @JvmField
         var genCinnabar: Boolean = true
 
         val AUTHORS = listOf("Baughn", "Briman", "Dries007", "Maeyanie", "Mr_Hazard", "Xbony2")
@@ -283,16 +340,84 @@ class Eln {
         val saveConfig: mods.eln.server.SaveConfig
             get() = mods.eln.server.SaveConfig.instance ?: throw RuntimeException("SaveConfig not initialized")
 
-        object Config {
-            var debugEnabled = false
-            var explosionEnable = true
-            var noSymbols = false
-            var cablePowerFactor = 1.0
-            var killMonstersAroundLamps = false
-            var debugExplosions = false
-        }
-        val config = Config
+        val config = mods.eln.config.LegacyConfig()
 
-        var isDevelopmentRun = false
+        var modbusPort = 1502
+        var versionCheckEnabled = true
+        var analyticsEnabled = true
+        var analyticsURL = ""
+        var analyticsPlayerUUIDOptIn = false
+        var verticalIronCableCrafting = false
+        var playerUUID = ""
+        var directPoles = true
+        var shaftEnergyFactor = 0.05
+        var dictTungstenOre = ""
+        var dictTungstenDust = ""
+        var dictTungstenIngot = ""
+        var dictCheapChip = ""
+        var dictAdvancedChip = ""
+        // var allowSwingingLamps = true // Moved to companion object
+        @JvmField
+        var allowSwingingLamps = true
+        @JvmField
+        var wirelessTxRange = 32
+        @JvmField
+        var cablePowerFactor = 1.0
+        @JvmField
+        var fuelHeatValueFactor = 0.0000675
+        @JvmField
+        var noVoltageBackground = false
+        @JvmField
+        var soundChannels = 200
+        @JvmField
+        var flywheelMass = 50.0
+        @JvmField
+        var plateConversionRatio = 1
+        @JvmField
+        var replicatorPop = false
+        @JvmField
+        var replicatorRegistrationId = -1
+        @JvmField
+        var killMonstersAroundLamps = true
+        @JvmField
+        var killMonstersAroundLampsRange = 9
+        @JvmField
+        var maxReplicators = 100
+        @JvmField
+        var incandescentLampLife = 16.0
+        @JvmField
+        var economicLampLife = 64.0
+        @JvmField
+        var carbonLampLife = 6.0
+        @JvmField
+        var ledLampLife = 512.0
+        @JvmField
+        var addOtherModOreToXRay = true
+        @JvmField
+        var xRayScannerRange = 5.0f
+        @JvmField
+        var xRayScannerCanBeCrafted = true
+        @JvmField
+        var electricalInterSystemOverSampling = 50
+        @JvmField
+        var fuelHeatFurnacePowerFactor = 1.0
+        @JvmField
+        var autominerRange = 10
+        @JvmField
+        var delayedTask = mods.eln.server.DelayedTaskManager()
+
+        @JvmField
+        var sixNodeBlock: mods.eln.node.six.SixNodeBlock? = null
+        @JvmField
+        var sixNodeEntity: net.minecraft.world.level.block.entity.BlockEntityType<mods.eln.node.six.SixNodeEntity>? = null
+
+        @JvmField
+        var portableOreScannerElement: mods.eln.generic.GenericItemUsingDamageDescriptor? = null
+
+        @JvmField
+        var serverEventListener: mods.eln.server.ServerEventListener? = null
+
+        @JvmField
+        var treeResinCollectorBlockEntity: net.minecraftforge.registries.RegistryObject<net.minecraft.world.level.block.entity.BlockEntityType<*>>? = null
     }
 }

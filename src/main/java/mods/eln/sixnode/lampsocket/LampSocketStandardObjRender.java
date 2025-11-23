@@ -5,8 +5,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 public class LampSocketStandardObjRender implements LampSocketObjRender {
@@ -33,28 +32,26 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
     }
 
     @Override
-    public void draw(LampSocketDescriptor descriptor, ItemRenderType type, double distanceToPlayer) {
-        if (type == ItemRenderType.INVENTORY) {
-            if (descriptor.hasGhostGroup()) {
-                GL11.glScalef(0.5f, 0.5f, 0.5f);
-                GL11.glRotatef(90, 0, -1, 0);
-                GL11.glTranslatef(-1.5f, 0f, 0f);
-            }
-        } else if (type == ItemRenderType.EQUIPPED_FIRST_PERSON) {
-            if (descriptor.hasGhostGroup()) {
-                GL11.glScalef(0.3f, 0.3f, 0.3f);
-                GL11.glRotatef(90, 0, -1, 0);
-                GL11.glTranslatef(-0.5f, 0f, -1f);
-            }
+    public void drawItem(LampSocketDescriptor descriptor) {
+        if (descriptor.hasGhostGroup()) {
+            GL11.glScalef(0.5f, 0.5f, 0.5f);
+            GL11.glRotatef(90, 0, -1, 0);
+            GL11.glTranslatef(-1.5f, 0f, 0f);
         }
-        draw(LRDU.Up, 0, (byte) 0, true, 15, distanceToPlayer);
+        draw(LRDU.Up, 0, (byte) 0, true, 15, 0.0);
     }
 
     @Override
-    public void draw(LampSocketRender render, double distanceToPlayer) {
+    public void draw(LampSocketRender render) {
         int color = 15;
-        if (render.descriptor.paintable)
+        if (render.getDescriptor().paintable)
             color = render.paintColor;
+        
+        double distanceToPlayer = 0.0;
+        if (render.blockEntity != null && render.blockEntity.getLevel() != null) {
+             distanceToPlayer = UtilsClient.distanceFromClientPlayer(render.blockEntity);
+        }
+
         draw(render.front, render.alphaZ, render.light, render.lampDescriptor != null, color, distanceToPlayer);
     }
 

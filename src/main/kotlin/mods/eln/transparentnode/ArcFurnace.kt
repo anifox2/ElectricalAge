@@ -9,6 +9,7 @@ import mods.eln.item.GraphiteDescriptor
 import mods.eln.misc.*
 import mods.eln.misc.Obj3D.Obj3DPart
 import mods.eln.node.NodeBase
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.*
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.mna.component.Resistor
@@ -105,7 +106,7 @@ class ArcFurnaceElement(node: TransparentNode, descriptor: TransparentNodeDescri
     }
 }
 
-class ArcFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, descriptor) {
+class ArcFurnaceRender(tileEntity: TransparentNodeBlockEntity, descriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, descriptor) {
 
     override val inventory = TransparentNodeElementInventory(5, 64, this)
 
@@ -159,6 +160,6 @@ class ArcFurnaceGui(player: Player, inventory: Container, @Suppress("UNUSED_PARA
     }
 
     override fun renderBg(guiGraphics: net.minecraft.client.gui.GuiGraphics, partialTick: Float, mouseX: Int, mouseY: Int) {
-        helper?.draw(guiGraphics, mouseX, mouseY, partialTick)
+        helper?.render(guiGraphics, leftPos, topPos)
     }
 }

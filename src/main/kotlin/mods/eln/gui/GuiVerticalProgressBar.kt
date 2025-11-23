@@ -15,10 +15,6 @@ class GuiVerticalProgressBar(val x: Int, val y: Int, val width: Int, val height:
         this.b = b
     }
 
-    fun setValue(value: Float) {
-        this.value = value
-    }
-
     fun setComment(index: Int, comment: String) {
         this.comment = comment
     }

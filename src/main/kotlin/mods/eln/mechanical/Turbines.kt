@@ -10,7 +10,7 @@ import mods.eln.node.published
 import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.sim.IProcess
 import mods.eln.sim.nbt.NbtElectricalGateInput
 import net.minecraft.world.entity.player.Player
@@ -143,10 +143,10 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
             rc.step(time.toFloat())
             fluidRate = rc.get()
 
-            val power = fluidRate * tank.heatEnergyPerMilliBucket * efficiency
+            val power = fluidRate * FuelRegistry.heatEnergyPerMilliBucket(tank.tank.fluid.fluid) * efficiency
             shaft.energy += power * time.toFloat()
 
-            volume = power / desc.maxFluidPower.toFloat()
+            volume = (power / desc.maxFluidPower).toFloat()
         }
 
         override fun readFromNBT(nbt: CompoundTag, str: String) {
@@ -208,8 +208,8 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     }
 }
 
-class TurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
-    override val cableRender = Eln.instance.stdCableRenderSignal
+class TurbineRender(entity: TransparentNodeBlockEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
+    override val cableRender = Eln.instance!!.stdCableRenderSignal
 
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)

@@ -9,14 +9,14 @@ import mods.eln.sim.mna.misc.MnaConst;
  */
 public class ResistorProcess implements IProcess {
 
-    ResistorElement element;
-    ResistorDescriptor descriptor;
+    IResistorElement element;
+    IResistorDescriptor descriptor;
     Resistor resistor;
     ThermalLoad thermal;
 
     private double lastResistance = -1;
 
-    public ResistorProcess(ResistorElement element, Resistor resistor, ThermalLoad thermal, ResistorDescriptor descriptor) {
+    public ResistorProcess(IResistorElement element, Resistor resistor, ThermalLoad thermal, IResistorDescriptor descriptor) {
         this.element = element;
         this.descriptor = descriptor;
         this.resistor = resistor;
@@ -27,9 +27,14 @@ public class ResistorProcess implements IProcess {
     public void process(double time) {
         double newResistance = Math.max(
             MnaConst.noImpedance,
-            element.nominalRs * (1 + descriptor.tempCoef * thermal.temperatureCelsius));
-        if (element.control != null) {
-            newResistance *= (element.control.getNormalized() + 0.01) / 1.01;
+            element.getNominalRs() * (1 + descriptor.getTempCoef() * thermal.temperatureCelsius));
+        
+        if (element.getControl() != null) {
+            if (descriptor.isRheostat()) {
+                newResistance = newResistance * element.getControl().getNormalized();
+            } else {
+                newResistance *= (element.getControl().getNormalized() + 0.01) / 1.01;
+            }
         }
         if (newResistance > lastResistance * 1.01 || newResistance < lastResistance * 0.99) {
             resistor.setResistance(newResistance);

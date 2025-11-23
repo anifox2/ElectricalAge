@@ -4,11 +4,11 @@ import mods.eln.generic.GenericItemBlockUsingDamageDescriptor
 import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.item.ItemMovingHelper
 import mods.eln.item.electricalinterface.IItemEnergyBattery
-import net.minecraft.entity.player.InventoryPlayer
+import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.Container
 import net.minecraft.world.item.ItemStack
 
-class AutoAcceptInventoryProxy(val inventory: Container) {
+class AutoAcceptInventoryProxy(val inventory: Container) : Container by inventory {
     interface ExistingItemHandler {
         fun handleExistingInventoryItem(itemStack: ItemStack)
     }
@@ -115,7 +115,7 @@ class AutoAcceptInventoryProxy(val inventory: Container) {
         }
     }
 
-    private val itemAcceptors: Array<ItemAcceptor?> = arrayOfNulls(inventory.sizeInventory)
+    private val itemAcceptors: Array<ItemAcceptor?> = arrayOfNulls(inventory.containerSize)
 
     fun acceptIfEmpty(index: Int, vararg types: Class<out Any>): AutoAcceptInventoryProxy {
         if (index >= 0 && index < itemAcceptors.count()) {
@@ -154,10 +154,11 @@ class AutoAcceptInventoryProxy(val inventory: Container) {
         } else
             false
 
-    fun takeFrom(inv: InventoryPlayer, nodeElement: INodeElement?, publish: Boolean = false, notifyInventoryChange: Boolean = false, matchDescriptor: GenericItemUsingDamageDescriptor? = null): Boolean {
+    fun takeFrom(inv: Inventory, nodeElement: INodeElement?, publish: Boolean = false, notifyInventoryChange: Boolean = false, matchDescriptor: GenericItemUsingDamageDescriptor? = null): Boolean {
         var ret = false
-        for(idx in 0 until inv.sizeInventory) {
-            val stack = inv.getItem(idx) ?: continue
+        for(idx in 0 until inv.containerSize) {
+            val stack = inv.getItem(idx)
+            if (stack.isEmpty) continue
             if(matchDescriptor != null) {
                 val desc = GenericItemUsingDamageDescriptor.getDescriptor(stack)
                 if(matchDescriptor != desc) continue

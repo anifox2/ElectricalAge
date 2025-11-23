@@ -1,19 +1,19 @@
 package mods.eln.sixnode.electricalrelay;
 
-import mods.eln.gui.GuiHelper;
-import mods.eln.gui.GuiScreenEln;
-import mods.eln.gui.IGuiObject;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.entity.player.EntityPlayer;
+import mods.eln.gui.GuiButtonEln;
+import mods.eln.gui.GuiHelperContainer;
+import mods.eln.gui.ScreenEln;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.entity.player.Player;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class ElectricalRelayGui extends GuiScreenEln {
+public class ElectricalRelayGui extends ScreenEln {
 
-    GuiButton toggleDefaultOutput;
+    GuiButtonEln toggleDefaultOutput;
     ElectricalRelayRender render;
 
-    public ElectricalRelayGui(EntityPlayer player, ElectricalRelayRender render) {
+    public ElectricalRelayGui(Player player, ElectricalRelayRender render) {
         this.render = render;
     }
 
@@ -21,28 +21,23 @@ public class ElectricalRelayGui extends GuiScreenEln {
     public void initGui() {
         super.initGui();
 
-        toggleDefaultOutput = newGuiButton(6, 32 / 2 - 10, 115, tr("Toggle switch"));
-    }
-
-    @Override
-    public void guiObjectEvent(IGuiObject object) {
-        super.guiObjectEvent(object);
-        if (object == toggleDefaultOutput) {
+        toggleDefaultOutput = new GuiButtonEln(leftPos + 6, topPos + 32 / 2 - 10, 115, 20, tr("Toggle switch"), (b) -> {
             render.clientToogleDefaultOutput();
-        }
+        });
+        addRenderableWidget(toggleDefaultOutput);
     }
 
     @Override
-    protected void preDraw(float f, int x, int y) {
-        super.preDraw(f, x, y);
+    public void preDraw(GuiGraphics guiGraphics, float f, int x, int y) {
+        super.preDraw(guiGraphics, f, x, y);
         if (render.defaultOutput)
-            toggleDefaultOutput.displayString = tr("Normally closed");
+            toggleDefaultOutput.setMessage(net.minecraft.network.chat.Component.literal(tr("Normally closed")));
         else
-            toggleDefaultOutput.displayString = tr("Normally open");
+            toggleDefaultOutput.setMessage(net.minecraft.network.chat.Component.literal(tr("Normally open")));
     }
 
     @Override
-    protected GuiHelper newHelper() {
-        return new GuiHelper(this, 128, 32);
+    public GuiHelperContainer newHelper() {
+        return new GuiHelperContainer(this, 128, 32);
     }
 }

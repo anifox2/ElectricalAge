@@ -61,7 +61,7 @@ class ThermalDissipatorActiveDescriptor(
     }
 
     fun applyTo(load: ElectricalLoad) {
-        load.setRs(electricalRp)
+        load.setSerialResistance(electricalRp)
     }
 
     fun draw(speed: Float) {

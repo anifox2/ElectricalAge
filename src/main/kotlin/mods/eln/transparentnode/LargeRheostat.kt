@@ -7,6 +7,7 @@ import mods.eln.i18n.I18N
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.*
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
@@ -21,7 +22,7 @@ import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sim.process.heater.ResistorHeatThermalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import mods.eln.sixnode.resistor.ResistorContainer
-import mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor
+import mods.eln.transparentnode.thermaldissipator.ThermalDissipatorPassiveDescriptor
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.Container
@@ -72,7 +73,7 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
     fun draw(position: Float = 0f) {
         dissipator.draw()
         GL11.glRotatef((1f - position) * 300f, 0f, 1f, 0f)
-        dissipator.obj.getPart("wiper")?.draw()
+        dissipator.obj?.getPart("wiper")?.draw()
     }
 
 
@@ -202,7 +203,7 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     )
 }
 
-class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) :
+class LargeRheostatRender(entity: TransparentNodeBlockEntity, desc: TransparentNodeDescriptor) :
     TransparentNodeElementRender(entity, desc) {
     val desc = desc as LargeRheostatDescriptor
     override val inventory = TransparentNodeElementInventory(1, 64, this)

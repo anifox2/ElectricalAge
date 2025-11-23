@@ -9,6 +9,7 @@ import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.NodePeriodicPublishProcess
 import mods.eln.node.published
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.*
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
@@ -143,7 +144,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
     }
 
     override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
-        if (player.level?.isClientSide == false) {
+        if (!player.level().isClientSide) {
             val bucket = player.mainHandItem
             val fluidHandler = FluidUtil.getFluidHandler(bucket).orElse(null)
             
@@ -164,9 +165,9 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
                     }
                 }
             } else {
-                if (Eln.multiMeterElement.checkSameItemStack(player.mainHandItem) ||
-                    Eln.thermometerElement.checkSameItemStack(player.mainHandItem) ||
-                    Eln.allMeterElement.checkSameItemStack(player.mainHandItem)) {
+                if (Eln.multiMeterElement!!.checkSameItemStack(player.mainHandItem) ||
+                    Eln.thermometerElement!!.checkSameItemStack(player.mainHandItem) ||
+                    Eln.allMeterElement!!.checkSameItemStack(player.mainHandItem)) {
                     return false
                 }
 
@@ -205,7 +206,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
     )
 }
 
-class FuelGeneratorRender(tileEntity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) :
+class FuelGeneratorRender(tileEntity: TransparentNodeBlockEntity, descriptor: TransparentNodeDescriptor) :
     TransparentNodeElementRender(tileEntity, descriptor) {
     internal var descriptor: FuelGeneratorDescriptor
     private var renderPreProcess: CableRenderType? = null

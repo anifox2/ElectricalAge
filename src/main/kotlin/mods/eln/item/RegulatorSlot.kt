@@ -5,6 +5,8 @@ import mods.eln.gui.ISlotSkin
 import net.minecraft.world.Container
 import net.minecraft.world.item.ItemStack
 
+import mods.eln.generic.GenericItemUsingDamageDescriptor
+
 class RegulatorSlot(
     inventory: Container,
     index: Int,
@@ -26,7 +28,7 @@ class RegulatorSlot(
 ) {
     override fun mayPlace(stack: ItemStack): Boolean {
         if (!super.mayPlace(stack)) return false
-        val descriptor = IRegulatorDescriptor.getDescriptor(stack) as? IRegulatorDescriptor ?: return false
+        val descriptor = GenericItemUsingDamageDescriptor.getDescriptor(stack) as? IRegulatorDescriptor ?: return false
         return type.any { it == descriptor.type }
     }
 }

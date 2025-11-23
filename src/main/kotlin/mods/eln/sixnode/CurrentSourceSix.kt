@@ -5,6 +5,7 @@ import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.GuiHelper
 import mods.eln.gui.ScreenEln
 import mods.eln.gui.GuiTextFieldEln
+import mods.eln.gui.GuiHelperContainer
 import mods.eln.i18n.I18N
 import mods.eln.i18n.I18N.tr
 import mods.eln.item.IConfigurable
@@ -153,30 +154,42 @@ class CurrentSourceElement(_sixNode: SixNode, side: Direction, descriptor: SixNo
     val setVoltageId: Byte = 1
 }
 
-class CurrentSourceGui(var render: CurrentSourceRender) : ScreenEln() {
+class CurrentSourceGui(var render: CurrentSourceRender) : ScreenEln(), GuiTextFieldEln.GuiTextFieldElnObserver {
     var current: GuiTextFieldEln? = null
-    override fun newHelper(): GuiHelper {
-        return GuiHelper(this, 50 + 12, 12 + 12)
+    override fun newHelper(): GuiHelperContainer {
+        return GuiHelperContainer(this, 50 + 12, 12 + 12)
     }
 
     override fun initGui() {
         super.initGui()
         current = newGuiTextField(6, 6, 50)
         current!!.value = render.current.toString()
-        current!!.setObserver(this)
-        current!!.setComment(listOf(tr("Current sourced")))
+        current!!.observer = this
+        current!!.setComment(arrayOf(tr("Current sourced")))
     }
 
     override fun textFieldNewValue(textField: GuiTextFieldEln, value: String) {
-
         val newCurrent = current!!.value.toDoubleOrNull()?: 0.0
+        clientSendPacket(newCurrent)
+    }
 
+    fun clientSendPacket(current: Double) {
+        val bos = ByteArrayOutputStream()
+        val stream = DataOutputStream(bos)
         try {
-            val bos = ByteArrayOutputStream()
-            val stream = DataOutputStream(bos)
-            render.preparePacketForServer(stream)
-            stream.writeDouble(newCurrent)
-            render.sendPacketToServer(bos)
+            stream.writeByte(Eln.packetPublishForNode.toInt())
+            val pos = render.blockEntity.blockPos
+            stream.writeInt(pos.x)
+            stream.writeInt(pos.y)
+            stream.writeInt(pos.z)
+            stream.writeByte(0) // Dimension TODO
+            stream.writeUTF(render.blockEntity.nodeUuid)
+            stream.writeByte(render.side.int)
+            
+            // Payload
+            stream.writeDouble(current)
+            
+            mods.eln.ElnNetwork.sendToServer(mods.eln.ElnPacket(bos.toByteArray()))
         } catch (e: IOException) {
             e.printStackTrace()
         }

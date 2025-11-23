@@ -1,25 +1,26 @@
 package mods.eln.sixnode.electricalbreaker;
 
 import mods.eln.gui.*;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class ElectricalBreakerGui extends GuiContainerEln {
+public class ElectricalBreakerGui extends GuiContainerEln<ElectricalBreakerContainer> implements GuiTextFieldEln.GuiTextFieldElnObserver {
 
-    GuiButton toogleSwitch;
+    GuiButtonEln toogleSwitch;
     GuiTextFieldEln setUmin, setUmax;
     ElectricalBreakerRender render;
 
     enum SelectedType {none, min, max}
 
-    public ElectricalBreakerGui(EntityPlayer player, IInventory inventory, ElectricalBreakerRender render) {
-        super(new ElectricalBreakerContainer(player, inventory));
+    public ElectricalBreakerGui(Player player, Container inventory, ElectricalBreakerRender render) {
+        super(new ElectricalBreakerContainer(player, inventory), player.getInventory(), Component.literal("Breaker"));
         this.render = render;
     }
 
@@ -30,44 +31,46 @@ public class ElectricalBreakerGui extends GuiContainerEln {
         setUmin = newGuiTextField(12, 58 / 2 + 3, 50);
         setUmax = newGuiTextField(12, 58 / 2 - 5 - 10, 50);
 
-        setUmin.setText(render.uMin);
-        setUmax.setText(render.uMax);
+        setUmin.setText(String.valueOf(render.uMin));
+        setUmax.setText(String.valueOf(render.uMax));
 
-        setUmin.setComment(0, tr("Minimum voltage before cutting off"));
-        setUmax.setComment(0, tr("Maximum voltage before cutting off"));
+        setUmin.setObserver(this);
+        setUmax.setObserver(this);
 
-        toogleSwitch = newGuiButton(72 - 2, 58 / 2 - 10, 70, tr("Toggle switch"));
+        setUmin.setComment(new String[]{tr("Minimum voltage before cutting off")});
+        setUmax.setComment(new String[]{tr("Maximum voltage before cutting off")});
+
+        toogleSwitch = newGuiButton(72 - 2, 58 / 2 - 10, 70, tr("Toggle switch"), (btn) -> {
+            render.clientToogleSwitch();
+        });
     }
 
     @Override
-    public void guiObjectEvent(IGuiObject object) {
-        super.guiObjectEvent(object);
-        if (object == setUmax) {
+    public void textFieldNewValue(GuiTextFieldEln textField, String value) {
+        if (textField == setUmax) {
             try {
-                render.clientSetVoltageMax(NumberFormat.getInstance().parse(setUmax.getText()).floatValue());
+                render.clientSetVoltageMax(NumberFormat.getInstance().parse(value).floatValue());
             } catch (ParseException e) {
             }
-        } else if (object == setUmin) {
+        } else if (textField == setUmin) {
             try {
-                render.clientSetVoltageMin(NumberFormat.getInstance().parse(setUmin.getText()).floatValue());
+                render.clientSetVoltageMin(NumberFormat.getInstance().parse(value).floatValue());
             } catch (ParseException e) {
             }
-        } else if (object == toogleSwitch) {
-            render.clientToogleSwitch();
         }
     }
 
     @Override
-    protected void preDraw(float f, int x, int y) {
-        super.preDraw(f, x, y);
+    public void preDraw(GuiGraphics guiGraphics, float f, int x, int y) {
+        super.preDraw(guiGraphics, f, x, y);
         if (!render.switchState)
-            toogleSwitch.displayString = tr("Switch is off");
+            toogleSwitch.setDisplayString(tr("Switch is off"));
         else
-            toogleSwitch.displayString = tr("Switch is on");
+            toogleSwitch.setDisplayString(tr("Switch is on"));
     }
 
     @Override
-    protected GuiHelperContainer newHelper() {
+    public GuiHelperContainer newHelper() {
         return new HelperStdContainerSmall(this);
     }
 }

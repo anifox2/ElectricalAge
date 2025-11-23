@@ -15,7 +15,7 @@ import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeElement
 import mods.eln.node.transparent.TransparentNodeElementRender
-import mods.eln.node.transparent.TransparentNodeEntity
+import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop
 import mods.eln.sim.nbt.NbtElectricalGateInput
@@ -33,6 +33,7 @@ import net.minecraftforge.registries.ForgeRegistries
 import net.minecraftforge.fluids.FluidStack
 import net.minecraftforge.fluids.capability.templates.FluidTank
 import net.minecraftforge.fluids.capability.IFluidHandler
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
 import org.lwjgl.opengl.GL11
 import java.lang.Math.ceil
 import java.lang.Math.min
@@ -94,8 +95,8 @@ class ThermalHeatExchangerElement(
         val ic2hotwater: Fluid? = ForgeRegistries.FLUIDS.getValue(ResourceLocation("ic2hotwater"))
         // Use 'steam' but fall back on 'ic2steam'. Or, just die.
         val steam: Fluid? = ForgeRegistries.FLUIDS.getValue(ResourceLocation("steam")) ?: ForgeRegistries.FLUIDS.getValue(ResourceLocation("ic2steam"))
-        val INPUT_SIDE = Direction.YN
-        val OUTPUT_SIDE = Direction.YP
+        val INPUT_SIDE = net.minecraft.core.Direction.DOWN
+        val OUTPUT_SIDE = net.minecraft.core.Direction.UP
 
     }
 
@@ -107,7 +108,7 @@ class ThermalHeatExchangerElement(
 
     private val electricalControlLoad = NbtElectricalGateInput("control")
     private val thermalLoad = NbtThermalLoad("thermalLoad")
-    val tankMap = mapOf(Pair(INPUT_SIDE, TankData(FluidTank(1000))), Pair(OUTPUT_SIDE, TankData(FluidTank(1000))))
+    val tankMap = mapOf(Pair(net.minecraft.core.Direction.DOWN, ElementSidedFluidHandler.TankData(FluidTank(1000), ArrayList())), Pair(net.minecraft.core.Direction.UP, ElementSidedFluidHandler.TankData(FluidTank(1000), ArrayList())))
     private val tank = ElementSidedFluidHandler(tankMap)
     private val thermalWatchdog = ThermalLoadWatchDog(thermalLoad)
     private val fluidRegulatorProcess = IProcess {
@@ -139,7 +140,7 @@ class ThermalHeatExchangerElement(
         val maxMbOutputPerTick = ceil(maxMbInputPerTick * ratio).toInt()
         //println("maxMbInputPerTick: $maxMbInputPerTick")
         //println("maxMbOutputPerTick: $maxMbOutputPerTick")
-        val canMoveOutputMb = tank.fill(OUTPUT_SIDE, FluidStack(outputFluid, maxMbOutputPerTick), false)
+        val canMoveOutputMb = tank.getHandler(OUTPUT_SIDE)?.fill(FluidStack(outputFluid, maxMbOutputPerTick), FluidAction.SIMULATE) ?: 0
         //println("canMoveOutputMb: $canMoveOutputMb")
         var inTempRange = 1.0
         if (minTemp != null) {
@@ -157,8 +158,8 @@ class ThermalHeatExchangerElement(
         val predictedInputMb = ceil(shouldMoveOutputMb / ratio).toInt()
         //println("predictedInputMb: $predictedInputMb")
         if (predictedInputMb > 0) {
-            val movedInputMb = tank.drain(INPUT_SIDE, predictedInputMb, true)?.amount?: 0
-            tank.fill(OUTPUT_SIDE, FluidStack(outputFluid, (movedInputMb * ratio).toInt()), true)
+            val movedInputMb = tank.getHandler(INPUT_SIDE)?.drain(predictedInputMb, FluidAction.EXECUTE)?.amount?: 0
+            tank.getHandler(OUTPUT_SIDE)?.fill(FluidStack(outputFluid, (movedInputMb * ratio).toInt()), FluidAction.EXECUTE)
             //println("movedInputMb: $movedInputMb")
             //println("movedOutputMb: $movedOutputMb")
             return movedInputMb
@@ -168,7 +169,7 @@ class ThermalHeatExchangerElement(
 
     private val thermalRegulatorProcess = IProcess { time ->
         //Yes, it's magic number time. 1.25 is a rough estimate of the "what the fuck" measure I got from thermal power.
-        val heatPower = joulesPerTick / (Eln.instance.thermalFrequency / Eln.instance.electricalFrequency) * 1.25 / time
+        val heatPower = joulesPerTick / (Eln.instance!!.thermalFrequency / Eln.instance!!.electricalFrequency) * 1.25 / time
         thermalLoad.movePowerTo(heatPower)
         //thermalLoad.PcTemp += heatPower
     }
@@ -264,13 +265,15 @@ class ThermalHeatExchangerElement(
 
     override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float) = false
 
+    /*
     override fun getFluidHandler(): net.minecraftforge.fluids.capability.IFluidHandler {
         return tank
     }
+    */
 }
 
 class ThermalHeatExchangerRender(
-    tileEntity: TransparentNodeEntity,
+    tileEntity: TransparentNodeBlockEntity,
     descriptor: TransparentNodeDescriptor
 ): TransparentNodeElementRender(tileEntity, descriptor) {
     override fun draw() {

@@ -20,10 +20,11 @@ import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -98,7 +99,7 @@ public class EnergyMeterElement extends SixNodeElement {
         this.descriptor = (EnergyMeterDescriptor) descriptor;
     }
 
-    public SixNodeElementInventory getInventory() {
+    public Container getInventory() {
         return inventory;
     }
 
@@ -117,7 +118,7 @@ public class EnergyMeterElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (inventory.getStackInSlot(EnergyMeterContainer.cableSlotId) == null) return 0;
+        if (inventory.getItem(EnergyMeterContainer.cableSlotId).isEmpty()) return 0;
         if (front == lrdu) return NodeBase.maskElectricalAll;
         if (front.inverse() == lrdu) return NodeBase.maskElectricalAll;
 
@@ -165,7 +166,7 @@ public class EnergyMeterElement extends SixNodeElement {
             stream.writeDouble(timeCounter);
 
             // stream.writeDouble(energyStack);
-            Utils.serialiseItemStack(stream, inventory.getStackInSlot(EnergyMeterContainer.cableSlotId));
+            Utils.serialiseItemStack(stream, inventory.getItem(EnergyMeterContainer.cableSlotId));
 
             stream.writeByte(energyUnit);
             stream.writeByte(timeUnit);
@@ -194,7 +195,7 @@ public class EnergyMeterElement extends SixNodeElement {
     }
 
     public void computeElectricalLoad() {
-        ItemStack cable = inventory.getStackInSlot(EnergyMeterContainer.cableSlotId);
+        ItemStack cable = inventory.getItem(EnergyMeterContainer.cableSlotId);
 
         cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
         if (cableDescriptor == null) {
@@ -257,12 +258,12 @@ public class EnergyMeterElement extends SixNodeElement {
 
     @Nullable
     @Override
-    public Container newContainer(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public AbstractContainerMenu newContainer(@NotNull Direction side, @NotNull Player player) {
         return new EnergyMeterContainer(player, inventory);
     }
 
     @Override
-    public void readFromNBT(@NotNull NBTTagCompound nbt) {
+    public void readFromNBT(@NotNull CompoundTag nbt) {
         super.readFromNBT(nbt);
 
         try {
@@ -279,15 +280,15 @@ public class EnergyMeterElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
 
-        nbt.setString("mode", mod.toString());
-        nbt.setDouble("energyStack", energyStack);
-        nbt.setDouble("timeCounter", timeCounter);
-        nbt.setString("password", password);
-        nbt.setByte("energyUnit", (byte) energyUnit);
-        nbt.setByte("timeUnit", (byte) timeUnit);
+        nbt.putString("mode", mod.toString());
+        nbt.putDouble("energyStack", energyStack);
+        nbt.putDouble("timeCounter", timeCounter);
+        nbt.putString("password", password);
+        nbt.putByte("energyUnit", (byte) energyUnit);
+        nbt.putByte("timeUnit", (byte) timeUnit);
     }
 
     class SlowProcess implements IProcess {
@@ -317,7 +318,7 @@ public class EnergyMeterElement extends SixNodeElement {
             }
 
             if (highImp) shunt.ultraImpedance();
-            else Eln.applySmallRs(shunt);
+            else shunt.setResistance(Eln.getSmallRs());
 
             publishTimeout -= time;
             if (publishTimeout < 0) {

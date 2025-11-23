@@ -5,8 +5,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 public class LampSocketSuspendedObjRender implements LampSocketObjRender {
@@ -55,21 +54,20 @@ public class LampSocketSuspendedObjRender implements LampSocketObjRender {
     }
 
     @Override
-    public void draw(LampSocketDescriptor descriptor, ItemRenderType type, double distanceToPlayer) {
-        if (type == ItemRenderType.INVENTORY) {
-            GL11.glScalef(0.5f, 0.5f, 0.5f);
-            GL11.glRotatef(90, 0, 1, 0);
-            GL11.glTranslatef(-1.5f, 0f, 0f);
-        } else if (type == ItemRenderType.EQUIPPED_FIRST_PERSON) {
-            GL11.glScalef(0.3f, 0.3f, 0.3f);
-            GL11.glRotatef(45, 0, 1, 0);
-            GL11.glTranslatef(-1.5f, 0f, 0.4f);
-        }
-        draw(LRDU.Up, 0, (byte) 0, 0, 0, distanceToPlayer);
+    public void drawItem(LampSocketDescriptor descriptor) {
+        GL11.glScalef(0.5f, 0.5f, 0.5f);
+        GL11.glRotatef(90, 0, 1, 0);
+        GL11.glTranslatef(-1.5f, 0f, 0f);
+        
+        draw(LRDU.Up, 0, (byte) 0, 0, 0, 0.0);
     }
 
     @Override
-    public void draw(LampSocketRender render, double distanceToPlayer) {
+    public void draw(LampSocketRender render) {
+        double distanceToPlayer = 0.0;
+        if (render.blockEntity != null && render.blockEntity.getLevel() != null) {
+             distanceToPlayer = UtilsClient.distanceFromClientPlayer(render.blockEntity);
+        }
         draw(render.front, render.alphaZ, render.light, render.pertuPy, render.pertuPz, distanceToPlayer);
     }
 

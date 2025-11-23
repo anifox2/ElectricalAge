@@ -5,18 +5,20 @@ import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import mods.eln.node.six.SixNodeElementInventory;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.GuiGraphics;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class ResistorGui extends GuiContainerEln {
+public class ResistorGui extends GuiContainerEln<ResistorContainer> {
 
     ResistorRender render;
     private SixNodeElementInventory inventory;
 
-    public ResistorGui(EntityPlayer player, IInventory inventory, ResistorRender render) {
-        super(new ResistorContainer(player, inventory));
+    public ResistorGui(Player player, Container inventory, ResistorRender render) {
+        super(new ResistorContainer(player, inventory), player.getInventory(), Component.literal("Resistor"));
         this.inventory = (SixNodeElementInventory) inventory;
         this.render = render;
     }
@@ -27,22 +29,22 @@ public class ResistorGui extends GuiContainerEln {
 
     @Override
     public void guiObjectEvent(IGuiObject object) {
-        super.guiObjectEvent(object);
+        //super.guiObjectEvent(object);
     }
 
     @Override
-    protected void preDraw(float f, int x, int y) {
-        super.preDraw(f, x, y);
+    public void preDraw(GuiGraphics guiGraphics, float f, int x, int y) {
+        super.preDraw(guiGraphics, f, x, y);
     }
 
     @Override
-    protected void postDraw(float f, int x, int y) {
-        helper.drawString(8, 12, 0xFF000000, tr("Resistance: %1$\u2126", Utils.plotValue(render.descriptor.getRsValue(render.inventory))));
-        super.postDraw(f, x, y);
+    public void postDraw(GuiGraphics guiGraphics, float f, int x, int y) {
+        helper.drawString(guiGraphics, 8, 12, String.format(tr("Resistance: %1$s\u2126"), Utils.plotValue(render.descriptor.getRsValue(render.inventory))), 0xFF000000);
+        super.postDraw(guiGraphics, f, x, y);
     }
 
     @Override
-    protected GuiHelperContainer newHelper() {
-        return new GuiHelperContainer(this, 176, 166 - 54, 8, 84 - 54);
+    public GuiHelperContainer newHelper() {
+        return new GuiHelperContainer(this, 176, 166 - 54, 8, 84 - 54, null);
     }
 }

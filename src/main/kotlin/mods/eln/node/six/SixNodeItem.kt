@@ -13,12 +13,13 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
-import net.minecraftforge.client.IItemRenderer
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
-import org.lwjgl.opengl.GL11
+//import net.minecraftforge.client.IItemRenderer
+//import net.minecraftforge.client.IItemRenderer.ItemRenderType
+//import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
+//import org.lwjgl.opengl.GL11
 
-class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor>(b), IItemRenderer {
+class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor>(b!!) {
+    /*
     override fun getMetadata(damageValue: Int): Int {
         return damageValue
     }
@@ -93,7 +94,7 @@ class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor>(b)
                 val ghostgroup = descriptor.getGhostGroup(direction, LRDU.Up)
                 ghostgroup?.plot(coord, coord, descriptor.ghostGroupUuid)
                 val sixNode = SixNode()
-                sixNode.onBlockPlacedBy(Coordinate(x, y, z, world), direction, player, stack)
+                sixNode.onBlockPlacedBy(world, Coordinate(x, y, z, world), direction, player, stack)
                 sixNode.createSubBlock(stack, direction, player)
                 world.setBlock(x, y, z, block, metadata, 0x03)
                 block.getIfOtherBlockIsSolid(world, x, y, z, direction)
@@ -135,7 +136,7 @@ class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor>(b)
 
     override fun renderItem(type: ItemRenderType, item: ItemStack, vararg data: Any) {
         if (!isStackValidToPlace(item)) return
-        Minecraft.getMinecraft().mcProfiler.startSection("SixNodeItem")
+        Minecraft.getInstance().mcProfiler.startSection("SixNodeItem")
         if (shouldUseRenderHelperEln(type, item, null)) {
             when (type) {
                 ItemRenderType.ENTITY -> GL11.glRotatef(90f, 0f, 0f, 1f)
@@ -161,11 +162,11 @@ class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor>(b)
             }
         }
         getDescriptor(item)!!.renderItem(type, item, *data)
-        Minecraft.getMinecraft().mcProfiler.endSection()
+        Minecraft.getInstance().mcProfiler.endSection()
     }
-
+    */
     init {
-        setHasSubtypes(true)
-        unlocalizedName = "SixNodeItem"
+        //setHasSubtypes(true)
+        //unlocalizedName = "SixNodeItem"
     }
 }

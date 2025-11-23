@@ -68,15 +68,15 @@ open class ElectricalCableElement(_sixNode: SixNode?, side: Direction?, descript
             .setDestroys(WorldExplosion(this).cableExplosion())
     }
 
-    override fun load(nbt: CompoundTag) {
-        super.load(nbt)
+    override fun readFromNBT(nbt: CompoundTag) {
+        super.readFromNBT(nbt)
         val b = nbt.getByte("color")
         color = b.toInt() and 0xF
         colorCare = b.toInt() shr 4 and 1
     }
 
-    override fun saveAdditional(nbt: CompoundTag) {
-        super.saveAdditional(nbt)
+    override fun writeToNBT(nbt: CompoundTag) {
+        super.writeToNBT(nbt)
         nbt.putByte("color", (color + (colorCare shl 4)).toByte())
     }
 

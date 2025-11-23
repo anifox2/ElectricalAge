@@ -1,60 +1,22 @@
 package mods.eln.block
 
-import mods.eln.Eln
 import net.minecraft.world.level.block.Block
-import net.minecraft.block.material.Material
-import net.minecraft.client.renderer.texture.IIconRegister
-import net.minecraft.util.IIcon
-import net.minecraft.item.ItemBlock
+import net.minecraft.world.level.block.state.BlockBehaviour
+import net.minecraft.world.item.BlockItem
+import net.minecraft.world.item.Item
 
-class ArcClayBlock : Block(Material.rock) {
-    private var icon: IIcon? = null
-
-    init {
-        setBlockName(name)
-        setBlockTextureName("eln:$name")
-        setCreativeTab(Eln.creativeTab)
-    }
-
-    @SideOnly(Side.CLIENT)
-    override fun registerBlockIcons(iconRegister: IIconRegister) {
-        icon = iconRegister.registerIcon("eln:$name")
-    }
-
-    @SideOnly(Side.CLIENT)
-    override fun getIcon(side: Int, damage: Int): IIcon {
-        return icon!!
-    }
-
+class ArcClayBlock : Block(BlockBehaviour.Properties.of().strength(2.0f)) {
     companion object {
-        private const val name = "arc_clay_block"
+        const val name = "arc_clay_block"
     }
 }
 
-class ArcMetalBlock : Block(Material.rock) {
-    private var icon: IIcon? = null
-
-    init {
-        setBlockName(name)
-        setBlockTextureName("eln:$name")
-        setCreativeTab(Eln.creativeTab)
-    }
-
-    @SideOnly(Side.CLIENT)
-    override fun registerBlockIcons(iconRegister: IIconRegister) {
-        icon = iconRegister.registerIcon("eln:$name")
-    }
-
-    @SideOnly(Side.CLIENT)
-    override fun getIcon(side: Int, damage: Int): IIcon {
-        return icon!!
-    }
-
+class ArcMetalBlock : Block(BlockBehaviour.Properties.of().strength(2.0f)) {
     companion object {
-        private const val name = "arc_metal_block"
+        const val name = "arc_metal_block"
     }
 }
 
-class ArcMetalItemBlock(block: Block?) : ItemBlock(block)
+class ArcMetalItemBlock(block: Block) : BlockItem(block, Item.Properties())
 
-class ArcClayItemBlock(block: Block?) : ItemBlock(block)
+class ArcClayItemBlock(block: Block) : BlockItem(block, Item.Properties())

@@ -68,7 +68,7 @@ open class BasicContainer(player: Player, protected var inventory: Container, sl
     override fun moveItemStackTo(par1ItemStack: ItemStack, par2: Int, par3: Int, par4: Boolean): Boolean {
         var flag1 = false
         var k = par2
-        if (flag.isAdvanced) {
+        if (par4) {
             k = par3 - 1
         }
         var slot: Slot
@@ -92,7 +92,7 @@ open class BasicContainer(player: Player, protected var inventory: Container, sl
                         flag1 = true
                     }
                 }
-                if (flag.isAdvanced) {
+                if (par4) {
                     --k
                 } else {
                     ++k
@@ -100,7 +100,7 @@ open class BasicContainer(player: Player, protected var inventory: Container, sl
             }
         }
         if (par1ItemStack.count > 0) {
-            k = if (flag.isAdvanced) {
+            k = if (par4) {
                 par3 - 1
             } else {
                 par2
@@ -127,7 +127,7 @@ open class BasicContainer(player: Player, protected var inventory: Container, sl
                         break
                     }
                 }
-                if (flag.isAdvanced) {
+                if (par4) {
                     --k
                 } else {
                     ++k

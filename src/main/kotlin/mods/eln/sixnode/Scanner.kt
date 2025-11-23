@@ -73,7 +73,7 @@ class ScannerElement(_sixNode: SixNode, side: Direction, descriptor: SixNodeDesc
             move(appliedLRDU)
         }
         val targetSide: MCDirection = appliedLRDU.inverse().toMCDirection()
-        val level = sixNode.entity.level!!
+        val level = sixNode!!.entity.level!!
         val pos = scannedCoord.toBlockPos()
         val te = level.getBlockEntity(pos)
         
@@ -210,5 +210,5 @@ class ScannerRender(tileEntity: SixNodeEntity, side: Direction, descriptor: SixN
         mode = ScanMode.fromByte(stream.readByte()) ?: ScanMode.SIMPLE
     }
     
-    override fun getCableRender(lrdu: LRDU): CableRenderDescriptor? = Eln.instance.signalCableDescriptor.render
+    override fun getCableRender(lrdu: LRDU): CableRenderDescriptor? = Eln.instance!!.signalCableDescriptor?.render
 }

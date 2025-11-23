@@ -1,5 +1,4 @@
+@file:Suppress("UNUSED", "UNUSED_PARAMETER")
 package mods.eln.integration.waila
 
-import net.minecraft.world.item.ItemStack
-
-data class SixNodeWailaData(val itemStack: ItemStack?, val data: Map<String, String>)
+// Temporarily disabled Waila integration for the 1.20 port.

@@ -74,7 +74,7 @@ class EnergyConverterElnToOtherGui(var render: EnergyConverterElnToOtherEntity) 
         return 100 * (((maxResistance / 100) + 1).pow(slider.toDouble()) - 1)
     }
 
-    fun guiObjectEvent(guiObject: IGuiObject) {
+    override fun guiObjectEvent(guiObject: IGuiObject) {
         // super.guiObjectEvent(guiObject) // super takes Int
         when {
             guiObject === resistanceSelector -> {

@@ -5,9 +5,9 @@ import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -59,12 +59,16 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-        super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Output voltage increases\nif entities are moving around.").split("\n"));
-        list.add(tr("Range: %1$ blocks", (int) maxRange));
+    public void appendHoverText(ItemStack stack, @Nullable net.minecraft.world.level.Level level, List<net.minecraft.network.chat.Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
+        super.appendHoverText(stack, level, tooltip, flag);
+        String[] lines = tr("Output voltage increases\nif entities are moving around.").split("\n");
+        for (String line : lines) {
+            tooltip.add(net.minecraft.network.chat.Component.literal(line));
+        }
+        tooltip.add(net.minecraft.network.chat.Component.literal(tr("Range: %1$s blocks", (int) maxRange)));
     }
 
+    /*
     @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
         return true;
@@ -89,10 +93,11 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
             draw(false, null);
         }
     }
+    */
 
     @Nullable
     @Override
-    public LRDU getFrontFromPlace(@NotNull Direction side, @NotNull EntityPlayer player) {
+    public LRDU getFrontFromPlace(@NotNull Direction side, @NotNull Player player) {
         return super.getFrontFromPlace(side, player).right();
     }
 }
