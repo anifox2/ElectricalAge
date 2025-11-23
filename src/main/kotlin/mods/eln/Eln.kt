@@ -27,6 +27,10 @@ import net.minecraft.world.item.HoeItem
 import net.minecraft.world.item.ItemStack
 import mods.eln.misc.IConfigSharing
 import mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor
+import mods.eln.registration.ItemRegistration
+import net.minecraftforge.registries.RegistryObject
+import mods.eln.registration.SixNodeRegistration
+import mods.eln.registration.TransparentNodeRegistration
 
 @Mod(Eln.MODID)
 class Eln {
@@ -111,6 +115,14 @@ class Eln {
     init {
         instance = this
         val modEventBus = FMLJavaModLoadingContext.get().modEventBus
+        
+        // Load models early as descriptors need them
+        obj.loadAllElnModels()
+
+        ItemRegistration.registerItem()
+        SixNodeRegistration.registerSix()
+        TransparentNodeRegistration.registerTransparent()
+        
         Registration.init(modEventBus)
         mods.eln.fluid.ElnFluids.init(modEventBus)
         mods.eln.recipe.ElnRecipeTypes.register(modEventBus)
@@ -125,6 +137,10 @@ class Eln {
     private fun commonSetup(event: FMLCommonSetupEvent) {
         LOGGER.info("Electrical Age Common Setup")
         sixNodeItem = Registration.SIX_NODE_ITEM.get()
+        transparentNodeItem = Registration.TRANSPARENT_NODE_ITEM.get() as TransparentNodeItem
+        
+        SixNodeRegistration.applyRegistrations()
+        TransparentNodeRegistration.applyRegistrations()
     }
 
     private fun clientSetup(event: FMLClientSetupEvent) {
@@ -191,7 +207,7 @@ class Eln {
 
         lateinit var transparentNodeItem: TransparentNodeItem
         var solarPanelBasePower = 40.0
-        lateinit var ghostBlock: GhostBlock
+        val ghostBlock: RegistryObject<GhostBlock> = Registration.GHOST_BLOCK
 
         var batteryVoltageFunctionTable = mods.eln.misc.FunctionTable(doubleArrayOf(0.0, 1.0), 1.0)
 

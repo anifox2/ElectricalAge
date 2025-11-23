@@ -357,7 +357,7 @@ public class Obj3D {
     }
 
     public ResourceLocation getModelResourceLocation(String name) {
-        return new ResourceLocation("eln", "model/" + dirPath + "/" + name);
+        return new ResourceLocation("eln", ("model/" + dirPath + "/" + name).toLowerCase(java.util.Locale.ROOT));
     }
 
     /**
@@ -494,10 +494,17 @@ public class Obj3D {
                     if (words[0].equals("newmtl")) {
                         mtlName = words[1];
                     } else if (words[0].equals("map_Kd")) {
+                        String texturePath = words[1];
+                        // Fix for absolute paths in MTL files (e.g. C:\...)
+                        texturePath = texturePath.replace('\\', '/');
+                        if (texturePath.contains("/")) {
+                            texturePath = texturePath.substring(texturePath.lastIndexOf('/') + 1);
+                        }
+
                         for (Obj3DPart partPtr : nameToPartHash.values()) {
                             for (FaceGroup fgroup : partPtr.faceGroup) {
                                 if (fgroup.mtlName != null && fgroup.mtlName.equals(mtlName))
-                                    fgroup.textureResource = getModelResourceLocation(words[1]);
+                                    fgroup.textureResource = getModelResourceLocation(texturePath);
                             }
                         }
                     }

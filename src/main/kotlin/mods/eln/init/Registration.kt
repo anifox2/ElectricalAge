@@ -12,13 +12,19 @@ import net.minecraftforge.eventbus.api.IEventBus
 import net.minecraftforge.registries.DeferredRegister
 import net.minecraftforge.registries.ForgeRegistries
 import net.minecraftforge.registries.RegistryObject
-
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.CreativeModeTab
+import net.minecraft.network.chat.Component
+import net.minecraft.core.registries.Registries
+import mods.eln.generic.GenericItemBlockUsingDamage
+import mods.eln.generic.GenericItemUsingDamage
+import mods.eln.ghost.GhostBlock
 import mods.eln.simplenode.DeviceProbeBlock
 import mods.eln.simplenode.DeviceProbeEntity
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity
-import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor
 import mods.eln.node.simple.SimpleNodeItem
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity
 import mods.eln.node.six.SixNodeBlock
 import mods.eln.node.six.SixNodeItem
 import mods.eln.node.six.SixNodeEntity
@@ -29,6 +35,7 @@ object Registration {
     val BLOCKS: DeferredRegister<Block> = DeferredRegister.create(ForgeRegistries.BLOCKS, Eln.MODID)
     val ITEMS: DeferredRegister<Item> = DeferredRegister.create(ForgeRegistries.ITEMS, Eln.MODID)
     val BLOCK_ENTITIES: DeferredRegister<BlockEntityType<*>> = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Eln.MODID)
+    val CREATIVE_MODE_TABS: DeferredRegister<CreativeModeTab> = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Eln.MODID)
 
     val TRANSPARENT_NODE_BLOCK: RegistryObject<TransparentNodeBlock> = BLOCKS.register("transparent_node") { TransparentNodeBlock(BlockBehaviour.Properties.of().noOcclusion()) }
     val TRANSPARENT_NODE_ITEM: RegistryObject<Item> = ITEMS.register("transparent_node") { TransparentNodeItem(TRANSPARENT_NODE_BLOCK.get()) }
@@ -56,10 +63,39 @@ object Registration {
         BlockEntityType.Builder.of(::SixNodeEntity, SIX_NODE_BLOCK.get()).build(null)
     }
 
+    val GHOST_BLOCK: RegistryObject<GhostBlock> = BLOCKS.register("ghost_block") { GhostBlock(BlockBehaviour.Properties.of().noOcclusion()) }
+
     val TREE_RESIN_COLLECTOR_BLOCK: RegistryObject<TreeResinCollectorBlock> = BLOCKS.register("tree_resin_collector") { TreeResinCollectorBlock() }
     val TREE_RESIN_COLLECTOR_ITEM: RegistryObject<Item> = ITEMS.register("tree_resin_collector") { SimpleNodeItem(TREE_RESIN_COLLECTOR_BLOCK.get()) }
     val TREE_RESIN_COLLECTOR_BLOCK_ENTITY: RegistryObject<BlockEntityType<TreeResinCollectorTileEntity>> = BLOCK_ENTITIES.register("tree_resin_collector") {
         BlockEntityType.Builder.of(::TreeResinCollectorTileEntity, TREE_RESIN_COLLECTOR_BLOCK.get()).build(null)
+    }
+
+    val ELN_TAB: RegistryObject<CreativeModeTab> = CREATIVE_MODE_TABS.register("eln_tab") {
+        CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.eln"))
+            .icon { ItemStack(SIX_NODE_ITEM.get()) }
+            .displayItems { _, output ->
+                ITEMS.entries.forEach { regObj ->
+                    val item = regObj.get()
+                    if (item is GenericItemBlockUsingDamage<*>) {
+                        for (id in item.orderList) {
+                            val stack = ItemStack(item)
+                            stack.damageValue = id
+                            output.accept(stack)
+                        }
+                    } else if (item is GenericItemUsingDamage<*>) {
+                        for (id in item.orderList) {
+                            val stack = ItemStack(item)
+                            stack.damageValue = id
+                            output.accept(stack)
+                        }
+                    } else {
+                        output.accept(item)
+                    }
+                }
+            }
+            .build()
     }
 
     @JvmStatic
@@ -67,5 +103,6 @@ object Registration {
         BLOCKS.register(eventBus)
         ITEMS.register(eventBus)
         BLOCK_ENTITIES.register(eventBus)
+        CREATIVE_MODE_TABS.register(eventBus)
     }
 }

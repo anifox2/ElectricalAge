@@ -27,7 +27,10 @@ open class GenericItemUsingDamageDescriptor @JvmOverloads constructor(val name: 
 
     @JvmOverloads
     open fun newItemStack(amount: Int = 1): ItemStack {
-        return ItemStack(registryObject.get(), amount)
+        if (registryObject.isPresent) {
+            return ItemStack(registryObject.get(), amount)
+        }
+        return ItemStack.EMPTY
     }
 
     companion object {

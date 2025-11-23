@@ -103,7 +103,7 @@ object ItemRegistration {
                 Eln.LVU,
                 150.0,
                 190.0,
-                Eln.instance!!.lowVoltageCableDescriptor!!
+                { Eln.instance!!.lowVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -115,7 +115,7 @@ object ItemRegistration {
                 Eln.LVU,
                 250.0,
                 320.0,
-                Eln.instance!!.lowVoltageCableDescriptor!!
+                { Eln.instance!!.lowVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -127,7 +127,7 @@ object ItemRegistration {
                 Eln.MVU,
                 400.0,
                 500.0,
-                Eln.instance!!.meduimVoltageCableDescriptor!!
+                { Eln.instance!!.meduimVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -139,7 +139,7 @@ object ItemRegistration {
                 Eln.MVU,
                 600.0,
                 750.0,
-                Eln.instance!!.highVoltageCableDescriptor!!
+                { Eln.instance!!.highVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -151,7 +151,7 @@ object ItemRegistration {
                 Eln.LVU,
                 180.0,
                 225.0,
-                Eln.instance!!.lowVoltageCableDescriptor!!
+                { Eln.instance!!.lowVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -163,7 +163,7 @@ object ItemRegistration {
                 Eln.LVU,
                 375.0,
                 480.0,
-                Eln.instance!!.lowVoltageCableDescriptor!!
+                { Eln.instance!!.lowVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -175,7 +175,7 @@ object ItemRegistration {
                 Eln.MVU,
                 600.0,
                 750.0,
-                Eln.instance!!.meduimVoltageCableDescriptor!!
+                { Eln.instance!!.meduimVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -187,7 +187,7 @@ object ItemRegistration {
                 Eln.MVU,
                 900.0,
                 1050.0,
-                Eln.instance!!.highVoltageCableDescriptor!!
+                { Eln.instance!!.highVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -199,7 +199,7 @@ object ItemRegistration {
                 Eln.LVU,
                 240.0,
                 300.0,
-                Eln.instance!!.lowVoltageCableDescriptor!!
+                { Eln.instance!!.lowVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -211,7 +211,7 @@ object ItemRegistration {
                 Eln.LVU,
                 500.0,
                 640.0,
-                Eln.instance!!.lowVoltageCableDescriptor!!
+                { Eln.instance!!.lowVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -223,7 +223,7 @@ object ItemRegistration {
                 Eln.MVU,
                 800.0,
                 1000.0,
-                Eln.instance!!.meduimVoltageCableDescriptor!!
+                { Eln.instance!!.meduimVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -235,7 +235,7 @@ object ItemRegistration {
                 Eln.MVU,
                 1200.0,
                 1500.0,
-                Eln.instance!!.highVoltageCableDescriptor!!
+                { Eln.instance!!.highVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -247,7 +247,7 @@ object ItemRegistration {
                 Eln.HVU,
                 3600.0,
                 4800.0,
-                Eln.instance!!.veryHighVoltageCableDescriptor!!
+                { Eln.instance!!.veryHighVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -259,7 +259,7 @@ object ItemRegistration {
                 Eln.HVU,
                 4812.0,
                 6015.0,
-                Eln.instance!!.veryHighVoltageCableDescriptor!!
+                { Eln.instance!!.veryHighVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -271,7 +271,7 @@ object ItemRegistration {
                 Eln.VVU,
                 4000.0,
                 6000.0,
-                Eln.instance!!.veryHighVoltageCableDescriptor!!
+                { Eln.instance!!.veryHighVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -283,7 +283,7 @@ object ItemRegistration {
                 Eln.VVU,
                 12000.0,
                 15000.0,
-                Eln.instance!!.veryHighVoltageCableDescriptor!!
+                { Eln.instance!!.veryHighVoltageCableDescriptor!! }
             )
             Eln.sharedItem.addElement(completId, element)
         }
@@ -1651,41 +1651,49 @@ object ItemRegistration {
 
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Helmet")
-            Eln.helmetCopper = genericArmorItem(
-                ArmorMaterials.IRON, 2, ArmourType.Helmet, "eln:textures" +
-                        "/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"
-            ).setUnlocalizedName(name).setTextureName("eln:copper_helmet").setCreativeTab(Eln.creativeTab) as genericArmorItem
-            GameRegistry.registerItem(Eln.helmetCopper!!, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.helmetCopper!!))
+            GameRegistry.registerItem("Eln.$name") {
+                val item = genericArmorItem(
+                    ArmorMaterials.IRON, 2, ArmourType.Helmet, "eln:textures" +
+                            "/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"
+                ).setUnlocalizedName(name).setTextureName("eln:copper_helmet").setCreativeTab(Eln.creativeTab) as genericArmorItem
+                Eln.helmetCopper = item
+                item
+            }
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Chestplate")
-            Eln.chestplateCopper = genericArmorItem(
-                ArmorMaterials.IRON, 2, ArmourType.Chestplate, "eln" +
-                        ":textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"
-            ).setUnlocalizedName(name).setTextureName("eln:copper_chestplate")
-                .setCreativeTab(Eln.creativeTab) as genericArmorItem
-            GameRegistry.registerItem(Eln.chestplateCopper!!, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.chestplateCopper!!))
+            GameRegistry.registerItem("Eln.$name") {
+                val item = genericArmorItem(
+                    ArmorMaterials.IRON, 2, ArmourType.Chestplate, "eln" +
+                            ":textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"
+                ).setUnlocalizedName(name).setTextureName("eln:copper_chestplate")
+                    .setCreativeTab(Eln.creativeTab) as genericArmorItem
+                Eln.chestplateCopper = item
+                item
+            }
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Leggings")
-            Eln.legsCopper = genericArmorItem(
-                ArmorMaterials.IRON, 2, ArmourType.Leggings, "eln:textures" +
-                        "/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"
-            ).setUnlocalizedName(name).setTextureName("eln:copper_leggings")
-                .setCreativeTab(Eln.creativeTab) as genericArmorItem
-            GameRegistry.registerItem(Eln.legsCopper!!, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.legsCopper!!))
+            GameRegistry.registerItem("Eln.$name") {
+                val item = genericArmorItem(
+                    ArmorMaterials.IRON, 2, ArmourType.Leggings, "eln:textures" +
+                            "/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"
+                ).setUnlocalizedName(name).setTextureName("eln:copper_leggings")
+                    .setCreativeTab(Eln.creativeTab) as genericArmorItem
+                Eln.legsCopper = item
+                item
+            }
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Boots")
-            Eln.bootsCopper = genericArmorItem(
-                ArmorMaterials.IRON, 2, ArmourType.Boots, "eln:textures" +
-                        "/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"
-            ).setUnlocalizedName(name).setTextureName("eln:copper_boots").setCreativeTab(Eln.creativeTab) as genericArmorItem
-            GameRegistry.registerItem(Eln.bootsCopper!!, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.bootsCopper!!))
+            GameRegistry.registerItem("Eln.$name") {
+                val item = genericArmorItem(
+                    ArmorMaterials.IRON, 2, ArmourType.Boots, "eln:textures" +
+                            "/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"
+                ).setUnlocalizedName(name).setTextureName("eln:copper_boots").setCreativeTab(Eln.creativeTab) as genericArmorItem
+                Eln.bootsCopper = item
+                item
+            }
         }
         val t1 = "eln:textures/armor/ecoal_layer_1.png"
         val t2 = "eln:textures/armor/ecoal_layer_2.png"
@@ -1698,52 +1706,60 @@ object ItemRegistration {
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "E-Coal Helmet")
             armor = 3
-            Eln.helmetECoal = ElectricalArmor(
-                eCoalMaterial, 2, ArmourType.Helmet, t1, t2, 8000.0, 2000.0,
-                armor / 20.0, armor * energyPerDamage, energyPerDamage
-            ).setUnlocalizedName(name).setTextureName(
-                "eln" +
-                        ":ecoal_helmet"
-            ).setCreativeTab(Eln.creativeTab) as genericArmorItem
-            GameRegistry.registerItem(Eln.helmetECoal!!, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.helmetECoal!!))
+            GameRegistry.registerItem("Eln.$name") {
+                val item = ElectricalArmor(
+                    eCoalMaterial, 2, ArmourType.Helmet, t1, t2, 8000.0, 2000.0,
+                    armor / 20.0, armor * energyPerDamage, energyPerDamage
+                ).setUnlocalizedName(name).setTextureName(
+                    "eln" +
+                            ":ecoal_helmet"
+                ).setCreativeTab(Eln.creativeTab) as genericArmorItem
+                Eln.helmetECoal = item
+                item
+            }
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "E-Coal Chestplate")
             armor = 8
-            Eln.plateECoal = ElectricalArmor(
-                eCoalMaterial, 2, ArmourType.Chestplate, t1, t2, 8000.0,
-                2000.0, armor / 20.0, armor * energyPerDamage, energyPerDamage
-            ).setUnlocalizedName(name).setTextureName("eln:ecoal_chestplate")
-                .setCreativeTab(Eln.creativeTab) as genericArmorItem
-            GameRegistry.registerItem(Eln.plateECoal!!, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.plateECoal!!))
+            GameRegistry.registerItem("Eln.$name") {
+                val item = ElectricalArmor(
+                    eCoalMaterial, 2, ArmourType.Chestplate, t1, t2, 8000.0,
+                    2000.0, armor / 20.0, armor * energyPerDamage, energyPerDamage
+                ).setUnlocalizedName(name).setTextureName("eln:ecoal_chestplate")
+                    .setCreativeTab(Eln.creativeTab) as genericArmorItem
+                Eln.plateECoal = item
+                item
+            }
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "E-Coal Leggings")
             armor = 6
-            Eln.legsECoal = ElectricalArmor(
-                eCoalMaterial, 2, ArmourType.Leggings, t1, t2, 8000.0, 2000.0,
-                armor / 20.0, armor * energyPerDamage, energyPerDamage
-            ).setUnlocalizedName(name).setTextureName(
-                "eln" +
-                        ":ecoal_leggings"
-            ).setCreativeTab(Eln.creativeTab) as genericArmorItem
-            GameRegistry.registerItem(Eln.legsECoal!!, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.legsECoal!!))
+            GameRegistry.registerItem("Eln.$name") {
+                val item = ElectricalArmor(
+                    eCoalMaterial, 2, ArmourType.Leggings, t1, t2, 8000.0, 2000.0,
+                    armor / 20.0, armor * energyPerDamage, energyPerDamage
+                ).setUnlocalizedName(name).setTextureName(
+                    "eln" +
+                            ":ecoal_leggings"
+                ).setCreativeTab(Eln.creativeTab) as genericArmorItem
+                Eln.legsECoal = item
+                item
+            }
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "E-Coal Boots")
             armor = 3
-            Eln.bootsECoal = ElectricalArmor(
-                eCoalMaterial, 2, ArmourType.Boots, t1, t2, 8000.0, 2000.0,
-                armor / 20.0, armor * energyPerDamage, energyPerDamage
-            ).setUnlocalizedName(name).setTextureName(
-                "eln" +
-                        ":ecoal_boots"
-            ).setCreativeTab(Eln.creativeTab) as genericArmorItem
-            GameRegistry.registerItem(Eln.bootsECoal!!, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.bootsECoal!!))
+            GameRegistry.registerItem("Eln.$name") {
+                val item = ElectricalArmor(
+                    eCoalMaterial, 2, ArmourType.Boots, t1, t2, 8000.0, 2000.0,
+                    armor / 20.0, armor * energyPerDamage, energyPerDamage
+                ).setUnlocalizedName(name).setTextureName(
+                    "eln" +
+                            ":ecoal_boots"
+                ).setCreativeTab(Eln.creativeTab) as genericArmorItem
+                Eln.bootsECoal = item
+                item
+            }
         }
     }
 
@@ -1751,46 +1767,54 @@ object ItemRegistration {
         var name: String
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Sword")
-            Eln.swordCopper = SwordItem(Tiers.IRON, 3, -2.4f, Item.Properties()).setUnlocalizedName(name).setTextureName(
-                "eln" +
-                        ":copper_sword"
-            ).setCreativeTab(Eln.creativeTab) as SwordItem
-            GameRegistry.registerItem(Eln.swordCopper!!, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.swordCopper!!))
+            GameRegistry.registerItem("Eln.$name") {
+                val item = SwordItem(Tiers.IRON, 3, -2.4f, Item.Properties()).setUnlocalizedName(name).setTextureName(
+                    "eln" +
+                            ":copper_sword"
+                ).setCreativeTab(Eln.creativeTab) as SwordItem
+                Eln.swordCopper = item
+                item
+            }
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Hoe")
-            Eln.hoeCopper =
-                HoeItem(Tiers.IRON, -2, -1.0f, Item.Properties()).setUnlocalizedName(name).setTextureName("eln:copper_hoe")
+            GameRegistry.registerItem("Eln.$name") {
+                val item = HoeItem(Tiers.IRON, -2, -1.0f, Item.Properties()).setUnlocalizedName(name).setTextureName("eln:copper_hoe")
                     .setCreativeTab(Eln.creativeTab) as HoeItem
-            GameRegistry.registerItem(Eln.hoeCopper!!, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.hoeCopper!!))
+                Eln.hoeCopper = item
+                item
+            }
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Shovel")
-            Eln.shovelCopper = ShovelItem(Tiers.IRON, 1.5f, -3.0f, Item.Properties()).setUnlocalizedName(name).setTextureName(
-                "eln" +
-                        ":copper_shovel"
-            ).setCreativeTab(Eln.creativeTab) as ShovelItem
-            GameRegistry.registerItem(Eln.shovelCopper!!, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.shovelCopper!!))
+            GameRegistry.registerItem("Eln.$name") {
+                val item = ShovelItem(Tiers.IRON, 1.5f, -3.0f, Item.Properties()).setUnlocalizedName(name).setTextureName(
+                    "eln" +
+                            ":copper_shovel"
+                ).setCreativeTab(Eln.creativeTab) as ShovelItem
+                Eln.shovelCopper = item
+                item
+            }
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Pickaxe")
-            Eln.pickaxeCopper = ItemPickaxeEln(Tiers.IRON).setUnlocalizedName(name).setTextureName(
-                "eln" +
-                        ":copper_pickaxe"
-            ).setCreativeTab(Eln.creativeTab) as ItemPickaxeEln
-            GameRegistry.registerItem(Eln.pickaxeCopper!!, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.pickaxeCopper!!))
+            GameRegistry.registerItem("Eln.$name") {
+                val item = ItemPickaxeEln(Tiers.IRON).setUnlocalizedName(name).setTextureName(
+                    "eln" +
+                            ":copper_pickaxe"
+                ).setCreativeTab(Eln.creativeTab) as ItemPickaxeEln
+                Eln.pickaxeCopper = item
+                item
+            }
         }
         run {
             name = I18N.TR_NAME(I18N.Type.ITEM, "Copper Axe")
-            Eln.axeCopper =
-                ItemAxeEln(Tiers.IRON).setUnlocalizedName(name).setTextureName("eln:copper_axe")
+            GameRegistry.registerItem("Eln.$name") {
+                val item = ItemAxeEln(Tiers.IRON).setUnlocalizedName(name).setTextureName("eln:copper_axe")
                     .setCreativeTab(Eln.creativeTab) as ItemAxeEln
-            GameRegistry.registerItem(Eln.axeCopper!!, "Eln.$name")
-            GameRegistry.registerCustomItemStack(name, ItemStack(Eln.axeCopper!!))
+                Eln.axeCopper = item
+                item
+            }
         }
     }
 

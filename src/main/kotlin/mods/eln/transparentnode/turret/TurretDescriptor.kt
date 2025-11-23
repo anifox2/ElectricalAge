@@ -27,7 +27,7 @@ class TurretDescriptor(
             turret = obj!!.getPart("Turret")
             gun = obj!!.getPart("Gun")
         }
-        Data.addEnergy(getStack())
+        Data.addEnergy(newItemStack())
     }
 
     class Properties {

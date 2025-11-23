@@ -33,6 +33,7 @@ abstract class SimpleNodeEntity(type: BlockEntityType<*>, override val nodeUuid:
             }
             if (level == null) return null
             if (field == null) {
+                if (NodeManager.instance == null) return null
                 field = NodeManager.instance!!.getNodeFromCoordonate(Coordinate(this)) as SimpleNode?
                 if (field == null) {
                     add(Coordinate(this))
@@ -106,6 +107,7 @@ abstract class SimpleNodeEntity(type: BlockEntityType<*>, override val nodeUuid:
     }
 
     fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+        if (level?.isClientSide == true) return true
         return node?.onBlockActivated(player, side, vx, vy, vz) ?: false
     }
 

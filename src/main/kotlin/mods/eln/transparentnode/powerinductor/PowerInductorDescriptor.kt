@@ -15,4 +15,6 @@ class PowerInductorDescriptor(
     PowerInductorElement::class.java,
     PowerInductorRender::class.java
 ) {
+    init {
+    }
 }

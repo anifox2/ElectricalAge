@@ -7,8 +7,11 @@ import mods.eln.misc.LRDU
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.Level
 import java.util.*
+import java.util.function.Supplier
 
-data class GhostGroupElement(var x: Int, var y: Int, var z: Int, var block: Block, var meta: Int)
+data class GhostGroupElement(var x: Int, var y: Int, var z: Int, var blockSupplier: Supplier<out Block>, var meta: Int) {
+    val block: Block get() = blockSupplier.get()
+}
 
 class GhostGroup {
     var elementList = ArrayList<GhostGroupElement>()
@@ -18,7 +21,11 @@ class GhostGroup {
     }
 
     fun addElement(x: Int, y: Int, z: Int, block: Block, meta: Int) {
-        elementList.add(GhostGroupElement(x, y, z, block, meta))
+        elementList.add(GhostGroupElement(x, y, z, { block }, meta))
+    }
+
+    fun addElement(x: Int, y: Int, z: Int, blockSupplier: Supplier<out Block>, meta: Int) {
+        elementList.add(GhostGroupElement(x, y, z, blockSupplier, meta))
     }
 
     fun removeElement(x: Int, y: Int, z: Int) {

@@ -50,7 +50,7 @@ class WindTurbineDescriptor(
             }
         }
         voltageLevelColor = VoltageLevelColor.LowVoltage
-        Data.addEnergy(getStack())
+        Data.addEnergy(newItemStack())
     }
 
     fun draw(alpha: Float) {

@@ -10,13 +10,13 @@ class HeatingCorpElement(
     var electricalNominalU: Double,
     var electricalNominalP: Double,
     var electricalMaximalP: Double,
-    var cableDescriptor: ElectricalCableDescriptor
+    var cableDescriptorProvider: () -> ElectricalCableDescriptor
 ) : GenericItemUsingDamageDescriptor(name) {
 
     var electricalR: Double = electricalNominalU * electricalNominalU / electricalNominalP
     var Umax: Double = sqrt(electricalMaximalP * electricalR)
 
     fun applyTo(load: ElectricalLoad) {
-        cableDescriptor.applyTo(load)
+        cableDescriptorProvider().applyTo(load)
     }
 }

@@ -150,7 +150,7 @@ class GhostManager {
     }
 
     @JvmOverloads
-    fun createGhost(coordinate: Coordinate, observerCoordinate: Coordinate, UUID: Int, block: Block? = Eln.ghostBlock, meta: Int = 0) {
+    fun createGhost(coordinate: Coordinate, observerCoordinate: Coordinate, UUID: Int, block: Block? = Eln.ghostBlock.get(), meta: Int = 0) {
         val world = getLevel(coordinate.dimension) ?: return
         val pos = BlockPos(coordinate.x, coordinate.y, coordinate.z)
         

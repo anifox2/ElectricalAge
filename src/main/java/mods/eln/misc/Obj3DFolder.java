@@ -26,34 +26,59 @@ public class Obj3DFolder {
      */
     public void loadAllElnModels() {
         try {
-            // Find location of electrical age jar file.
-            CodeSource codeSource = Obj3DFolder.class.getProtectionDomain().getCodeSource();
-            if (codeSource != null) {
-                String jarFilePath = codeSource.getLocation().getPath();
-                if (jarFilePath.contains("!")) {
-                    jarFilePath = jarFilePath.substring(5, jarFilePath.indexOf("!"));
-                    JarFile jarFile = new JarFile(URLDecoder.decode(jarFilePath, "UTF-8"));
-                    Enumeration<JarEntry> entries = jarFile.entries();
-                    int modelCount = 0;
-                    while (entries.hasMoreElements()) {
-                        String filename = entries.nextElement().getName();
-                        if (filename.startsWith("assets/eln/model/") && filename.toLowerCase().endsWith(".obj")) {
-                            filename = filename.substring(filename.indexOf("/model/") + 7, filename.length());
-                            Utils.println(String.format("Loading model %03d '%s'", ++modelCount, filename));
-                            loadObj(filename);
-                        }
-                    }
-                } else {
-                    Integer modelCount = 0;
-                    File modelFolder = new File(mods.eln.Eln.class.getResource("/assets/eln/model").toURI());
-                    if (modelFolder.isDirectory()) {
-                        loadModelsRecursive(modelFolder, modelCount);
+            java.net.URL url = mods.eln.Eln.class.getResource("/assets/eln/model");
+            if (url == null) {
+                Utils.println("Could not find /assets/eln/model resource");
+                return;
+            }
+            
+            Utils.println("DEBUG: Model URL: " + url);
+            
+            if (url.getProtocol().equals("jar")) {
+                String path = url.getPath(); // file:/path/to/jar!/assets/eln/model
+                if (path.startsWith("file:")) {
+                    path = path.substring(5);
+                }
+                String jarPath = path.substring(0, path.indexOf("!"));
+                jarPath = URLDecoder.decode(jarPath, "UTF-8");
+                
+                Utils.println("Loading models from JAR: " + jarPath);
+                JarFile jarFile = new JarFile(jarPath);
+                Enumeration<JarEntry> entries = jarFile.entries();
+                int modelCount = 0;
+                while (entries.hasMoreElements()) {
+                    String filename = entries.nextElement().getName();
+                    if (filename.startsWith("assets/eln/model/") && filename.toLowerCase().endsWith(".obj")) {
+                        filename = filename.substring(filename.indexOf("/model/") + 7, filename.length());
+                        Utils.println(String.format("Loading model %03d '%s'", ++modelCount, filename));
+                        loadObj(filename);
                     }
                 }
+            } else if (url.getProtocol().equals("file")) {
+                File modelFolder = new File(url.toURI());
+                Utils.println("Loading models from folder: " + modelFolder.getAbsolutePath());
+                if (modelFolder.isDirectory()) {
+                    loadModelsRecursive(modelFolder, 0);
+                }
+            } else if (url.getProtocol().equals("union")) {
+                // Handle Forge/ModLauncher union protocol in dev environment
+                // Example: union:/path/to/build/resources/main/%23203!/assets/eln/model
+                String path = url.getPath();
+                path = URLDecoder.decode(path, "UTF-8");
+                // Remove the artifact part like /#203!/
+                path = path.replaceAll("/#[^/]*!/", "/");
+                
+                File modelFolder = new File(path);
+                Utils.println("Loading models from UNION folder: " + modelFolder.getAbsolutePath());
+                if (modelFolder.isDirectory()) {
+                    loadModelsRecursive(modelFolder, 0);
+                } else {
+                    Utils.println("Union path is not a directory: " + modelFolder.getAbsolutePath());
+                }
+            } else {
+                Utils.println("Unknown protocol: " + url.getProtocol());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

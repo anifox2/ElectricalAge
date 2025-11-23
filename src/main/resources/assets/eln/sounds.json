@@ -17,15 +17,15 @@
             }
         ]
     },
-	"arc": {
-		"category": "block",
-		"sounds": [
-			{
-				"name": "arc",
-				"stream": false
-			}
-		]
-	},
+    "arc": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "arc",
+                "stream": false
+            }
+        ]
+    },
     "arc_furnace": {
         "category": "block",
         "sounds": [
@@ -35,11 +35,11 @@
             }
         ]
     },
-    "Arcfurnace_loop": {
+    "arcfurnace_loop": {
         "category": "block",
         "sounds": [
             {
-                "name": "Arcfurnace_loop",
+                "name": "arcfurnace_loop",
                 "stream": false
             }
         ]
@@ -143,29 +143,29 @@
             }
         ]
     },
-    "NEON_LFNOISE": {
+    "neon_lfnoise": {
         "category": "block",
         "sounds": [
             {
-                "name": "NEON_LFNOISE",
+                "name": "neon_lfnoise",
                 "stream": false
             }
         ]
     },
-    "WINDTURBINE_BIG_FF": {
+    "windturbine_big_ff": {
         "category": "block",
         "sounds": [
             {
-                "name": "WINDTURBINE_BIG_FF",
+                "name": "windturbine_big_ff",
                 "stream": false
             }
         ]
     },
-    "WINDTURBINE_BIG_SF": {
+    "windturbine_big_sf": {
         "category": "block",
         "sounds": [
             {
-                "name": "WINDTURBINE_BIG_SF",
+                "name": "windturbine_big_sf",
                 "stream": false
             }
         ]
@@ -179,83 +179,83 @@
             }
         ]
     },
-    "Transformer": {
+    "transformer": {
         "category": "block",
         "sounds": [
             {
-                "name": "Transformer",
+                "name": "transformer",
                 "stream": false
             }
         ]
     },
-    "Motor": {
+    "motor": {
         "category": "block",
         "sounds": [
             {
-                "name": "Motor",
+                "name": "motor",
                 "stream": false
             }
         ]
     },
-    "LaserGun": {
+    "lasergun": {
         "category": "block",
         "sounds": [
             {
-                "name": "LaserGun",
+                "name": "lasergun",
                 "stream": false
             }
         ]
     },
-    "TurretActivated": {
+    "turretactivated": {
         "category": "block",
         "sounds": [
             {
-                "name": "TurretActivated",
+                "name": "turretactivated",
                 "stream": false
             }
         ]
     },
-    "TurretDeactivated": {
+    "turretdeactivated": {
         "category": "block",
         "sounds": [
             {
-                "name": "TurretDeactivated",
+                "name": "turretdeactivated",
                 "stream": false
             }
         ]
     },
-    "TurretFire": {
+    "turretfire": {
         "category": "block",
         "sounds": [
             {
-                "name": "TurretFire",
+                "name": "turretfire",
                 "stream": false
             }
         ]
     },
-    "TurretKill": {
+    "turretkill": {
         "category": "block",
         "sounds": [
             {
-                "name": "TurretKill",
+                "name": "turretkill",
                 "stream": false
             }
         ]
     },
-    "FuelGenerator": {
+    "fuelgenerator": {
         "category": "block",
         "sounds": [
             {
-                "name": "FuelGenerator",
+                "name": "fuelgenerator",
                 "stream": false
             }
         ]
     },
-    "FireAlarm": {
+    "firealarm": {
         "category": "block",
         "sounds": [
             {
-                "name": "FireAlarm",
+                "name": "firealarm",
                 "stream": false
             }
         ]
@@ -296,65 +296,65 @@
             }
         ]
     },
-	"shaft_motor": {
-		"category": "block",
-		"sounds": [
-			{
-				"name": "shaft_motor",
-				"stream": false
-			}
-		]
-	},
-	"clutch": {
-		"category": "block",
-		"sounds": [
-			{
-				"name": "clutch",
-				"stream": false
-			}
-		]
-	},
-	"click": {
-		"category": "block",
-		"sounds": [
-			{
-				"name": "click",
-				"stream": false
-			}
-		]
-	},
-	"beep_accept": {
-		"category": "player",
-		"sounds": [
-			{
-				"name": "beep_accept",
-				"stream": false
-			}
-		]
-	},
-	"beep_accept_2": {
-		"category": "player",
-		"sounds": [
-			{
-				"name": "beep_accept_2",
-				"stream": false
-			}
-		]
-	},
-	"beep_error": {
-		"category": "player",
-		"sounds": [
-			{
-				"name": "beep_error",
-				"stream": false
-			}
-		]
-	},
-    "RadialEngine": {
+    "shaft_motor": {
         "category": "block",
         "sounds": [
             {
-                "name": "RadialEngine",
+                "name": "shaft_motor",
+                "stream": false
+            }
+        ]
+    },
+    "clutch": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "clutch",
+                "stream": false
+            }
+        ]
+    },
+    "click": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "click",
+                "stream": false
+            }
+        ]
+    },
+    "beep_accept": {
+        "category": "player",
+        "sounds": [
+            {
+                "name": "beep_accept",
+                "stream": false
+            }
+        ]
+    },
+    "beep_accept_2": {
+        "category": "player",
+        "sounds": [
+            {
+                "name": "beep_accept_2",
+                "stream": false
+            }
+        ]
+    },
+    "beep_error": {
+        "category": "player",
+        "sounds": [
+            {
+                "name": "beep_error",
+                "stream": false
+            }
+        ]
+    },
+    "radialengine": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "radialengine",
                 "stream": false
             }
         ]

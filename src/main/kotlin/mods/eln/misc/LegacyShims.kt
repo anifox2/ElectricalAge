@@ -41,9 +41,9 @@ object LegacyShims {
 }
 
 object GameRegistry {
-    fun registerItem(item: Item, name: String) {
+    fun registerItem(name: String, supplier: () -> Item) {
         val cleanName = name.replace("Eln.", "").lowercase().replace(" ", "_")
-        Registration.ITEMS.register(cleanName) { item }
+        Registration.ITEMS.register(cleanName, supplier)
     }
 
     fun registerBlock(block: Block, itemClass: Class<*>, name: String) {
