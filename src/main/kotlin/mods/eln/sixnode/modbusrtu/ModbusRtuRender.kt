@@ -38,14 +38,18 @@ class ModbusRtuRender(
 
     override fun draw() {
         super.draw()
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
 
         if (side.isY) {
-            front!!.inverse().glRotateOnX()
+            front!!.inverse().rotatePoseOnX(poseStack)
         } else {
-            LRDU.Down.glRotateOnX()
+            LRDU.Down.rotatePoseOnX(poseStack)
         }
 
-        descriptor.draw(interpolator.get(), true, modbusActivityTimeout > 0, modbusErrorTimeout > 0)
+        descriptor.draw(poseStack, buffer, light, overlay, interpolator.get(), true, modbusActivityTimeout > 0, modbusErrorTimeout > 0)
     }
 
     override fun refresh(deltaT: Float) {

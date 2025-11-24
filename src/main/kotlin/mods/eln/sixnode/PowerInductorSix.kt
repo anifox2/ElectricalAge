@@ -29,6 +29,7 @@ import mods.eln.sim.mna.misc.MnaConst
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.wiki.Data
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.Container
@@ -81,6 +82,13 @@ class PowerInductorSixDescriptor(name: String,
         InductorBaseExtention?.draw(poseStack, consumer, packedLight, packedOverlay)
         InductorCables?.draw(poseStack, consumer, packedLight, packedOverlay)
         InductorCore?.draw(poseStack, consumer, packedLight, packedOverlay)
+    }
+
+    fun draw(poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        if (null != Base) Base!!.draw(poseStack, buffer, packedLight, packedOverlay)
+        if (null != InductorBaseExtention) InductorBaseExtention!!.draw(poseStack, buffer, packedLight, packedOverlay)
+        if (null != InductorCables) InductorCables!!.draw(poseStack, buffer, packedLight, packedOverlay)
+        if (null != InductorCore) InductorCore!!.draw(poseStack, buffer, packedLight, packedOverlay)
     }
 
     fun draw() {
@@ -271,8 +279,13 @@ class PowerInductorSixRender(tileEntity: SixNodeEntity, side: Direction, descrip
     override var inventory = SixNodeElementInventory(2, 64, this)
 
     override fun draw() {
-        front!!.left().glRotateOnX()
-        descriptor.draw()
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+        
+        front!!.left().rotatePoseOnX(poseStack)
+        descriptor.draw(poseStack, buffer, light, overlay)
     }
 
     override fun newGuiDraw(side: Direction, player: Player): Screen {

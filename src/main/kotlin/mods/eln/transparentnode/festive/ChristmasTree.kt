@@ -51,6 +51,31 @@ class ChristmasTreeDescriptor(name: String, override var obj: Obj3D?) : Transpar
             tree?.draw()
         }
     }
+
+    fun draw(front: Direction, delta: Int, powered: Boolean, poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        if (star != null && tree != null && string1 != null && string2 != null) {
+            poseStack.pushPose()
+            front.rotateZnRef(poseStack)
+            poseStack.translate(0.5, -0.5, 0.5)
+            
+            if (powered) {
+                UtilsClient.drawLight(star, poseStack, bufferSource, packedLight, packedOverlay)
+                if (delta > 10) {
+                    UtilsClient.drawLight(string2, poseStack, bufferSource, packedLight, packedOverlay)
+                    string1?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+                } else {
+                    UtilsClient.drawLight(string1, poseStack, bufferSource, packedLight, packedOverlay)
+                    string2?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+                }
+            } else {
+                star?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+                string1?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+                string2?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+            }
+            tree?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+            poseStack.popPose()
+        }
+    }
 }
 
 class ChristmasTreeRender(tileEntity: TransparentNodeBlockEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
@@ -69,6 +94,10 @@ class ChristmasTreeRender(tileEntity: TransparentNodeBlockEntity, transparentNod
 
     override fun draw() {
         (transparentNodedescriptor as ChristmasTreeDescriptor).draw(front!!, x, powered)
+    }
+
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        (transparentNodedescriptor as ChristmasTreeDescriptor).draw(front!!, x, powered, poseStack, bufferSource, packedLight, packedOverlay)
     }
 
     override fun refresh(deltaT: Float) {

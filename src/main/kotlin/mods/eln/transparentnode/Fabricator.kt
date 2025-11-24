@@ -49,6 +49,18 @@ class FabricatorDescriptor(
         etcherZ.draw()
     }
 
+    fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int, isRunning: Boolean = false) {
+        poseStack.pushPose()
+        poseStack.translate(-0.5, -0.5, 0.5)
+        body.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        if (isRunning) {
+            poseStack.translate(0.3 * Math.random() - 0.15, -0.1 * Math.random(), 0.0)
+        }
+        etcherX.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        etcherZ.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        poseStack.popPose()
+    }
+
     override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
         super.appendHoverText(itemStack, level, list, flag)
         list?.addAll(tr("The Fabricator creates chips\nfrom silicon and copper plates").split("\n").map { net.minecraft.network.chat.Component.literal(it) })
@@ -256,6 +268,11 @@ class FabricatorRender(entity: TransparentNodeBlockEntity, descriptor: Transpare
 
     override fun draw() {
         (this.transparentNodedescriptor as FabricatorDescriptor).draw(isRunning)
+    }
+
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        front?.rotateXnRef(poseStack)
+        (this.transparentNodedescriptor as FabricatorDescriptor).draw(poseStack, bufferSource, packedLight, packedOverlay, isRunning)
     }
 
     override fun newGuiDraw(side: Direction, player: Player): Screen {

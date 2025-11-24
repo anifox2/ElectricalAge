@@ -31,6 +31,11 @@ class TeleporterRender(
         d.main?.draw()
     }
 
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        front?.rotateXnRef(poseStack)
+        d.main?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+    }
+
     override fun refresh(deltaT: Float) {
         doorInterpolator.step(deltaT)
         processRatioInterpolator.step(deltaT)

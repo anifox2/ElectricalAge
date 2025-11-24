@@ -49,18 +49,28 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
     }
     */
 
-    fun draw(installedFuse: ElectricalFuseDescriptor?) {
-        case?.draw()
+    fun draw(poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int, packedOverlay: Int, installedFuse: ElectricalFuseDescriptor?) {
+        case?.draw(poseStack, buffer, packedLight, packedOverlay)
         if (installedFuse != null) {
             if (installedFuse.cableDescriptor != null) {
-                VoltageLevelColor.fromCable(installedFuse.cableDescriptor as ElectricalCableDescriptor).setGLColor()
+                val c = VoltageLevelColor.fromCable(installedFuse.cableDescriptor as ElectricalCableDescriptor)
+                val r = (c.r * 255).toInt()
+                val g = (c.g * 255).toInt()
+                val b = (c.b * 255).toInt()
+
+                if (fuseType != null) {
+                    val texture = fuseType.getTextureResource() ?: ResourceLocation("eln", "textures/missing.png")
+                    val consumer = buffer.getBuffer(RenderType.entityCutout(texture))
+                    fuseType.drawColored(poseStack, consumer, packedLight, packedOverlay, r, g, b, 255)
+                }
+            } else {
+                fuseType?.draw(poseStack, buffer, packedLight, packedOverlay)
             }
-            fuseType?.draw()
-            GL11.glColor3f(1f, 1f, 1f)
+
             if (installedFuse.cableDescriptor != null) {
-                fuseOk?.draw()
+                fuseOk?.draw(poseStack, buffer, packedLight, packedOverlay)
             }
-            fuse?.draw()
+            fuse?.draw(poseStack, buffer, packedLight, packedOverlay)
         }
     }
 
@@ -218,8 +228,13 @@ class ElectricalFuseHolderRender(tileEntity: SixNodeEntity, side: Direction, des
     private var installedFuse: ElectricalFuseDescriptor? = null
 
     override fun draw() {
-        front!!.right().glRotateOnX()
-        descriptor.draw(installedFuse)
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+
+        front!!.right().rotatePoseOnX(poseStack)
+        descriptor.draw(poseStack, buffer, light, overlay, installedFuse)
     }
 
     override fun publishUnserialize(stream: DataInputStream) {

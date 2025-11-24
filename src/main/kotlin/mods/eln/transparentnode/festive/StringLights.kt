@@ -12,6 +12,9 @@ import net.minecraft.world.level.Level
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.IOException
+import com.mojang.blaze3d.vertex.PoseStack
+import net.minecraft.client.renderer.MultiBufferSource
+import java.util.function.IntFunction
 
 class StringLightsDescriptor(name: String, override var obj: Obj3D?): TransparentNodeDescriptor(name, FestiveElement::class.java, StringLightsRender::class.java) {
     private var base: Obj3D.Obj3DPart? = null
@@ -30,6 +33,19 @@ class StringLightsDescriptor(name: String, override var obj: Obj3D?): Transparen
             base?.draw()
             if (powered)
                 UtilsClient.drawLight(light)
+        }
+    }
+
+    fun draw(front: Direction, powered: Boolean, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        if (base != null && light != null) {
+            poseStack.pushPose()
+            front.rotateZnRef(poseStack)
+            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0f))
+            poseStack.translate(-0.5, -0.5, -0.5)
+            base?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+            if (powered)
+                UtilsClient.drawLight(light, poseStack, bufferSource, packedLight, packedOverlay)
+            poseStack.popPose()
         }
     }
 
@@ -64,6 +80,10 @@ class StringLightsRender(tileEntity: TransparentNodeBlockEntity, transparentNode
 
     override fun draw() {
         (transparentNodedescriptor as StringLightsDescriptor).draw(front!!, powered)
+    }
+
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        (transparentNodedescriptor as StringLightsDescriptor).draw(front!!, powered, poseStack, bufferSource, packedLight, packedOverlay)
     }
 }
 

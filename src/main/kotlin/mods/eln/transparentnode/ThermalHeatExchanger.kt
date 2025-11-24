@@ -60,6 +60,13 @@ class ThermalHeatExchangerDescriptor(
         main.draw()
     }
 
+    fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        poseStack.pushPose()
+        poseStack.translate(-0.5, -0.5, 0.5)
+        main.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        poseStack.popPose()
+    }
+
     /*
     override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) = true //type != IItemRenderer.ItemRenderType.INVENTORY
@@ -279,5 +286,10 @@ class ThermalHeatExchangerRender(
     override fun draw() {
         front!!.glRotateXnRef()
         (transparentNodedescriptor as ThermalHeatExchangerDescriptor).draw()
+    }
+
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        front?.rotateXnRef(poseStack)
+        (transparentNodedescriptor as ThermalHeatExchangerDescriptor).draw(poseStack, bufferSource, packedLight, packedOverlay)
     }
 }

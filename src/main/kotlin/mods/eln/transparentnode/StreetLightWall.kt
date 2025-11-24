@@ -49,6 +49,25 @@ class StreetLightWallDescriptor(name: String, override var obj: Obj3D?): Transpa
             fixture?.draw()
         }
     }
+
+    fun draw(front: Direction, powered: Boolean, poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        if (fixture != null && part2 != null && part3 != null) {
+            poseStack.pushPose()
+            front.rotateZnRef(poseStack)
+            poseStack.translate(0.0, -0.5, -0.5)
+            poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(90.0f))
+            
+            if (powered) {
+                UtilsClient.drawLight(part2, poseStack, bufferSource, packedLight, packedOverlay)
+                UtilsClient.drawLight(part3, poseStack, bufferSource, packedLight, packedOverlay)
+            } else {
+                part2?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+                part3?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+            }
+            fixture?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+            poseStack.popPose()
+        }
+    }
 }
 
 
@@ -154,6 +173,10 @@ class StreetLightWallRender(tileEntity: TransparentNodeBlockEntity, transparentN
 
     override fun draw() {
         (transparentNodedescriptor as StreetLightWallDescriptor).draw(front!!, powered)
+    }
+
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        (transparentNodedescriptor as StreetLightWallDescriptor).draw(front!!, powered, poseStack, bufferSource, packedLight, packedOverlay)
     }
 
     override fun cameraDrawOptimisation(): Boolean {

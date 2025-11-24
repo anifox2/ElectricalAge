@@ -1,5 +1,6 @@
 package mods.eln.sixnode
 
+import com.mojang.blaze3d.vertex.PoseStack
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.i18n.I18N.tr
@@ -59,46 +60,52 @@ class ElectricalVuMeterDescriptor(name: String, objName: String, var onOffOnly: 
     }
     */
 
-    fun draw(factorArg: Float, entity: BlockEntity?) {
+    fun draw(poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int, packedOverlay: Int, factorArg: Float, entity: BlockEntity?) {
         var factor = factorArg
         if (factor < 0.0) factor = 0.0f
         if (factor > 1.0) factor = 1.0f
         when (objType) {
             ObjType.LedOnOff -> {
-                main!!.draw()
+                main!!.draw(poseStack, buffer, packedLight, packedOverlay)
                 if (isRGB) {
                     val ledColor = Color.getHSBColor(factor, 1f, 1f)
+                    val r = ledColor.red / 255f
+                    val g = ledColor.green / 255f
+                    val b = ledColor.blue / 255f
+                    
                     if (factor > 0.005f) {
-                        GL11.glColor3f(ledColor.red / 255f, ledColor.green / 255f, ledColor.blue / 255f)
+                        UtilsClient.drawLight(led, poseStack, buffer, packedLight, packedOverlay, r, g, b, 1f)
                     } else {
-                        GL11.glColor3f(0.5f, 0.5f, 0.5f)
+                        UtilsClient.drawLight(led, poseStack, buffer, packedLight, packedOverlay, 0.5f, 0.5f, 0.5f, 1f)
                     }
-                    UtilsClient.drawLight(led)
+                    
                     if (entity != null) {
                         if (factor > 0.005f) {
-                            UtilsClient.drawHalo(halo, ledColor.red / 255f, ledColor.green / 255f, ledColor.blue / 255f, entity, false)
+                            UtilsClient.drawHalo(halo, r, g, b, entity, false)
                         }
                     } else {
                         if (factor > 0.005f) {
-                            UtilsClient.drawLight(halo)
+                            UtilsClient.drawLight(halo, poseStack, buffer, packedLight, packedOverlay)
                         }
                     }
                 } else {
                     val s = factor > 0.5
                     val c = UtilsClient.ledOnOffColorC(s)
-                    GL11.glColor3f(c.red / 255f, c.green / 255f, c.blue / 255f)
-                    UtilsClient.drawLight(led)
-                    if (entity != null) UtilsClient.drawHalo(halo, c.red / 255f, c.green / 255f, c.blue / 255f, entity as net.minecraft.world.level.block.entity.BlockEntity, false) else UtilsClient.drawLight(halo)
+                    val r = c.red / 255f
+                    val g = c.green / 255f
+                    val b = c.blue / 255f
+                    
+                    UtilsClient.drawLight(led, poseStack, buffer, packedLight, packedOverlay, r, g, b, 1f)
+                    if (entity != null) UtilsClient.drawHalo(halo, r, g, b, entity as net.minecraft.world.level.block.entity.BlockEntity, false) else UtilsClient.drawLight(halo, poseStack, buffer, packedLight, packedOverlay)
                 }
             }
             ObjType.Rot -> {
-                vumeter!!.draw()
+                vumeter!!.draw(poseStack, buffer, packedLight, packedOverlay)
                 val alphaOff: Float = pointer!!.getFloat("alphaOff")
                 val alphaOn: Float = pointer!!.getFloat("alphaOn")
-                pointer!!.draw(factor * (alphaOn - alphaOff) + alphaOff, 1.0f, 0f, 0f)
+                pointer!!.draw(poseStack, buffer, packedLight, packedOverlay, factor * (alphaOn - alphaOff) + alphaOff, 1.0f, 0f, 0f)
             }
-            else -> {
-            }
+            else -> {}
         }
     }
 
@@ -212,11 +219,16 @@ class ElectricalVuMeterRender(tileEntity: SixNodeEntity, side: Direction, descri
     var boot = true
     override fun draw() {
         super.draw()
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+        
         drawSignalPin(front, descriptor.pinDistance)
         if (side == Direction.YP || side == Direction.YN) {
-            front!!.right().glRotateOnX()
+            front!!.right().rotatePoseOnX(poseStack)
         }
-        descriptor.draw(if (descriptor.onOffOnly) interpolator.target else interpolator.get(), blockEntity)
+        descriptor.draw(poseStack, buffer, light, overlay, if (descriptor.onOffOnly) interpolator.target else interpolator.get(), blockEntity)
     }
 
     override fun refresh(deltaT: Float) {

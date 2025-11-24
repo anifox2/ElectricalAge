@@ -26,6 +26,7 @@ import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.CurrentSource
 import mods.eln.sim.nbt.NbtElectricalLoad
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
@@ -199,8 +200,13 @@ class PowerSinkRender(tileEntity: SixNodeEntity, side: Direction, descriptor: Si
     var current = 0.0
     override fun draw() {
         super.draw()
-        front!!.glRotateOnX()
-        descriptor.draw()
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+        
+        front!!.rotatePoseOnX(poseStack)
+        descriptor.draw(poseStack, buffer, light, overlay)
     }
 
     override fun publishUnserialize(stream: DataInputStream) {

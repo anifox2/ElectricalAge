@@ -18,6 +18,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 
@@ -53,26 +56,26 @@ public class EnergyMeterRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
 
-        GL11.glPushMatrix();
+        poseStack.pushPose();
 
         float[] pinDistances = descriptor.pinDistance;
         if (side.isY()) {
             pinDistances = front.rotate4PinDistances(pinDistances);
-            front.left().glRotateOnX();
+            front.left().rotatePoseOnX(poseStack);
         }
 
-        descriptor.draw(energyStack / Math.pow(10, energyUnit * 3 - 1), timerCouter / (timeUnit == 0 ? 360 : 8640),
+        descriptor.draw(poseStack, buffer, light, overlay, energyStack / Math.pow(10, energyUnit * 3 - 1), timerCouter / (timeUnit == 0 ? 360 : 8640),
             energyUnit, timeUnit,
             UtilsClient.distanceFromClientPlayer(getTileEntity()) < 20);
 
-        GL11.glPopMatrix();
-
-        GL11.glColor3f(0.9f, 0f, 0f);
-        drawPowerPinWhite(front, pinDistances);
-        GL11.glColor3f(0f, 0f, 0.9f);
-        drawPowerPinWhite(front.inverse(), pinDistances);
-        GL11.glColor3f(1f, 1f, 1f);
+        poseStack.popPose();
     }
 
     @Override

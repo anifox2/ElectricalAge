@@ -46,6 +46,28 @@ class BasicFloodlightDescriptor(name: String, override var obj: Obj3D?): Transpa
         bulb1_on.draw()
         bulb2_on.draw()
     }
+
+    fun draw(front: Direction, x: Double, y: Double, poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        poseStack.pushPose()
+        front.rotateZnRefInv(poseStack)
+        poseStack.translate(-0.5, -0.5, 0.5)
+        base.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        
+        poseStack.translate(0.5, 0.5, -0.5)
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(y.toFloat()))
+        poseStack.translate(-0.5, -0.5, 0.5)
+        swivel.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        
+        poseStack.translate(0.5, 0.5, -0.5)
+        poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-x.toFloat()))
+        poseStack.translate(-0.5, -0.5, 0.5)
+        head.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        bulb1.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        bulb2.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        bulb1_on.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        bulb2_on.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        poseStack.popPose()
+    }
 }
 
 class BasicFloodlightElement(node: TransparentNode, descriptor: TransparentNodeDescriptor): TransparentNodeElement(node, descriptor) {
@@ -85,6 +107,10 @@ class BasicFloodlightRender(tileEntity: TransparentNodeBlockEntity, transparentN
 
     override fun draw() {
         (transparentNodedescriptor as BasicFloodlightDescriptor).draw(front!!, x, y)
+    }
+
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        (transparentNodedescriptor as BasicFloodlightDescriptor).draw(front!!, x, y, poseStack, bufferSource, packedLight, packedOverlay)
     }
 
     override fun refresh(deltaT: Float) {
@@ -135,6 +161,26 @@ class MotorizedFloodlightDescriptor(name: String, override var obj: Obj3D?): Tra
         //bulb1.draw()
         //bulb2.draw()
     }
+
+    fun draw(front: Direction, x: Double, y: Double, poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        poseStack.pushPose()
+        front.rotateZnRefInv(poseStack)
+        poseStack.translate(-0.5, -0.5, 0.5)
+        //base.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        
+        poseStack.translate(0.5, 0.5, -0.5)
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(y.toFloat()))
+        poseStack.translate(-0.5, -0.5, 0.5)
+        //swivel.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        
+        poseStack.translate(0.5, 0.5, -0.5)
+        poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-x.toFloat()))
+        poseStack.translate(-0.5, -0.5, 0.5)
+        //head.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        //bulb1.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        //bulb2.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        poseStack.popPose()
+    }
 }
 
 class MotorizedFloodlightElement(node: TransparentNode, descriptor: TransparentNodeDescriptor): TransparentNodeElement(node, descriptor) {
@@ -177,7 +223,11 @@ class MotorizedFloodlightRender(tileEntity: TransparentNodeBlockEntity, transpar
     var y: Double = 0.0
 
     override fun draw() {
-        (transparentNodedescriptor as BasicFloodlightDescriptor).draw(front!!, x, y)
+        (transparentNodedescriptor as MotorizedFloodlightDescriptor).draw(front!!, x, y)
+    }
+
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        (transparentNodedescriptor as MotorizedFloodlightDescriptor).draw(front!!, x, y, poseStack, bufferSource, packedLight, packedOverlay)
     }
 
     override fun refresh(deltaT: Float) {

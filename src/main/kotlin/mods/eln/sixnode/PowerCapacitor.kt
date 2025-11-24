@@ -99,6 +99,12 @@ class PowerCapacitorSixDescriptor(name: String,
         CapacitorCore?.draw(poseStack, consumer, packedLight, packedOverlay)
     }
 
+    override fun draw(poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        if (null != Base) Base!!.draw(poseStack, buffer, packedLight, packedOverlay)
+        if (null != CapacitorCables) CapacitorCables!!.draw(poseStack, buffer, packedLight, packedOverlay)
+        if (null != CapacitorCore) CapacitorCore!!.draw(poseStack, buffer, packedLight, packedOverlay)
+    }
+
     override fun appendHoverText(
         itemStack: ItemStack,
         level: net.minecraft.world.level.Level?,
@@ -293,9 +299,14 @@ class PowerCapacitorSixRender(tileEntity: SixNodeEntity, side: Direction, descri
     override var inventory = SixNodeElementInventory(2, 64, this)
 
     override fun draw() {
-        GL11.glRotatef(90f, 1f, 0f, 0f)
-        front!!.glRotateOnX()
-        descriptor.draw()
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+        
+        poseStack.mulPose(Axis.XP.rotationDegrees(90f))
+        front!!.rotatePoseOnX(poseStack)
+        descriptor.draw(poseStack, buffer, light, overlay)
     }
 
     override fun newGuiDraw(side: Direction, player: Player): Screen {

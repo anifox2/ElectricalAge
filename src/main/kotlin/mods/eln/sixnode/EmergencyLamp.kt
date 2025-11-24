@@ -52,32 +52,24 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
         panelCeiling.draw(poseStack, consumer, packedLight, packedOverlay)
     }
 
-    fun draw(onCeiling: Boolean = false, on: Boolean = false, mirrorSign: Boolean = false) {
+    fun draw(poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int, packedOverlay: Int, onCeiling: Boolean = false, on: Boolean = false, mirrorSign: Boolean = false) {
         if (onCeiling) {
-            mainCeiling.draw()
+            mainCeiling.draw(poseStack, buffer, packedLight, packedOverlay)
 
             if (on) {
-                preserveMatrix {
-                    UtilsClient.drawLight(panelCeiling)
-                    GL11.glColor3f(0.3f, 0.3f, 0.3f)
-                    UtilsClient.drawLight(lightCeiling)
-                }
+                UtilsClient.drawLight(panelCeiling, poseStack, buffer, packedLight, packedOverlay)
+                UtilsClient.drawLight(lightCeiling, poseStack, buffer, packedLight, packedOverlay, 0.3f, 0.3f, 0.3f, 1f)
             } else {
-                panelCeiling.draw()
+                panelCeiling.draw(poseStack, buffer, packedLight, packedOverlay)
             }
         } else {
             if (on) {
-                preserveMatrix {
-                    UtilsClient.drawLight(mainWall)
-                    UtilsClient.drawLight(if (mirrorSign) mainWallL else mainWallR)
-                    GL11.glColor3f(0.3f, 0.3f, 0.3f)
-                    UtilsClient.drawLight(lightWall)
-                }
+                UtilsClient.drawLight(mainWall, poseStack, buffer, packedLight, packedOverlay)
+                UtilsClient.drawLight(if (mirrorSign) mainWallL else mainWallR, poseStack, buffer, packedLight, packedOverlay)
+                UtilsClient.drawLight(lightWall, poseStack, buffer, packedLight, packedOverlay, 0.3f, 0.3f, 0.3f, 1f)
             } else {
-                preserveMatrix {
-                    mainWall.draw()
-                    (if (mirrorSign) mainWallL else mainWallR).draw()
-                }
+                mainWall.draw(poseStack, buffer, packedLight, packedOverlay)
+                (if (mirrorSign) mainWallL else mainWallR).draw(poseStack, buffer, packedLight, packedOverlay)
             }
         }
     }
@@ -250,8 +242,13 @@ class EmergencyLampRender(entity: SixNodeEntity, side: Direction, descriptor: Si
 
     override fun draw() {
         super.draw()
-        front!!.glRotateOnX()
-        desc.draw(side == Direction.YP, on, front == LRDU.Up)
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+        
+        front!!.rotatePoseOnX(poseStack)
+        desc.draw(poseStack, buffer, light, overlay, side == Direction.YP, on, front == LRDU.Up)
     }
 
     override fun publishUnserialize(stream: DataInputStream) {

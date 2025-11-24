@@ -1,5 +1,6 @@
 package mods.eln.sixnode.logicgate
 
+import com.mojang.blaze3d.vertex.PoseStack
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.GuiHelper
@@ -37,14 +38,12 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
     SixNodeDescriptor(name, elementClass, renderClass) {
     private val case = obj?.getPart("Case")
     private val top = obj?.getPart(functionName)
-    // ...existing code...
     private val pins = arrayOfNulls<Obj3D.Obj3DPart>(4)
 
     internal val function = functionClass.getDeclaredConstructor().newInstance()
 
     init {
         pins[0] = obj?.getPart("Output")
-// ...existing code...
         for (i in 1..function.inputCount) pins[i] = obj?.getPart("Input$i")
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage
@@ -54,10 +53,10 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
         this(name, obj, functionName, functionClass, LogicGateElement::class.java, LogicGateRender::class.java) {
     }
 
-    fun draw() {
-        pins.forEach { it?.draw() }
-        case?.draw()
-        top?.draw()
+    fun draw(poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        pins.forEach { it?.draw(poseStack, buffer, packedLight, packedOverlay) }
+        case?.draw(poseStack, buffer, packedLight, packedOverlay)
+        top?.draw(poseStack, buffer, packedLight, packedOverlay)
     }
 
     // ...existing code...
@@ -163,8 +162,13 @@ open class LogicGateRender(entity: SixNodeEntity, side: Direction, descriptor: S
 
     override fun draw() {
         super.draw()
-        front!!.glRotateOnX()
-        descriptor.draw()
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+        
+        front!!.rotatePoseOnX(poseStack)
+        descriptor.draw(poseStack, buffer, light, overlay)
     }
 
     override fun getCableRender(lrdu: LRDU): CableRenderDescriptor? = when (lrdu) {

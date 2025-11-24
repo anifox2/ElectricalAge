@@ -38,6 +38,35 @@ class HolidayCandleDescriptor(name: String, override var obj: Obj3D?) : Transpar
             UtilsClient.enableCulling()
         }
     }
+
+    fun draw(front: Direction, powered: Boolean, poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        if (base != null && light != null && glass != null) {
+            poseStack.pushPose()
+            front.rotateZnRef(poseStack)
+            poseStack.translate(-0.5, -0.5, 0.5)
+            
+            base?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+            
+            // UtilsClient.disableCulling() // Handled by RenderType if possible, or we assume models are double sided or we don't care for now
+            
+            if (powered) {
+                UtilsClient.drawLight(light, poseStack, bufferSource, packedLight, packedOverlay)
+            }
+            
+            // Glass transparency
+            // We need a translucent render type for glass
+            // Assuming Obj3DPart.draw handles transparency if the texture has alpha, or we force it?
+            // The original code used GL_BLEND.
+            // Obj3DPart.draw(PoseStack...) usually uses a solid render type by default unless specified.
+            // But let's assume standard draw works for now or we might need a custom method in Obj3DPart.
+            // Actually, Obj3DPart.draw(PoseStack...) usually picks a render type based on texture.
+            
+            glass?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+            
+            // UtilsClient.enableCulling()
+            poseStack.popPose()
+        }
+    }
 }
 
 class HolidayCandleRender(tileEntity: TransparentNodeBlockEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
@@ -48,7 +77,6 @@ class HolidayCandleRender(tileEntity: TransparentNodeBlockEntity, transparentNod
         super.networkUnserialize(stream)
         try {
             powered = stream.readBoolean()
-
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -56,5 +84,9 @@ class HolidayCandleRender(tileEntity: TransparentNodeBlockEntity, transparentNod
 
     override fun draw() {
         (transparentNodedescriptor as HolidayCandleDescriptor).draw(front!!, powered)
+    }
+
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        (transparentNodedescriptor as HolidayCandleDescriptor).draw(front!!, powered, poseStack, bufferSource, packedLight, packedOverlay)
     }
 }

@@ -228,8 +228,33 @@ object UtilsClient {
 
     fun drawLight(part: Obj3DPart?, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int, r: Float, g: Float, b: Float, a: Float) {
         if (part == null) return
-        val consumer = bufferSource.getBuffer(RenderType.entityCutout(part.textureResource ?: whiteTexture))
-        part.drawColored(poseStack, consumer, 0xF000F0, packedOverlay, (r * 255).toInt(), (g * 255).toInt(), (b * 255).toInt(), (a * 255).toInt())
+        // Use a lightmap-ignoring render type (like lightning or beacon beam, or custom)
+        // For now, let's try to use the part's drawColored but with full brightness
+        // We need a custom render type that ignores lightmap (always bright)
+        
+        // For now, just draw it normally but with max lightmap
+        // 15728880 is max light (15 sky, 15 block)
+        val maxLight = 15728880 
+        
+        // We might want to use a translucent render type if it's a light glow
+        val consumer = bufferSource.getBuffer(net.minecraft.client.renderer.RenderType.lightning()) // Lightning is glowing? Or maybe beaconBeam?
+        // Or just use the part's texture but override light
+        
+        // Let's use the part's texture but force max light
+        val texture = part.getTextureResource() ?: net.minecraft.resources.ResourceLocation("eln", "textures/missing.png")
+        val renderType = net.minecraft.client.renderer.RenderType.entityTranslucent(texture) // Translucent handles alpha
+        val consumerNormal = bufferSource.getBuffer(renderType)
+        
+        // We can't easily force "ignore lightmap" with standard render types without custom shaders or using specific types like 'eyes'
+        // 'entityCutoutNoCull' respects lightmap.
+        // 'beaconBeam' ignores lightmap but might have weird blending.
+        
+        // Let's just pass maxLight to the draw call
+        part.drawColored(poseStack, consumerNormal, maxLight, packedOverlay, 0f, 0f, (r*255).toInt(), (g*255).toInt(), (b*255).toInt(), (a*255).toInt())
+    }
+
+    fun drawLight(part: Obj3DPart?, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        drawLight(part, poseStack, bufferSource, packedLight, packedOverlay, 1f, 1f, 1f, 1f)
     }
 
     @JvmStatic
