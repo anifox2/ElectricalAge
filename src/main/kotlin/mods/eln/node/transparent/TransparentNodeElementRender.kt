@@ -48,6 +48,11 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeBlock
     }
 
     abstract fun draw()
+
+    open fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        draw()
+    }
+
     open fun networkUnserialize(stream: DataInputStream) {
         try {
             val b = stream.readByte()

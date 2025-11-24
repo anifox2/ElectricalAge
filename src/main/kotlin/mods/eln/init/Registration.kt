@@ -1,6 +1,7 @@
 package mods.eln.init
 
 import mods.eln.Eln
+import mods.eln.misc.elnMetadata
 import mods.eln.node.transparent.TransparentNodeBlock
 import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.TransparentNodeItem
@@ -81,13 +82,13 @@ object Registration {
                     if (item is GenericItemBlockUsingDamage<*>) {
                         for (id in item.orderList) {
                             val stack = ItemStack(item)
-                            stack.damageValue = id
+                            stack.elnMetadata = id
                             output.accept(stack)
                         }
                     } else if (item is GenericItemUsingDamage<*>) {
                         for (id in item.orderList) {
                             val stack = ItemStack(item)
-                            stack.damageValue = id
+                            stack.elnMetadata = id
                             output.accept(stack)
                         }
                     } else {

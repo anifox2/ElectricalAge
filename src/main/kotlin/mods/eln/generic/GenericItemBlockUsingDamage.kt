@@ -6,6 +6,8 @@ import net.minecraft.world.item.ItemStack
 import java.util.Hashtable
 import java.util.ArrayList
 
+import mods.eln.misc.elnMetadata
+
 open class GenericItemBlockUsingDamage<Descriptor : GenericItemBlockUsingDamageDescriptor>(block: Block) : BlockItem(block, Properties()) {
 
     val subItemList = Hashtable<Int, Descriptor>()
@@ -40,7 +42,7 @@ open class GenericItemBlockUsingDamage<Descriptor : GenericItemBlockUsingDamageD
     fun getDescriptor(itemStack: ItemStack?): Descriptor? {
         if (itemStack == null) return defaultElement
         if (itemStack.item != this) return defaultElement
-        return getDescriptor(itemStack.damageValue)
+        return getDescriptor(itemStack.elnMetadata)
     }
     
     override fun getDescriptionId(stack: ItemStack): String {

@@ -3,6 +3,7 @@ package mods.eln.node.six
 
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
+import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 import mods.eln.misc.Direction.Companion.fromInt
 import mods.eln.misc.LRDU
@@ -184,6 +185,19 @@ class SixNodeEntity(pos: net.minecraft.core.BlockPos, state: net.minecraft.world
         } else {
             if (node == null) 0 else node!!.isProvidingWeakPower(side)
         }
+    }
+
+    override fun onBlockPlacedBy(front: Direction?, entityLiving: net.minecraft.world.entity.LivingEntity?, stack: net.minecraft.world.item.ItemStack) {
+        if (level!!.isClientSide) return
+        
+        val node = SixNode()
+        node.coordinate = Coordinate(this)
+        node.level = level
+        
+        mods.eln.node.NodeManager.instance!!.addNode(node)
+        this.internalNode = node
+        
+        node.onBlockPlacedBy(level!!, Coordinate(this), front ?: Direction.N, entityLiving, stack)
     }
 
     companion object {

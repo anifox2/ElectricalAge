@@ -137,6 +137,7 @@ class Eln {
 
     private fun commonSetup(event: FMLCommonSetupEvent) {
         LOGGER.info("Electrical Age Common Setup")
+        ElnNetwork.init()
         sixNodeItem = Registration.SIX_NODE_ITEM.get()
         sixNodeBlock = Registration.SIX_NODE_BLOCK.get()
         sixNodeEntity = Registration.SIX_NODE_BLOCK_ENTITY.get()

@@ -1,5 +1,6 @@
 package mods.eln.node.six
 
+import mods.eln.misc.elnMetadata
 import mods.eln.misc.Utils
 import mods.eln.node.ISixNodeCache
 import net.minecraft.world.level.block.Block
@@ -18,6 +19,6 @@ class SixNodeCacheStd : ISixNodeCache {
     }
 
     override fun getMeta(stack: ItemStack): Int {
-        return stack.damageValue
+        return stack.elnMetadata
     }
 }

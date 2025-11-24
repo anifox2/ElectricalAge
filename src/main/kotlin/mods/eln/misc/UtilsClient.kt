@@ -4,6 +4,8 @@ package mods.eln.misc
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.PoseStack
 import mods.eln.Eln
+import mods.eln.ElnNetwork
+import mods.eln.ElnPacket
 
 import mods.eln.misc.Obj3D.Obj3DPart
 import mods.eln.node.six.SixNodeEntity
@@ -27,6 +29,12 @@ object UtilsClient {
     @JvmField
     var guiLastOpen: Screen? = null
     var lightmapTexUnitTextureEnable = false
+
+    // Rendering context for 1.20 port
+    var currentPoseStack: PoseStack? = null
+    var currentBufferSource: MultiBufferSource? = null
+    var currentPackedLight: Int = 0
+    var currentPackedOverlay: Int = 0
     
     @JvmStatic
     var uuid = Int.MIN_VALUE
@@ -39,7 +47,21 @@ object UtilsClient {
     val portableBatteryOverlayResource = ResourceLocation("eln", "sprites/portablebatteryoverlay.png")
     
     fun drawItemEntity(entityItem: ItemEntity?, x: Double, y: Double, z: Double, roty: Float, scale: Float) {
-        // TODO: Implement modern rendering
+        if (entityItem == null) return
+        val poseStack = currentPoseStack ?: return
+        val bufferSource = currentBufferSource ?: return
+        
+        poseStack.pushPose()
+        poseStack.translate(x, y, z)
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(roty))
+        poseStack.scale(scale, scale, scale)
+        
+        Minecraft.getInstance().entityRenderDispatcher.render(
+            entityItem, 0.0, 0.0, 0.0, 0.0f, 0.0f,
+            poseStack, bufferSource, currentPackedLight
+        )
+        
+        poseStack.popPose()
     }
 
     @JvmStatic
@@ -56,7 +78,7 @@ object UtilsClient {
 
     @JvmStatic
     fun drawHaloNoLightSetup(halo: ResourceLocation, r: Float, g: Float, b: Float, entity: Entity, bilinear: Boolean) {
-        // Stub
+        // Texture based halo not implemented yet
     }
 
     @JvmStatic
@@ -76,7 +98,19 @@ object UtilsClient {
 
     @JvmStatic
     fun drawHalo(halo: Obj3DPart?, r: Float, g: Float, b: Float, level: Level?, x: Int, y: Int, z: Int, bilinear: Boolean) {
-        // TODO: Modern rendering
+        if (halo == null) return
+        // Assume matrix is already set up if called from render
+        
+        RenderSystem.enableBlend()
+        RenderSystem.defaultBlendFunc()
+        GL11.glDisable(GL11.GL_LIGHTING)
+        GL11.glColor4f(r, g, b, 1.0f)
+        
+        halo.draw()
+        
+        GL11.glEnable(GL11.GL_LIGHTING)
+        RenderSystem.disableBlend()
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f)
     }
 
     @JvmStatic
@@ -269,7 +303,7 @@ object UtilsClient {
 
     @JvmStatic
     fun sendPacketToServer(bos: java.io.ByteArrayOutputStream) {
-        // TODO: Modern networking
+        ElnNetwork.sendToServer(ElnPacket(bos.toByteArray()))
     }
 
     val glListsAllocated = HashSet<Int>()

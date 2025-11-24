@@ -3,6 +3,7 @@ package mods.eln.node.six
 import mods.eln.Eln
 import mods.eln.ServerKeyHandler
 import mods.eln.item.IConfigurable
+import mods.eln.misc.elnMetadata
 import mods.eln.misc.Direction
 import mods.eln.misc.Direction.Companion.fromInt
 import mods.eln.misc.LRDU
@@ -75,13 +76,13 @@ class SixNode : Node() {
         val descriptor = Eln.sixNodeItem?.getDescriptor(itemStack) as? SixNodeDescriptor
         if (sideElementList[direction.int] != null) return false
         try {
-            sideElementIdList[direction.int] = itemStack.damageValue //Je sais c'est moche !
+            sideElementIdList[direction.int] = itemStack.elnMetadata //Je sais c'est moche !
             sideElementList[direction.int] = descriptor!!.ElementClass.getConstructor(SixNode::class.java, Direction::class.java, SixNodeDescriptor::class.java).newInstance(this, direction, descriptor) as SixNodeElement
             sideElementIdList[direction.int] = 0
             disconnect()
             sideElementList[direction.int]!!.front = descriptor.getFrontFromPlace(direction, player!!)!!
             sideElementList[direction.int]!!.initialize()
-            sideElementIdList[direction.int] = itemStack.damageValue
+            sideElementIdList[direction.int] = itemStack.elnMetadata
             connect()
             println("createSubBlock " + sideElementIdList[direction.int] + " " + direction)
             needPublish = true

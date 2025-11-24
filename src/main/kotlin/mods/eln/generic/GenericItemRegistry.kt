@@ -1,5 +1,6 @@
 package mods.eln.generic
 
+import mods.eln.misc.elnMetadata
 import java.util.Hashtable
 
 class GenericItemRegistry {
@@ -21,7 +22,7 @@ class GenericItemRegistry {
 
     fun getDescriptor(itemStack: net.minecraft.world.item.ItemStack?): GenericItemUsingDamageDescriptor? {
         if (itemStack == null) return null
-        return subItemList[itemStack.damageValue]
+        return subItemList[itemStack.elnMetadata]
     }
 
     fun getDescriptor(id: Int): GenericItemUsingDamageDescriptor? {

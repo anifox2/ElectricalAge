@@ -1,5 +1,6 @@
 package mods.eln.node.transparent
 
+import mods.eln.misc.elnMetadata
 import mods.eln.Eln
 import mods.eln.item.IConfigurable
 import mods.eln.misc.Direction
@@ -132,7 +133,7 @@ class TransparentNode : Node() {
     override fun initializeFromThat(front: Direction, entityLiving: LivingEntity?, itemStack: ItemStack?) {
         try {
             val descriptor = Eln.transparentNodeItem.getDescriptor(itemStack)
-            val metadata = itemStack!!.damageValue
+            val metadata = itemStack!!.elnMetadata
             elementId = metadata
             element = descriptor!!.ElementClass.getConstructor(TransparentNode::class.java, TransparentNodeDescriptor::class.java).newInstance(this, descriptor) as TransparentNodeElement
             element!!.initializeFromThat(front, entityLiving, itemStack.tag)

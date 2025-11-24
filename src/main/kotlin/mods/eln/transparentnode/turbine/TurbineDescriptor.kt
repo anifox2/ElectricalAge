@@ -5,6 +5,7 @@ import mods.eln.node.transparent.TransparentNodeElement
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.Obj3D
 import mods.eln.misc.FunctionTable
+import mods.eln.Eln
 
 class TurbineDescriptor(
     name: String,
@@ -27,4 +28,9 @@ class TurbineDescriptor(
     TurbineElement::class.java,
     TurbineRender::class.java
 ) {
+    init {
+        if (obj == null && objName.isNotEmpty()) {
+            obj = Eln.obj.getObj(objName)
+        }
+    }
 }

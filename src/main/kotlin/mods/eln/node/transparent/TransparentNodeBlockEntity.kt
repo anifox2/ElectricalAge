@@ -1,5 +1,6 @@
 package mods.eln.node.transparent
 
+import mods.eln.misc.elnMetadata
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.Coordinate
@@ -42,7 +43,7 @@ open class TransparentNodeBlockEntity(type: BlockEntityType<*>, pos: BlockPos, s
     override fun onBlockPlacedBy(front: Direction?, entityLiving: net.minecraft.world.entity.LivingEntity?, stack: ItemStack) {
         if (level!!.isClientSide) return
         
-        val metadata = stack.damageValue
+        val metadata = stack.elnMetadata
         val node = TransparentNode()
         node.elementId = metadata
         node.coordinate = Coordinate(this)

@@ -1,5 +1,6 @@
 package mods.eln.node.transparent
 
+import mods.eln.misc.elnMetadata
 import mods.eln.Eln
 import mods.eln.init.Registration
 import mods.eln.node.NodeBase
@@ -15,6 +16,7 @@ import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.VoxelShape
 import net.minecraft.world.phys.shapes.Shapes
 import net.minecraft.world.phys.HitResult
+import net.minecraft.world.level.block.RenderShape
 
 class TransparentNodeBlock(properties: Properties) : NodeBlock(properties, { pos, state -> TransparentNodeBlockEntity(pos, state) }, 0) {
 
@@ -22,10 +24,14 @@ class TransparentNodeBlock(properties: Properties) : NodeBlock(properties, { pos
         val entity = level.getBlockEntity(pos) as? TransparentNodeBlockEntity
         if (entity != null) {
              val stack = ItemStack(this)
-             stack.damageValue = entity.elementRenderId.toInt()
+             stack.elnMetadata = entity.elementRenderId.toInt()
              return stack
         }
         return super.getCloneItemStack(state, target, level, pos, player)
+    }
+
+    override fun getRenderShape(state: BlockState): RenderShape {
+        return RenderShape.ENTITYBLOCK_ANIMATED
     }
 
     override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape {

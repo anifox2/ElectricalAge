@@ -53,3 +53,13 @@ fun ItemStack.getShort(key: String): Short {
 fun ItemStack.setShort(key: String, value: Short) {
     this.nbt.putShort(key, value)
 }
+
+var ItemStack.elnMetadata: Int
+    get() = if (this.hasTag() && this.tag!!.contains("eln_metadata")) this.tag!!.getInt("eln_metadata") else this.damageValue
+    set(value) {
+        this.getOrCreateTag().putInt("eln_metadata", value)
+        // For compatibility with code that might check damageValue, we could set it too, 
+        // but only if it doesn't interfere with durability.
+        // For now, we rely on NBT.
+        this.damageValue = value // Try setting damage too, just in case some renderers use it
+    }

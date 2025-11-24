@@ -2,6 +2,7 @@ package mods.eln.generic
 
 import mods.eln.init.Registration
 import mods.eln.misc.RealisticEnum
+import mods.eln.misc.elnMetadata
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.item.Item
@@ -13,8 +14,13 @@ import net.minecraftforge.registries.RegistryObject
 open class GenericItemUsingDamageDescriptor @JvmOverloads constructor(val name: String, var iconName: String? = null, val registerItem: Boolean = true) {
     val registryObject: RegistryObject<Item>?
     var parentItemDamage: Int = 0
+    var parentItem: Item? = null
+
     open fun setParent(registry: Any?, id: Int) {
         this.parentItemDamage = id
+        if (registry is Item) {
+            this.parentItem = registry
+        }
     }
 
     open fun getName(stack: ItemStack): Component {
@@ -29,6 +35,11 @@ open class GenericItemUsingDamageDescriptor @JvmOverloads constructor(val name: 
     open fun newItemStack(amount: Int = 1): ItemStack {
         if (registryObject != null && registryObject.isPresent) {
             return ItemStack(registryObject.get(), amount)
+        }
+        if (parentItem != null) {
+            val stack = ItemStack(parentItem!!, amount)
+            stack.elnMetadata = parentItemDamage
+            return stack
         }
         return ItemStack.EMPTY
     }

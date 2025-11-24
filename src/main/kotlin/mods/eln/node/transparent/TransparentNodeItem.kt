@@ -70,10 +70,9 @@ class TransparentNodeItem(b: Block?) : GenericItemBlockUsingDamage<TransparentNo
         val newState = this.block.defaultBlockState()
         if (level.setBlock(targetPos, newState, 3)) {
             val entity = level.getBlockEntity(targetPos) as? TransparentNodeBlockEntity
-            val node = entity?.node as? TransparentNode
 
-            if (node != null) {
-                node.onBlockPlacedBy(level, coord, front, player, stack)
+            if (entity != null) {
+                entity.onBlockPlacedBy(front, player, stack)
 
                 if (!player.isCreative) stack.shrink(1)
                 return InteractionResult.SUCCESS

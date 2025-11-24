@@ -79,7 +79,7 @@ public class ThermalCableDescriptor extends SixNodeDescriptor {
     }
 
     public static ThermalCableDescriptor getDescriptorFrom(ItemStack itemStack) {
-        return list[(itemStack.getDamageValue() >> 8) & 0xFF];
+        return list[(mods.eln.misc.ItemExtensionsKt.getElnMetadata(itemStack) >> 8) & 0xFF];
     }
 
     /*

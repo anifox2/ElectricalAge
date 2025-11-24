@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "eln:block/longsuspendedlampsocket(noswing)"
+        "layer0": "eln:block/long_suspended_lamp_socket_no_swing"
     }
 }

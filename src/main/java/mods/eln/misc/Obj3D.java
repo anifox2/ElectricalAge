@@ -697,6 +697,12 @@ public class Obj3D {
         return nameToPartHash.get(part);
     }
 
+    public void draw() {
+        for (Obj3DPart part : nameToPartHash.values()) {
+            part.draw();
+        }
+    }
+
     public void draw(String part) {
         Obj3DPart partPtr = getPart(part);
         if (partPtr != null)

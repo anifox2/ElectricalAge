@@ -3,23 +3,14 @@ package mods.eln.generic
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import mods.eln.misc.elnMetadata
 
-open class GenericItemBlockUsingDamageDescriptor(name: String, iconName: String? = null, registerItem: Boolean = true) : GenericItemUsingDamageDescriptor(name, iconName, registerItem) {
-    var parentItem: Item? = null
-    var damage: Int = 0
+// Blocks with damage-based variants should be driven by their shared BlockItem;
+// avoid auto-registering standalone items by default.
+open class GenericItemBlockUsingDamageDescriptor(name: String, iconName: String? = null, registerItem: Boolean = false) : GenericItemUsingDamageDescriptor(name, iconName, registerItem) {
 
     open fun setParent(item: Item, damage: Int) {
-        this.parentItem = item
-        this.damage = damage
-    }
-
-    override fun newItemStack(amount: Int): ItemStack {
-        if (parentItem != null) {
-            val stack = ItemStack(parentItem!!, amount)
-            stack.damageValue = damage
-            return stack
-        }
-        return super.newItemStack(amount)
+        super.setParent(item, damage)
     }
 
     override fun getDefaultNBT(): CompoundTag {

@@ -29,7 +29,7 @@ open class TransparentNodeDescriptor @JvmOverloads constructor(
     name: String?,
     var ElementClass: Class<*>,
     var RenderClass: Class<*>,
-    val tileEntityMetaTag: EntityMetaTag = EntityMetaTag.Basic) : GenericItemBlockUsingDamageDescriptor(name!!) /*, IItemRenderer */ {
+    val tileEntityMetaTag: EntityMetaTag = EntityMetaTag.Basic) : GenericItemBlockUsingDamageDescriptor(name!!, null, false) /*, IItemRenderer */ {
     
     open var obj: Obj3D? = null
 

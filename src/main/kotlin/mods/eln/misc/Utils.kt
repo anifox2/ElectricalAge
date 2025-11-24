@@ -1,6 +1,8 @@
 package mods.eln.misc
 
 import mods.eln.Eln
+import mods.eln.ElnNetwork
+import mods.eln.ElnPacket
 import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 import java.io.DataInputStream
@@ -81,13 +83,65 @@ object Utils {
 
     @JvmStatic
     fun canPutStackInInventory(stacks: Array<ItemStack>, inventory: net.minecraft.world.Container, slots: IntArray): Boolean {
-        // Stub implementation
+        val copyInventory = java.util.ArrayList<ItemStack>()
+        for (slot in slots) {
+            copyInventory.add(inventory.getItem(slot).copy())
+        }
+
+        for (stackToAdd in stacks) {
+            if (stackToAdd.isEmpty) continue
+            var remaining = stackToAdd.count
+            for (i in slots.indices) {
+                val slotStack = copyInventory[i]
+                
+                if (slotStack.isEmpty) {
+                    val toAdd = Math.min(remaining, Math.min(inventory.maxStackSize, stackToAdd.maxStackSize))
+                    val newStack = stackToAdd.copy()
+                    newStack.count = toAdd
+                    copyInventory[i] = newStack
+                    remaining -= toAdd
+                } else if (ItemStack.isSameItemSameTags(slotStack, stackToAdd)) {
+                    val space = Math.min(inventory.maxStackSize, slotStack.maxStackSize) - slotStack.count
+                    val toAdd = Math.min(remaining, space)
+                    if (toAdd > 0) {
+                        slotStack.grow(toAdd)
+                        remaining -= toAdd
+                    }
+                }
+                if (remaining <= 0) break
+            }
+            if (remaining > 0) return false
+        }
         return true
     }
 
     @JvmStatic
     fun tryPutStackInInventory(stacks: Array<ItemStack>, inventory: net.minecraft.world.Container, slots: IntArray): Boolean {
-        // Stub implementation
+        if (!canPutStackInInventory(stacks, inventory, slots)) return false
+        
+        for (stackToAdd in stacks) {
+            if (stackToAdd.isEmpty) continue
+            var remaining = stackToAdd.count
+            for (slotIndex in slots) {
+                val slotStack = inventory.getItem(slotIndex)
+                
+                if (slotStack.isEmpty) {
+                    val toAdd = Math.min(remaining, Math.min(inventory.maxStackSize, stackToAdd.maxStackSize))
+                    val newStack = stackToAdd.copy()
+                    newStack.count = toAdd
+                    inventory.setItem(slotIndex, newStack)
+                    remaining -= toAdd
+                } else if (ItemStack.isSameItemSameTags(slotStack, stackToAdd)) {
+                    val space = Math.min(inventory.maxStackSize, slotStack.maxStackSize) - slotStack.count
+                    val toAdd = Math.min(remaining, space)
+                    if (toAdd > 0) {
+                        slotStack.grow(toAdd)
+                        remaining -= toAdd
+                    }
+                }
+                if (remaining <= 0) break
+            }
+        }
         return true
     }
 
@@ -274,8 +328,10 @@ object Utils {
 
     @JvmStatic
     fun isPlayerUsingWrench(player: net.minecraft.world.entity.player.Player): Boolean {
-        // TODO: Implement proper wrench check
-        return false
+        val stack = player.mainHandItem
+        if (stack.isEmpty) return false
+        val wrench = Eln.wrenchItemStack
+        return wrench != null && stack.item == wrench.item && stack.elnMetadata == wrench.elnMetadata
     }
 
     @JvmStatic
@@ -289,7 +345,7 @@ object Utils {
             stream.writeInt(-1)
         } else {
             stream.writeInt(net.minecraft.core.registries.BuiltInRegistries.ITEM.getId(stack.item))
-            stream.writeInt(stack.damageValue)
+            stream.writeInt(stack.elnMetadata)
         }
     }
 
@@ -301,13 +357,26 @@ object Utils {
         val item = net.minecraft.core.registries.BuiltInRegistries.ITEM.byId(id)
         val stack = net.minecraft.world.item.ItemStack(item)
         stack.damageValue = damage
+        stack.elnMetadata = damage
         return stack
     }
 
     @JvmStatic
     fun unserializeItemStackToItemEntity(stream: java.io.DataInputStream, old: net.minecraft.world.entity.item.ItemEntity?, tileEntity: net.minecraft.world.level.block.entity.BlockEntity): net.minecraft.world.entity.item.ItemEntity? {
-        // Stub
-        return null
+        val stack = unserialiseItemStack(stream)
+        if (stack == null) {
+            old?.discard()
+            return null
+        }
+        if (old != null && old.isAlive) {
+            old.item = stack
+            return old
+        }
+        val pos = tileEntity.blockPos
+        val entity = net.minecraft.world.entity.item.ItemEntity(tileEntity.level!!, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5, stack)
+        entity.deltaMovement = net.minecraft.world.phys.Vec3.ZERO
+        entity.setPickUpDelay(40)
+        return entity
     }
 
     @JvmStatic
@@ -317,7 +386,7 @@ object Utils {
 
     @JvmStatic
     fun sendPacketToClient(bos: java.io.ByteArrayOutputStream, player: net.minecraft.server.level.ServerPlayer) {
-        // TODO: Implement packet sending
+        ElnNetwork.sendToClient(ElnPacket(bos.toByteArray()), player)
     }
 
     class TraceRayWeightOpaque
@@ -481,7 +550,14 @@ object Utils {
 
     @JvmStatic
     fun dropItem(stack: ItemStack, x: Int, y: Int, z: Int, level: Level) {
-        // Stub
+        if (stack.isEmpty) return
+        val f = 0.7
+        val d0 = (level.random.nextFloat() * f).toDouble() + (1.0 - f) * 0.5
+        val d1 = (level.random.nextFloat() * f).toDouble() + (1.0 - f) * 0.5
+        val d2 = (level.random.nextFloat() * f).toDouble() + (1.0 - f) * 0.5
+        val entityitem = net.minecraft.world.entity.item.ItemEntity(level, x.toDouble() + d0, y.toDouble() + d1, z.toDouble() + d2, stack)
+        entityitem.setDefaultPickUpDelay()
+        level.addFreshEntity(entityitem)
     }
 
     @JvmStatic
@@ -515,7 +591,7 @@ object Utils {
 
     @JvmStatic
     fun unserializeItemStack(stream: DataInputStream): ItemStack {
-        return ItemStack.EMPTY
+        return unserialiseItemStack(stream) ?: ItemStack.EMPTY
     }
 }
 

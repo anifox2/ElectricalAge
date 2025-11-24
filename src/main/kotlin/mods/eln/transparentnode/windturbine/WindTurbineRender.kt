@@ -41,7 +41,7 @@ class WindTurbineRender(
     override fun draw() {
         renderPreProcess = drawCable(Direction.YN, descriptor.cable.render, eConn, renderPreProcess, false)
         front?.glRotateXnRef()
-        descriptor.draw(alpha)
+        descriptor.draw(alpha, haloState)
     }
 
     override fun refresh(deltaT: Float) {

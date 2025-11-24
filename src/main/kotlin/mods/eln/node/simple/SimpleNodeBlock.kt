@@ -81,7 +81,17 @@ abstract class SimpleNodeBlock protected constructor(properties: BlockBehaviour.
         if (!world.isClientSide) {
             val entity = world.getBlockEntity(pos) as? SimpleNodeEntity
             if (entity != null) {
-                val node = entity.node
+                var node = entity.node
+                if (node == null) {
+                    node = newNode()
+                    if (node != null) {
+                        node.coordinate = mods.eln.misc.Coordinate(pos, world)
+                        node.level = world
+                        mods.eln.node.NodeManager.instance!!.addNode(node)
+                        entity.node = node
+                    }
+                }
+                
                 if (node != null) {
                     node.descriptorKey = this.descriptorKey
                     node.onBlockPlacedBy(world, mods.eln.misc.Coordinate(pos, world), getFrontForPlacement(placer), placer, stack)

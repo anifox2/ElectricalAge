@@ -90,14 +90,17 @@ class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor>(b!
                     val newState = this.block.defaultBlockState()
                     if (level.setBlock(targetPos, newState, 3)) {
                         val entity = level.getBlockEntity(targetPos) as? SixNodeEntity
-                        val sixNode = entity?.node as? SixNode
 
-                        if (sixNode != null) {
-                            sixNode.onBlockPlacedBy(level, coord, direction, player, stack)
-                            sixNode.createSubBlock(stack, direction, player)
+                        if (entity != null) {
+                            entity.onBlockPlacedBy(direction, player, stack)
+                            val sixNode = entity.node as? SixNode
 
-                            if (!player.isCreative) stack.shrink(1)
-                            return net.minecraft.world.InteractionResult.SUCCESS
+                            if (sixNode != null) {
+                                sixNode.createSubBlock(stack, direction, player)
+
+                                if (!player.isCreative) stack.shrink(1)
+                                return net.minecraft.world.InteractionResult.SUCCESS
+                            }
                         }
                     }
                 }
