@@ -24,11 +24,11 @@ import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import org.lwjgl.opengl.GL11
 
-class ArcFurnaceDescriptor(name: String, val obj: Obj3D): TransparentNodeDescriptor(name, ArcFurnaceElement::class.java, ArcFurnaceRender::class.java) {
+class ArcFurnaceDescriptor(name: String, override var obj: Obj3D?): TransparentNodeDescriptor(name, ArcFurnaceElement::class.java, ArcFurnaceRender::class.java) {
     private var main: Obj3DPart? = null
 
     init {
-        main = obj.getPart("ArcFurnace")
+        main = obj!!.getPart("ArcFurnace")
         val gg = GhostGroup()
         gg.addRectangle(0, 2, 0, 4, -1, 1)
         gg.removeElement(0, 0, 0)

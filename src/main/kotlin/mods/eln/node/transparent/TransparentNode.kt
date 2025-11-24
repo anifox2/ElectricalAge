@@ -132,7 +132,7 @@ class TransparentNode : Node() {
     override fun initializeFromThat(front: Direction, entityLiving: LivingEntity?, itemStack: ItemStack?) {
         try {
             val descriptor = Eln.transparentNodeItem.getDescriptor(itemStack)
-            val metadata = itemStack!!.getOrCreateTag().getInt("elementId")
+            val metadata = itemStack!!.damageValue
             elementId = metadata
             element = descriptor!!.ElementClass.getConstructor(TransparentNode::class.java, TransparentNodeDescriptor::class.java).newInstance(this, descriptor) as TransparentNodeElement
             element!!.initializeFromThat(front, entityLiving, itemStack.tag)

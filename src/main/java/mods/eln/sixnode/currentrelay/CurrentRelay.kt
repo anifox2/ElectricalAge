@@ -1,5 +1,7 @@
 package mods.eln.sixnode.currentrelay
 
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.i18n.I18N.tr
@@ -49,15 +51,15 @@ val CurrentCableDescriptor.nodeMask: Int
 
 class CurrentRelayDescriptor(
     name: String?,
-    val obj: Obj3D,
+    override var obj: Obj3D?,
     val cable: CurrentCableDescriptor
 ) : SixNodeDescriptor(name, CurrentRelayElement::class.java, CurrentRelayRender::class.java) {
     var speed: Float = 0f
 
-    private val relay1: Obj3DPart = obj.getPart("relay1")
-    private val relay0: Obj3DPart = obj.getPart("relay0")
-    private val main: Obj3DPart = obj.getPart("main")
-    private val backplate: Obj3DPart = obj.getPart("backplate")
+    private val relay1: Obj3DPart = obj!!.getPart("relay1")
+    private val relay0: Obj3DPart = obj!!.getPart("relay0")
+    private val main: Obj3DPart = obj!!.getPart("main")
+    private val backplate: Obj3DPart = obj!!.getPart("backplate")
 
     private var r0rOff = 0f
     private var r0rOn = 0f
@@ -140,6 +142,25 @@ class CurrentRelayDescriptor(
         backplate.draw()
         GL11.glPopMatrix()
         enableCulling()
+    }
+
+    fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, factor: Float) {
+        poseStack.pushPose()
+        poseStack.scale(0.5f, 0.5f, 0.5f)
+
+        main.draw(poseStack, consumer, packedLight, packedOverlay)
+
+        relay0.draw(poseStack, consumer, packedLight, packedOverlay, factor * (r0rOn - r0rOff) + r0rOff, 0f, 0f, 1f)
+        relay1.draw(poseStack, consumer, packedLight, packedOverlay, factor * (r1rOn - r1rOff) + r1rOff, 0f, 0f, 1f)
+
+        val r = (voltageLevelColor.getRed() * 255).toInt()
+        val g = (voltageLevelColor.getGreen() * 255).toInt()
+        val b = (voltageLevelColor.getBlue() * 255).toInt()
+        val a = 255
+
+        backplate.drawColored(poseStack, consumer, packedLight, packedOverlay, r, g, b, a)
+
+        poseStack.popPose()
     }
 
     override fun getFrontFromPlace(side: Direction, player: Player): LRDU {
@@ -388,8 +409,22 @@ class CurrentRelayRender(
     override fun draw() {
         super.draw()
         drawSignalPin(front, floatArrayOf(2.5f, 2.5f, 2.5f, 2.5f))
-        front!!.glRotateOnX()
-        currentRelayDescriptor.draw(interpolator.get())
+        
+        val poseStack = currentPoseStack
+        val buffer = currentBuffer
+        if (poseStack != null && buffer != null) {
+            val light = currentLight
+            val overlay = currentOverlay
+            val consumer = buffer.getBuffer(net.minecraft.client.renderer.RenderType.solid())
+            
+            poseStack.pushPose()
+            front!!.rotatePoseOnX(poseStack)
+            currentRelayDescriptor.draw(poseStack, consumer, light, overlay, interpolator.get())
+            poseStack.popPose()
+        } else {
+            front!!.glRotateOnX()
+            currentRelayDescriptor.draw(interpolator.get())
+        }
     }
 
     override fun refresh(deltaT: Float) {

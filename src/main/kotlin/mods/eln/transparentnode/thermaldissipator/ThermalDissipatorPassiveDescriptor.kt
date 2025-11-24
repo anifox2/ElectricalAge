@@ -10,7 +10,7 @@ import net.minecraft.world.item.Item
 
 class ThermalDissipatorPassiveDescriptor(
     name: String?,
-    var obj: Obj3D?,
+    override var obj: Obj3D?,
     var warmLimit: Double,
     var coolLimit: Double,
     var nominalP: Double,

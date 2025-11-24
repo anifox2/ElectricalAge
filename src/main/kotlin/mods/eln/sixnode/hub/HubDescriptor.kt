@@ -15,8 +15,10 @@ import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.Level
 import org.lwjgl.opengl.GL11
 import mods.eln.i18n.I18N.tr
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 
-class HubDescriptor(name: String, var obj: Obj3D?) : SixNodeDescriptor(name, HubElement::class.java, HubRender::class.java) {
+class HubDescriptor(name: String, override var obj: Obj3D?) : SixNodeDescriptor(name, HubElement::class.java, HubRender::class.java) {
 
     var main: Obj3DPart? = null
     var connection = arrayOfNulls<Obj3DPart>(6)
@@ -25,10 +27,22 @@ class HubDescriptor(name: String, var obj: Obj3D?) : SixNodeDescriptor(name, Hub
         if (obj != null) {
             main = obj!!.getPart("main")
             for (idx in 0 until 6) {
-                connection[idx] = obj!!.getPart("con$idx")
+                connection[idx] = obj!!.getPart("connection$idx")
             }
         }
         voltageLevelColor = VoltageLevelColor.Neutral
+    }
+
+    fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, connectionGrid: BooleanArray) {
+        main?.draw(poseStack, consumer, packedLight, packedOverlay)
+        for (idx in 0 until 6) {
+            if (connectionGrid[idx]) {
+                // TODO: Set color dark
+            } else {
+                // TODO: Set color light
+            }
+            connection[idx]?.draw(poseStack, consumer, packedLight, packedOverlay)
+        }
     }
 
     fun draw(connectionGrid: BooleanArray) {

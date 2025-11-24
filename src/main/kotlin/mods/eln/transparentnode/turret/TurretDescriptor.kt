@@ -14,7 +14,7 @@ class TurretDescriptor(
     TurretElement::class.java,
     TurretRender::class.java
 ) {
-    var obj: Obj3D? = null
+    override var obj: Obj3D? = null
     var base: Obj3D.Obj3DPart? = null
     var turret: Obj3D.Obj3DPart? = null
     var gun: Obj3D.Obj3DPart? = null

@@ -10,7 +10,7 @@ import net.minecraft.world.item.Item
 
 class TeleporterDescriptor(
     name: String?,
-    var obj: Obj3D?,
+    override var obj: Obj3D?,
     var cable: ElectricalCableDescriptor,
     var areaCoordinate: Coordinate,
     var lightCoordinate: Coordinate,

@@ -11,7 +11,7 @@ class ElectricalFurnaceDescriptor(
     val PfT: FunctionTable,
     val thermalPlostfT: FunctionTable,
     val thermalMass: Double,
-    val obj: Obj3D? = null
+    override var obj: Obj3D? = null
 ) : TransparentNodeDescriptor(
     name,
     ElectricalFurnaceElement::class.java,

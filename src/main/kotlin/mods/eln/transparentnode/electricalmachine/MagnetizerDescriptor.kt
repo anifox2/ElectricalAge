@@ -10,7 +10,7 @@ import org.lwjgl.opengl.GL11
 
 class MagnetizerDescriptor(
     name: String?,
-    var obj: Obj3D,
+    override var obj: Obj3D?,
     var nominalVoltage: Double,
     var nominalPower: Double,
     var maxPower: Double,
@@ -32,8 +32,8 @@ class MagnetizerDescriptor(
     private var rot: Obj3D.Obj3DPart? = null
 
     init {
-        rot = obj.getPart("rot")
-        main = obj.getPart("main")
+        rot = obj?.getPart("rot")
+        main = obj?.getPart("main")
     }
 
     class MaceratorDescriptorHandle {

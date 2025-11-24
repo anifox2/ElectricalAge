@@ -13,7 +13,7 @@ import org.lwjgl.opengl.GL11
 
 class WindTurbineDescriptor(
     name: String?,
-    var obj: Obj3D?,
+    override var obj: Obj3D?,
     var cable: ElectricalCableDescriptor,
     var PfW: FunctionTable,
     var nominalPower: Double,

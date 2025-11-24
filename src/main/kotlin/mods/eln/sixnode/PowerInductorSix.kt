@@ -1,5 +1,7 @@
 package mods.eln.sixnode
 
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 import mods.eln.Eln
 import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.generic.GenericItemUsingDamageSlot
@@ -73,6 +75,13 @@ class PowerInductorSixDescriptor(name: String,
         Data.addEnergy(newItemStack())
     }
     */
+
+    override fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, signal: Boolean) {
+        Base?.draw(poseStack, consumer, packedLight, packedOverlay)
+        InductorBaseExtention?.draw(poseStack, consumer, packedLight, packedOverlay)
+        InductorCables?.draw(poseStack, consumer, packedLight, packedOverlay)
+        InductorCore?.draw(poseStack, consumer, packedLight, packedOverlay)
+    }
 
     fun draw() {
         if (null != Base) Base!!.draw()

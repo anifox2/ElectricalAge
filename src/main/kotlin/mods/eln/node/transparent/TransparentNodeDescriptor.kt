@@ -1,5 +1,7 @@
 package mods.eln.node.transparent
 
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor
 import mods.eln.ghost.GhostGroup
 import mods.eln.i18n.I18N.tr
@@ -28,6 +30,31 @@ open class TransparentNodeDescriptor @JvmOverloads constructor(
     var ElementClass: Class<*>,
     var RenderClass: Class<*>,
     val tileEntityMetaTag: EntityMetaTag = EntityMetaTag.Basic) : GenericItemBlockUsingDamageDescriptor(name!!) /*, IItemRenderer */ {
+    
+    open var obj: Obj3D? = null
+
+    open fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int) {
+        if (obj != null) {
+            // Apply scaling for item rendering
+            poseStack.pushPose()
+            
+            // Calculate scale factor similar to objItemScale
+            val obj = this.obj!!
+            var factor = obj.yDim * 0.6f
+            factor = factor.coerceAtLeast((obj.zMax.coerceAtLeast(-obj.xMin) + Math.max(obj.xMax, -obj.zMin)) * 0.7f)
+            factor = 1f / factor
+            
+            // Center and scale
+            poseStack.scale(factor, factor, factor)
+            val tx = (obj.zMin.coerceAtMost(obj.xMin) + obj.xMax.coerceAtLeast(obj.zMax)) / 2 - (obj.xMax + obj.xMin) / 2
+            val ty = 1.0f - (obj.xMax + obj.xMin) / 2 - (obj.zMax + obj.zMin) / 2 - (obj.yMax + obj.yMin) / 2
+            poseStack.translate(tx.toDouble(), ty.toDouble(), 0.0)
+
+            obj.draw(poseStack, consumer, packedLight, packedOverlay)
+            poseStack.popPose()
+        }
+    }
+
     @JvmField
     protected var voltageLevelColor = VoltageLevelColor.None
     @JvmField

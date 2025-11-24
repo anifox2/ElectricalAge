@@ -8,7 +8,7 @@ import mods.eln.misc.SeriesFunction
 
 class PowerInductorDescriptor(
     name: String,
-    val obj: Obj3D?,
+    override var obj: Obj3D?,
     val series: SeriesFunction
 ) : TransparentNodeDescriptor(
     name,

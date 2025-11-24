@@ -114,6 +114,7 @@ class Eln {
 
     init {
         instance = this
+        mods.eln.node.NodeManager()
         val modEventBus = FMLJavaModLoadingContext.get().modEventBus
         
         // Load models early as descriptors need them
@@ -137,10 +138,13 @@ class Eln {
     private fun commonSetup(event: FMLCommonSetupEvent) {
         LOGGER.info("Electrical Age Common Setup")
         sixNodeItem = Registration.SIX_NODE_ITEM.get()
+        sixNodeBlock = Registration.SIX_NODE_BLOCK.get()
+        sixNodeEntity = Registration.SIX_NODE_BLOCK_ENTITY.get()
         transparentNodeItem = Registration.TRANSPARENT_NODE_ITEM.get() as TransparentNodeItem
         
         SixNodeRegistration.applyRegistrations()
         TransparentNodeRegistration.applyRegistrations()
+        mods.eln.registration.SingleNodeRegistration.registerSingle()
     }
 
     private fun clientSetup(event: FMLClientSetupEvent) {

@@ -65,7 +65,7 @@ class GridSwitchDescriptor(
         "SwitchBase_SwitchBaseMesh",
         "Belt_1_BeltMesh_1",
         "Belt_2_BeltMesh_2"
-    ).map { obj.getPart(it) }
+    ).map { obj!!.getPart(it) }
 
     val rotors = mapOf(  // Name to Pair(Origin,cw?)
         "Contact_M1_ContactMMesh_1" to Pair(Vec3(4.5, 1.75, 0.5), true),
@@ -74,7 +74,7 @@ class GridSwitchDescriptor(
         "Contact_F2_ContactFMesh_2" to Pair(Vec3(0.5, 1.75, 2.5), true),
         "Belt_pulley_1_BeltPulleyMesh_1" to Pair(Vec3(4.0, 1.75, 0.5), false),
         "Belt_pulley_2_BeltPulleyMesh_2" to Pair(Vec3(4.0, 1.75, 2.5), true)
-    ).mapKeys { obj.getPart(it.key) }
+    ).mapKeys { obj!!.getPart(it.key) }
 
     init {
         plus.clear()
@@ -82,11 +82,11 @@ class GridSwitchDescriptor(
         plus.addAll(listOf(
             "p0_Cube",
             "p1_Cube"
-        ).map { obj.getPart(it) })
+        ).map { obj!!.getPart(it) })
         gnd.addAll(listOf(
             "g0_Cube",
             "g1_Cube"
-        ).map { obj.getPart(it) })
+        ).map { obj!!.getPart(it) })
         rotating_parts.clear()
         static_parts.clear()
         static_parts.addAll(objectList)

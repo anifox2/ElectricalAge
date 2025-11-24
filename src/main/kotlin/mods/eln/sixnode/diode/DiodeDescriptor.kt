@@ -22,6 +22,8 @@ import mods.eln.i18n.I18N.tr
 import net.minecraft.world.level.Level
 import net.minecraft.world.item.TooltipFlag
 import net.minecraft.network.chat.Component
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 
 class DiodeDescriptor(
     name: String,
@@ -39,6 +41,12 @@ class DiodeDescriptor(
     private val diodeCore: Obj3DPart? = obj.getPart("DiodeCore")
 
     var descriptor: String? = null
+
+    override fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, signal: Boolean) {
+        base?.draw(poseStack, consumer, packedLight, packedOverlay)
+        diodeCables?.draw(poseStack, consumer, packedLight, packedOverlay)
+        diodeCore?.draw(poseStack, consumer, packedLight, packedOverlay)
+    }
 
     init {
         thermal.setMaximalPower(stdU * stdI * 1.2)

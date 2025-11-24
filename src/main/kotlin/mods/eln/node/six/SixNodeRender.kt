@@ -13,26 +13,22 @@ class SixNodeRender(context: BlockEntityRendererProvider.Context) : BlockEntityR
     override fun render(entity: SixNodeEntity, partialTick: Float, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         Minecraft.getInstance().profiler.push("SixNode")
         
-        val pos = entity.blockPos
-        val cameraPos = Minecraft.getInstance().gameRenderer.mainCamera.position
-        val x = pos.x - cameraPos.x
-        val y = pos.y - cameraPos.y
-        val z = pos.z - cameraPos.z
-
-        GL11.glPushMatrix()
-        GL11.glTranslated(x + 0.5, y + 0.5, z + 0.5)
+        poseStack.pushPose()
+        poseStack.translate(0.5, 0.5, 0.5)
         
         for ((idx, render) in entity.elementRenderList.withIndex()) {
             if (render != null) {
-                glDefaultColor()
-                GL11.glPushMatrix()
-                fromInt(idx).glRotateXnRef()
-                GL11.glTranslatef(-0.5f, 0f, 0f)
+                poseStack.pushPose()
+                fromInt(idx).rotatePose(poseStack)
+                poseStack.translate(-0.5, 0.0, 0.0)
+                
+                render.prepareRender(poseStack, bufferSource, packedLight, packedOverlay)
                 render.draw()
-                GL11.glPopMatrix()
+                
+                poseStack.popPose()
             }
         }
-        GL11.glPopMatrix()
+        poseStack.popPose()
         Minecraft.getInstance().profiler.pop()
     }
 }

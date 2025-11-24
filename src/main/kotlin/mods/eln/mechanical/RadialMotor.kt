@@ -70,7 +70,7 @@ class RadialMotorDescriptor(baseName: String, obj: Obj3D) :
     }
 
     @Suppress("CanBePrimaryConstructorProperty") // If you do that, it changes the constructor and BLAMO, Crash!
-    override val obj: Obj3D = obj
+    override var obj: Obj3D? = obj
 
     override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
         list.add(Component.literal(tr("Converts %1$ into mechanical energy.",fluidDescription)))

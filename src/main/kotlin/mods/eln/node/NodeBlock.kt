@@ -32,7 +32,7 @@ abstract class NodeBlock(properties: Properties, val blockEntityFactory: (BlockP
 
     override fun setPlacedBy(level: Level, pos: BlockPos, state: BlockState, placer: LivingEntity?, stack: ItemStack) {
         val tileEntity = level.getBlockEntity(pos) as? NodeBlockEntity
-        tileEntity?.onBlockPlacedBy(null, placer, 0)
+        tileEntity?.onBlockPlacedBy(null, placer, stack)
     }
 
     override fun onPlace(state: BlockState, level: Level, pos: BlockPos, oldState: BlockState, isMoving: Boolean) {

@@ -22,16 +22,45 @@ enum class VoltageLevelColor(private val voltageLevel: String?) {
         // Legacy rendering removed
     }
 
-    fun setGLColor() {
-        when (this) {
-            SignalVoltage -> GL11.glColor3f(.80f, .87f, .82f)
-            LowVoltage -> GL11.glColor3f(.55f, .84f, .68f)
-            MediumVoltage -> GL11.glColor3f(.55f, .74f, .85f)
-            HighVoltage -> GL11.glColor3f(.96f, .80f, .56f)
-            VeryHighVoltage -> GL11.glColor3f(.86f, .58f, .55f)
-            None, Neutral -> {}
-            else -> {}
+    fun getRed(): Float {
+        return when (this) {
+            SignalVoltage -> .80f
+            LowVoltage -> .55f
+            MediumVoltage -> .55f
+            HighVoltage -> .96f
+            VeryHighVoltage -> .96f
+            Grid -> .8f
+            Thermal -> 1f
+            else -> 1f
         }
+    }
+    fun getGreen(): Float {
+        return when (this) {
+            SignalVoltage -> .87f
+            LowVoltage -> .84f
+            MediumVoltage -> .74f
+            HighVoltage -> .80f
+            VeryHighVoltage -> .56f
+            Grid -> .8f
+            Thermal -> 1f
+            else -> 1f
+        }
+    }
+    fun getBlue(): Float {
+        return when (this) {
+            SignalVoltage -> .82f
+            LowVoltage -> .68f
+            MediumVoltage -> .85f
+            HighVoltage -> .56f
+            VeryHighVoltage -> .56f
+            Grid -> .8f
+            Thermal -> 1f
+            else -> 1f
+        }
+    }
+
+    fun setGLColor() {
+        GL11.glColor3f(getRed(), getGreen(), getBlue())
     }
 
     companion object {

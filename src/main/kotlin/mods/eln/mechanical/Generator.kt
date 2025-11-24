@@ -56,7 +56,7 @@ class GeneratorDescriptor(
         voltageLevelColor = VoltageLevelColor.VeryHighVoltage
     }
 
-    override val obj = obj
+    override var obj: Obj3D? = obj
     override val static = arrayOf(
         obj.getPart("Cowl"),
         obj.getPart("Stand")

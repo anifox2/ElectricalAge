@@ -16,15 +16,15 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
-class StreetLightWallDescriptor(name: String, val obj: Obj3D): TransparentNodeDescriptor(name, StreetLightWallElement::class.java, StreetLightWallRender::class.java) {
+class StreetLightWallDescriptor(name: String, override var obj: Obj3D?): TransparentNodeDescriptor(name, StreetLightWallElement::class.java, StreetLightWallRender::class.java) {
     private var fixture: Obj3D.Obj3DPart? = null
     private var part2: Obj3D.Obj3DPart? = null
     private var part3: Obj3D.Obj3DPart? = null
 
     init {
-        fixture = obj.getPart("Structure_StreetLightWall_socket")
-        part2 = obj.getPart("Glass_StreetLightWall_socket.002")
-        part3 = obj.getPart("Light_StreetLightWall_socket.003")
+        fixture = obj!!.getPart("Structure_StreetLightWall_socket")
+        part2 = obj!!.getPart("Glass_StreetLightWall_socket.002")
+        part3 = obj!!.getPart("Light_StreetLightWall_socket.003")
         // ...existing code...
         val gg = GhostGroup()
         gg.addElement(0, 1, 0)

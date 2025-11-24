@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Player
 
 open class StraightJointDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
     StraightJointElement::class, ShaftRender::class, EntityMetaTag.Basic) {
-    override val obj = obj
+    override var obj: Obj3D? = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = arrayOf(obj.getPart("Shaft"))
 }

@@ -60,7 +60,7 @@ class MotorDescriptor(
     val customSound = "eln:shaft_motor"
     val efficiency = 0.99
 
-    override val obj = obj
+    override var obj: Obj3D? = obj
     override val static = arrayOf(
         obj.getPart("Cowl"),
         obj.getPart("Stand")

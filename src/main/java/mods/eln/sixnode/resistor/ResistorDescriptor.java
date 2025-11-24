@@ -20,6 +20,8 @@ import java.util.List;
 import static mods.eln.i18n.I18N.tr;
 
 import mods.eln.sim.IResistorDescriptor;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 /**
  * Created by svein on 05/08/15.
@@ -36,6 +38,19 @@ public class ResistorDescriptor extends SixNodeDescriptor implements IResistorDe
     Obj3D.Obj3DPart ResistorBaseExtension, ResistorCore, ResistorTrack, ResistorWiper, Base, Cables;
     IFunction series;
     private Obj3D obj;
+
+    @Override
+    public void draw(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay, boolean signal) {
+        if (Base != null) Base.draw(poseStack, consumer, packedLight, packedOverlay);
+        if (ResistorBaseExtension != null) ResistorBaseExtension.draw(poseStack, consumer, packedLight, packedOverlay);
+        if (ResistorCore != null) ResistorCore.draw(poseStack, consumer, packedLight, packedOverlay);
+        if (Cables != null) Cables.draw(poseStack, consumer, packedLight, packedOverlay);
+
+        if (isRheostat) {
+            if (ResistorTrack != null) ResistorTrack.draw(poseStack, consumer, packedLight, packedOverlay);
+            if (ResistorWiper != null) ResistorWiper.draw(poseStack, consumer, packedLight, packedOverlay);
+        }
+    }
 
     @Override
     public double getTempCoef() {

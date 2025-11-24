@@ -10,7 +10,7 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import org.lwjgl.opengl.GL11
 
-class ModbusRtuDescriptor(name: String, var obj: Obj3D?) : SixNodeDescriptor(name, ModbusRtuElement::class.java, ModbusRtuRender::class.java) {
+class ModbusRtuDescriptor(name: String, override var obj: Obj3D?) : SixNodeDescriptor(name, ModbusRtuElement::class.java, ModbusRtuRender::class.java) {
 
     var main: Obj3DPart? = null
     var door: Obj3DPart? = null

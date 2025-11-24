@@ -10,8 +10,8 @@ import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.Level
 import net.minecraftforge.registries.RegistryObject
 
-open class GenericItemUsingDamageDescriptor @JvmOverloads constructor(val name: String, var iconName: String? = null) {
-    val registryObject: RegistryObject<Item>
+open class GenericItemUsingDamageDescriptor @JvmOverloads constructor(val name: String, var iconName: String? = null, val registerItem: Boolean = true) {
+    val registryObject: RegistryObject<Item>?
     var parentItemDamage: Int = 0
     open fun setParent(registry: Any?, id: Int) {
         this.parentItemDamage = id
@@ -27,7 +27,7 @@ open class GenericItemUsingDamageDescriptor @JvmOverloads constructor(val name: 
 
     @JvmOverloads
     open fun newItemStack(amount: Int = 1): ItemStack {
-        if (registryObject.isPresent) {
+        if (registryObject != null && registryObject.isPresent) {
             return ItemStack(registryObject.get(), amount)
         }
         return ItemStack.EMPTY
@@ -57,12 +57,16 @@ open class GenericItemUsingDamageDescriptor @JvmOverloads constructor(val name: 
     }
 
     init {
-        // Sanitize name for registry
-        val regName = name.lowercase().replace(" ", "_").replace(Regex("[^a-z0-9_]"), "")
-        registryObject = Registration.ITEMS.register(regName) {
-            val item = createItem()
-            descriptorMap[item] = this
-            item
+        if (registerItem) {
+            // Sanitize name for registry
+            val regName = name.lowercase().replace(" ", "_").replace(Regex("[^a-z0-9_]"), "")
+            registryObject = Registration.ITEMS.register(regName) {
+                val item = createItem()
+                descriptorMap[item] = this
+                item
+            }
+        } else {
+            registryObject = null
         }
         nameMap[name] = this
     }
@@ -127,11 +131,14 @@ open class GenericItemUsingDamageDescriptor @JvmOverloads constructor(val name: 
     open fun getDefaultNBT(): net.minecraft.nbt.CompoundTag? = null
 
     fun getStack(count: Int = 1): ItemStack {
-        return ItemStack(registryObject.get(), count)
+        if (registryObject != null && registryObject.isPresent) {
+            return ItemStack(registryObject.get(), count)
+        }
+        return ItemStack.EMPTY
     }
 
     fun checkSameItemStack(stack: ItemStack): Boolean {
-        return !stack.isEmpty && stack.item == registryObject.get()
+        return !stack.isEmpty && registryObject != null && registryObject.isPresent && stack.item == registryObject.get()
     }
 
     open fun addRealismContext(list: MutableList<String>): RealisticEnum {

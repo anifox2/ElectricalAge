@@ -9,10 +9,13 @@ import mods.eln.misc.LRDU
 import mods.eln.misc.Utils.addChatMessage
 import mods.eln.misc.Utils.entityLivingHorizontalViewDirection
 // import mods.eln.misc.UtilsClient.drawIcon
+import mods.eln.misc.Obj3D
 import mods.eln.misc.VoltageLevelColor
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.resources.ResourceLocation
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 
 open class SixNodeDescriptor : GenericItemBlockUsingDamageDescriptor {
     @JvmField
@@ -22,14 +25,20 @@ open class SixNodeDescriptor : GenericItemBlockUsingDamageDescriptor {
     @JvmField
     var voltageLevelColor = VoltageLevelColor.None
 
-    constructor(name: String?, ElementClass: Class<*>, RenderClass: Class<*>) : super(name!!) {
+    open var obj: Obj3D? = null
+
+    constructor(name: String?, ElementClass: Class<*>, RenderClass: Class<*>) : super(name!!, null, false) {
         this.ElementClass = ElementClass
         this.RenderClass = RenderClass
     }
 
-    constructor(name: String?, ElementClass: Class<*>, RenderClass: Class<*>, iconName: String?) : super(name!!, iconName) {
+    constructor(name: String?, ElementClass: Class<*>, RenderClass: Class<*>, iconName: String?) : super(name!!, iconName, false) {
         this.ElementClass = ElementClass
         this.RenderClass = RenderClass
+    }
+
+    open fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, signal: Boolean) {
+        obj?.draw(poseStack, consumer, packedLight, packedOverlay)
     }
 
     open fun hasVolume(): Boolean {

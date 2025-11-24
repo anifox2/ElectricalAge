@@ -55,7 +55,7 @@ class BatteryDescriptor(
     var modelPart: Obj3DPart? = null
     @JvmField
     var IMax: Double
-    var obj: Obj3D?
+    override var obj: Obj3D?
     var main: Obj3DPart? = null
     var plugPlus: Obj3DPart? = null
     var plusMinus: Obj3DPart? = null

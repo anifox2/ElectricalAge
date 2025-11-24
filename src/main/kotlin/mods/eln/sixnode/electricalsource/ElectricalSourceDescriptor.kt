@@ -11,10 +11,13 @@ import mods.eln.node.six.SixNodeDescriptor
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import org.lwjgl.opengl.GL11
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
+import java.util.List
 
 class ElectricalSourceDescriptor(
     name: String,
-    var obj: Obj3D?,
+    override var obj: Obj3D?,
     var signalSource: Boolean
 ) : SixNodeDescriptor(name, ElectricalSourceElement::class.java, ElectricalSourceRender::class.java) {
 
@@ -45,6 +48,16 @@ class ElectricalSourceDescriptor(
                 led!!.draw()
                 GL11.glPopMatrix()
             }
+        }
+    }
+
+    override fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, signal: Boolean) {
+        if (signalSource) {
+            if (signal) obj!!.draw("on", poseStack, consumer, packedLight, packedOverlay)
+            else obj!!.draw("off", poseStack, consumer, packedLight, packedOverlay)
+            obj!!.draw("main", poseStack, consumer, packedLight, packedOverlay)
+        } else {
+            obj!!.draw(poseStack, consumer, packedLight, packedOverlay)
         }
     }
 

@@ -1,5 +1,7 @@
 package mods.eln.sixnode
 
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 import mods.eln.Eln
 import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.i18n.I18N.tr
@@ -34,6 +36,10 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
 
     init {
         voltageLevelColor = VoltageLevelColor.Neutral
+    }
+
+    override fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, signal: Boolean) {
+        case?.draw(poseStack, consumer, packedLight, packedOverlay)
     }
 
     /*

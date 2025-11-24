@@ -21,7 +21,7 @@ class TurbineDescriptor(
     val val3: Double,
     val val4: Double,
     val soundName: String,
-    val obj: Obj3D? = null
+    override var obj: Obj3D? = null
 ) : TransparentNodeDescriptor(
     name,
     TurbineElement::class.java,

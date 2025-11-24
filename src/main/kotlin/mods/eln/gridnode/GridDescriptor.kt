@@ -14,7 +14,7 @@ import java.util.ArrayList
 
 import org.lwjgl.opengl.GL11.*
 
-open class GridDescriptor(name: String, protected val obj: Obj3D, ElementClass: Class<*>, RenderClass: Class<*>, val cableTexture: String, val cableDescriptor: ElectricalCableDescriptor, val connectRange: Int) : TransparentNodeDescriptor(name, ElementClass, RenderClass) {
+open class GridDescriptor(name: String, override var obj: Obj3D?, ElementClass: Class<*>, RenderClass: Class<*>, val cableTexture: String, val cableDescriptor: ElectricalCableDescriptor, val connectRange: Int) : TransparentNodeDescriptor(name, ElementClass, RenderClass) {
     val plus = ArrayList<Obj3D.Obj3DPart>()
     val gnd = ArrayList<Obj3D.Obj3DPart>()
 
@@ -24,11 +24,11 @@ open class GridDescriptor(name: String, protected val obj: Obj3D, ElementClass: 
     protected var rotating_parts = ArrayList<Obj3D.Obj3DPart>()
 
     init {
-        rotating_parts.add(obj.getPart("main"))
+        rotating_parts.add(obj!!.getPart("main"))
         var i = 0
         while (true) {
-            val plus = obj.getPart("p" + i)
-            val gnd = obj.getPart("g" + i)
+            val plus = obj!!.getPart("p" + i)
+            val gnd = obj!!.getPart("g" + i)
             if (plus == null || gnd == null) break
             rotating_parts.add(plus)
             rotating_parts.add(gnd)

@@ -10,7 +10,7 @@ import mods.eln.sim.ThermalLoad
 import net.minecraft.world.entity.player.Player
 import org.lwjgl.opengl.GL11
 
-class BasicFloodlightDescriptor(name: String, val obj: Obj3D): TransparentNodeDescriptor(name, BasicFloodlightElement::class.java, BasicFloodlightRender::class.java) {
+class BasicFloodlightDescriptor(name: String, override var obj: Obj3D?): TransparentNodeDescriptor(name, BasicFloodlightElement::class.java, BasicFloodlightRender::class.java) {
     val base: Obj3D.Obj3DPart
     val swivel: Obj3D.Obj3DPart
     val head: Obj3D.Obj3DPart
@@ -20,13 +20,13 @@ class BasicFloodlightDescriptor(name: String, val obj: Obj3D): TransparentNodeDe
     val bulb2_on: Obj3D.Obj3DPart
 
     init {
-        base = obj.getPart("Lamp_Base_Cube.008")
-        swivel = obj.getPart("Lamp_Swivel_Cube.014")
-        head = obj.getPart("Lamp_Head_Cylinder.004")
-        bulb1 = obj.getPart("Lamp1_OFF_Cylinder.003")
-        bulb2 = obj.getPart("Lamp2_OFF_Cylinder.002")
-        bulb1_on = obj.getPart("Lamp1_ON_Cylinder.000")
-        bulb2_on = obj.getPart("Lamp2_ON_Cylinder.001")
+        base = obj!!.getPart("Lamp_Base_Cube.008")
+        swivel = obj!!.getPart("Lamp_Swivel_Cube.014")
+        head = obj!!.getPart("Lamp_Head_Cylinder.004")
+        bulb1 = obj!!.getPart("Lamp1_OFF_Cylinder.003")
+        bulb2 = obj!!.getPart("Lamp2_OFF_Cylinder.002")
+        bulb1_on = obj!!.getPart("Lamp1_ON_Cylinder.000")
+        bulb2_on = obj!!.getPart("Lamp2_ON_Cylinder.001")
     }
 
     fun draw(front: Direction, x: Double, y: Double) {
@@ -95,7 +95,7 @@ class BasicFloodlightRender(tileEntity: TransparentNodeBlockEntity, transparentN
     }
 }
 
-class MotorizedFloodlightDescriptor(name: String, val obj: Obj3D): TransparentNodeDescriptor(name, MotorizedFloodlightElement::class.java, MotorizedFloodlightRender::class.java) {
+class MotorizedFloodlightDescriptor(name: String, override var obj: Obj3D?): TransparentNodeDescriptor(name, MotorizedFloodlightElement::class.java, MotorizedFloodlightRender::class.java) {
 
     val base: Obj3D.Obj3DPart
     val swivel: Obj3D.Obj3DPart
@@ -109,13 +109,13 @@ class MotorizedFloodlightDescriptor(name: String, val obj: Obj3D): TransparentNo
 
     init {
 
-        base = obj.getPart("Lamp_Base_Cube.008")
-        swivel = obj.getPart("Lamp_Swivel_Cube.014")
-        head = obj.getPart("Lamp_Head_Cylinder.004")
-        bulb1 = obj.getPart("Lamp1_OFF_Cylinder.003")
-        bulb2 = obj.getPart("Lamp2_OFF_Cylinder.002")
-        bulb1_on = obj.getPart("Lamp1_ON_Cylinder.000")
-        bulb2_on = obj.getPart("Lamp2_ON_Cylinder.001")
+        base = obj!!.getPart("Lamp_Base_Cube.008")
+        swivel = obj!!.getPart("Lamp_Swivel_Cube.014")
+        head = obj!!.getPart("Lamp_Head_Cylinder.004")
+        bulb1 = obj!!.getPart("Lamp1_OFF_Cylinder.003")
+        bulb2 = obj!!.getPart("Lamp2_OFF_Cylinder.002")
+        bulb1_on = obj!!.getPart("Lamp1_ON_Cylinder.000")
+        bulb2_on = obj!!.getPart("Lamp2_ON_Cylinder.001")
 
 
     }

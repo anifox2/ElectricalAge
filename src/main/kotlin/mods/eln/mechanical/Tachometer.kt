@@ -39,7 +39,7 @@ import java.text.ParseException
 
 class TachometerDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
     TachometerElement::class, TachometerRender::class, EntityMetaTag.Basic) {
-    override val obj = obj
+    override var obj: Obj3D? = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = arrayOf(obj.getPart("Shaft"))
 }

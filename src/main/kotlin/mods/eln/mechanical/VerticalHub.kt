@@ -22,7 +22,7 @@ class VerticalHubDescriptor(baseName: String, obj: Obj3D):
         EntityMetaTag.Basic
     )
 {
-    override val obj = obj
+    override var obj: Obj3D? = obj
     override val static = arrayOf(obj.getPart("Cowl"))
     override val rotating = emptyArray<Obj3D.Obj3DPart>()
 

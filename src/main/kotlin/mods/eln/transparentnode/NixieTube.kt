@@ -22,10 +22,10 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
-class NixieTubeDescriptor(name: String, val obj: Obj3D) : TransparentNodeDescriptor(name, NixieTubeElement::class.java, NixieTubeRender::class.java) {
-    val display = obj.getPart("display")
-    val base = obj.getPart("base")
-    val tube = obj.getPart("tube")
+class NixieTubeDescriptor(name: String, override var obj: Obj3D?) : TransparentNodeDescriptor(name, NixieTubeElement::class.java, NixieTubeRender::class.java) {
+    val display = obj!!.getPart("display")
+    val base = obj!!.getPart("base")
+    val tube = obj!!.getPart("tube")
 
     val pinDistance = Utils.getSixNodePinDistance(base)
 
@@ -61,7 +61,7 @@ class NixieTubeDescriptor(name: String, val obj: Obj3D) : TransparentNodeDescrip
         UtilsClient.enableBlend()
         UtilsClient.disableLight()
         UtilsClient.disableCulling()
-        obj.bindTexture("digit_atlas.png")
+        obj!!.bindTexture("digit_atlas.png")
         GL11.glColor4f(1f, 0.4f, 0.2f, 1.0f)
         if(blank) {
             display.draw(10.0f / 16.0f, 0.0f)

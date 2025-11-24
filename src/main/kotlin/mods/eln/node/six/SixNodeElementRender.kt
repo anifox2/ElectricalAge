@@ -81,22 +81,29 @@ abstract class SixNodeElementRender(@JvmField var blockEntity: SixNodeEntity, @J
     }
 
     open fun draw() {
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+
         if (needRedraw) {
             needRedraw = false
             connectionType = CableRender.connectionType(this, side)
             newConnectionType(connectionType)
-            if (drawCableAuto()) {
-                drawCables()
+        }
+
+        if (drawCableAuto()) {
+            for (idx in 0..3) {
+                val lrdu = fromInt(idx)
+                val render = getCableRender(lrdu)
+                if (render != null && connectedSide.mask and (1 shl idx) != 0) {
+                    // setGlColorFromDye(connectionType!!.otherdry[idx])
+                    val texture = render.cableTexture
+                    val consumer = buffer.getBuffer(net.minecraft.client.renderer.RenderType.entitySolid(texture))
+                    CableRender.drawCable(poseStack, consumer, light, overlay, render, LRDUMask(1 shl idx), connectionType!!)
+                }
             }
         }
-        for (idx in 0..3) {
-            setGlColorFromDye(connectionType!!.otherdry[idx])
-            if (cableListReady[idx]) {
-                bindTexture(getCableRender(fromInt(idx))!!.cableTexture)
-                GL11.glCallList(cableList[idx])
-            }
-        }
-        GL11.glColor3f(1f, 1f, 1f)
     }
 
     open fun drawCableAuto(): Boolean {
@@ -324,5 +331,17 @@ abstract class SixNodeElementRender(@JvmField var blockEntity: SixNodeEntity, @J
 
     fun getTileEntity(): SixNodeEntity {
         return blockEntity
+    }
+
+    var currentPoseStack: com.mojang.blaze3d.vertex.PoseStack? = null
+    var currentBuffer: net.minecraft.client.renderer.MultiBufferSource? = null
+    var currentLight: Int = 0
+    var currentOverlay: Int = 0
+
+    fun prepareRender(poseStack: com.mojang.blaze3d.vertex.PoseStack, buffer: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        this.currentPoseStack = poseStack
+        this.currentBuffer = buffer
+        this.currentLight = packedLight
+        this.currentOverlay = packedOverlay
     }
 }

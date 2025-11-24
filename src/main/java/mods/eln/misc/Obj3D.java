@@ -4,6 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import org.joml.Matrix4f;
+import org.joml.Matrix3f;
 
 import java.io.*;
 import java.util.*;
@@ -127,6 +131,63 @@ public class Obj3D {
             }
 
             GL11.glCallList(glList);
+        }
+
+        public void draw(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay) {
+            draw(poseStack, consumer, packedLight, packedOverlay, 0, 0);
+        }
+
+        public void draw(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay, float offsetX, float offsetY) {
+            draw(poseStack, consumer, packedLight, packedOverlay, offsetX, offsetY, 255, 255, 255, 255);
+        }
+
+
+
+        public void draw(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay, float offsetX, float offsetY, int r, int g, int b, int a) {
+            Matrix4f pose = poseStack.last().pose();
+            Matrix3f normalMatrix = poseStack.last().normal();
+
+            for (Face f : face) {
+                int count = f.vertexNbr;
+                if (count == 3) {
+                    putVertex(consumer, pose, normalMatrix, f, 0, offsetX, offsetY, packedLight, packedOverlay, r, g, b, a);
+                    putVertex(consumer, pose, normalMatrix, f, 1, offsetX, offsetY, packedLight, packedOverlay, r, g, b, a);
+                    putVertex(consumer, pose, normalMatrix, f, 2, offsetX, offsetY, packedLight, packedOverlay, r, g, b, a);
+                    putVertex(consumer, pose, normalMatrix, f, 2, offsetX, offsetY, packedLight, packedOverlay, r, g, b, a);
+                } else if (count == 4) {
+                    for (int i = 0; i < 4; i++) {
+                        putVertex(consumer, pose, normalMatrix, f, i, offsetX, offsetY, packedLight, packedOverlay, r, g, b, a);
+                    }
+                }
+            }
+        }
+
+        private void putVertex(VertexConsumer consumer, Matrix4f pose, Matrix3f normalMatrix, Face f, int idx, float offsetX, float offsetY, int packedLight, int packedOverlay) {
+            Vertex v = f.vertex[idx];
+            Uv u = f.uv[idx];
+            Normal n = f.normal;
+
+            consumer.vertex(pose, v.x, v.y, v.z)
+                    .color(255, 255, 255, 255)
+                    .uv(u != null ? u.u + offsetX : 0, u != null ? u.v + offsetY : 0)
+                    .overlayCoords(packedOverlay)
+                    .uv2(packedLight)
+                    .normal(normalMatrix, n.x, n.y, n.z)
+                    .endVertex();
+        }
+
+        private void putVertex(VertexConsumer consumer, Matrix4f pose, Matrix3f normalMatrix, Face f, int idx, float offsetX, float offsetY, int packedLight, int packedOverlay, int r, int g, int b, int a) {
+            Vertex v = f.vertex[idx];
+            Uv u = f.uv[idx];
+            Normal n = f.normal;
+
+            consumer.vertex(pose, v.x, v.y, v.z)
+                    .color(r, g, b, a)
+                    .uv(u != null ? u.u + offsetX : 0, u != null ? u.v + offsetY : 0)
+                    .overlayCoords(packedOverlay)
+                    .uv2(packedLight)
+                    .normal(normalMatrix, n.x, n.y, n.z)
+                    .endVertex();
         }
     }
 
@@ -259,6 +320,45 @@ public class Obj3D {
                 fg.drawVertex(texOffsetX, texOffsetY);
             }
             //	Minecraft.getMinecraft().mcProfiler.endSection();
+        }
+
+        public void draw(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay) {
+            draw(poseStack, consumer, packedLight, packedOverlay, 0, 0);
+        }
+
+        public void draw(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay, float texOffsetX, float texOffsetY) {
+            if (locked) return;
+            for (FaceGroup fg : faceGroup) {
+                fg.draw(poseStack, consumer, packedLight, packedOverlay, texOffsetX, texOffsetY);
+            }
+        }
+
+        public void drawColored(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay, int r, int g, int b, int a) {
+            drawColored(poseStack, consumer, packedLight, packedOverlay, 0, 0, r, g, b, a);
+        }
+
+        public void drawColored(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay, float texOffsetX, float texOffsetY, int r, int g, int b, int a) {
+            if (locked) return;
+            for (FaceGroup fg : faceGroup) {
+                fg.draw(poseStack, consumer, packedLight, packedOverlay, texOffsetX, texOffsetY, r, g, b, a);
+            }
+        }
+
+        public void draw(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay, float angle, float x, float y, float z) {
+            draw(poseStack, consumer, packedLight, packedOverlay, angle, x, y, z, 0, 0);
+        }
+
+        public void draw(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay, float angle, float x, float y, float z, float texOffsetX, float texOffsetY) {
+            if (locked) return;
+
+            poseStack.pushPose();
+            poseStack.translate(ox, oy, oz);
+            poseStack.mulPose(new org.joml.Quaternionf().setAngleAxis(Math.toRadians(angle), x, y, z));
+            poseStack.translate(-ox, -oy, -oz);
+
+            draw(poseStack, consumer, packedLight, packedOverlay, texOffsetX, texOffsetY);
+
+            poseStack.popPose();
         }
 
         // Returns the bounding box of the vertices we'd draw.
@@ -601,6 +701,19 @@ public class Obj3D {
         Obj3DPart partPtr = getPart(part);
         if (partPtr != null)
             partPtr.draw();
+    }
+
+    public void draw(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay) {
+        for (Obj3DPart part : nameToPartHash.values()) {
+            part.draw(poseStack, consumer, packedLight, packedOverlay);
+        }
+    }
+
+    public void draw(String partName, PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay) {
+        Obj3DPart part = nameToPartHash.get(partName);
+        if (part != null) {
+            part.draw(poseStack, consumer, packedLight, packedOverlay);
+        }
     }
 
     public String getString(String name) {

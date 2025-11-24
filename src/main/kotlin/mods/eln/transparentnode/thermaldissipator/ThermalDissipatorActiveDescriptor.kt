@@ -12,7 +12,7 @@ import net.minecraft.world.item.Item
 
 class ThermalDissipatorActiveDescriptor(
     name: String?,
-    var obj: Obj3D?,
+    override var obj: Obj3D?,
     var nominalElectricalU: Double,
     var electricalNominalP: Double,
     var nominalElectricalCoolingPower: Double,

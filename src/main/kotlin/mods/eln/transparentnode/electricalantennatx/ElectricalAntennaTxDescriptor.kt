@@ -20,8 +20,9 @@ class ElectricalAntennaTxDescriptor(
     ElectricalAntennaTxElement::class.java,
     ElectricalAntennaTxRender::class.java
 ) {
-    var obj: Obj3D.Obj3DPart? = null
+    var mainPart: Obj3D.Obj3DPart? = null
     init {
-        this.obj = obj.getPart("main")
+        this.mainPart = obj.getPart("main")
+        this.obj = obj
     }
 }

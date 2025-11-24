@@ -45,6 +45,7 @@ import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.ItemDisplayContext
 import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 import org.lwjgl.opengl.GL11
 import java.util.HashMap
 import kotlin.math.abs
@@ -90,6 +91,12 @@ class PowerCapacitorSixDescriptor(name: String,
         if (null != Base) Base!!.draw()
         if (null != CapacitorCables) CapacitorCables!!.draw()
         if (null != CapacitorCore) CapacitorCore!!.draw()
+    }
+
+    override fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, signal: Boolean) {
+        Base?.draw(poseStack, consumer, packedLight, packedOverlay)
+        CapacitorCables?.draw(poseStack, consumer, packedLight, packedOverlay)
+        CapacitorCore?.draw(poseStack, consumer, packedLight, packedOverlay)
     }
 
     override fun appendHoverText(

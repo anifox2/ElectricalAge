@@ -18,7 +18,7 @@ import kotlin.reflect.KClass
 abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNodeElement>, render: KClass<out TransparentNodeElementRender>, tag: EntityMetaTag) :
     TransparentNodeDescriptor(name, elm.java, render.java, tag) {
 
-    abstract val obj: Obj3D
+    abstract override var obj: Obj3D?
     abstract val static: Array<out Obj3D.Obj3DPart>
     abstract val rotating: Array<out Obj3D.Obj3DPart>
     // If you set this you should also set volumeSetting in render.

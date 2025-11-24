@@ -1,5 +1,7 @@
 package mods.eln.sixnode
 
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.GuiHelper
@@ -37,6 +39,11 @@ import java.util.*
 class PowerSinkDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, PowerSinkElement::class.java, PowerSinkRender::class.java) {
 
     private var main: Obj3D.Obj3DPart = obj.getPart("main")
+
+    override fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, signal: Boolean) {
+        main.draw(poseStack, consumer, packedLight, packedOverlay)
+    }
+
     fun draw() {
         main.draw()
     }
@@ -62,7 +69,6 @@ class PowerSinkDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, Po
 
 class PowerSinkElement(_sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor) : SixNodeElement(_sixNode, side, descriptor), IConfigurable {
     var electricalLoad = NbtElectricalLoad("electricalLoad")
-// ...existing code...
 
     var currentSource = CurrentSource("currSrc", electricalLoad, null)
 

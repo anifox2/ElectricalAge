@@ -37,7 +37,7 @@ import java.util.*
 
 
 class ElectricalVuMeterDescriptor(name: String, objName: String, var onOffOnly: Boolean) : SixNodeDescriptor(name, ElectricalVuMeterElement::class.java, ElectricalVuMeterRender::class.java) {
-    var obj: Obj3D?
+    override var obj: Obj3D?
 
     enum class ObjType {
         Rot, LedOnOff

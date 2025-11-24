@@ -4,6 +4,7 @@ import net.minecraft.core.Direction as MCDirection
 import org.lwjgl.opengl.GL11
 import net.minecraft.world.phys.Vec3
 import net.minecraft.nbt.CompoundTag
+import com.mojang.blaze3d.vertex.PoseStack
 
 typealias ForgeDirection = MCDirection
 
@@ -197,5 +198,22 @@ enum class Direction(val int: Int) {
         if (this.up() == other) return LRDU.Up
         if (this.down() == other) return LRDU.Down
         return null
+    }
+
+    fun rotatePose(poseStack: PoseStack) {
+        when (this) {
+            XN -> {}
+            XP -> poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f))
+            YN -> {
+                poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-90f))
+                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90f))
+            }
+            YP -> {
+                poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(90f))
+                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90f))
+            }
+            ZN -> poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-90f))
+            ZP -> poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90f))
+        }
     }
 }

@@ -11,11 +11,11 @@ import net.minecraft.world.item.ItemStack
 import java.io.DataOutputStream
 import kotlin.math.abs
 
-class CrankableShaftDescriptor(name: String, override val obj: Obj3D, private val nominalRads: Float, val nominalP: Float) :
+class CrankableShaftDescriptor(name: String, override var obj: Obj3D?, private val nominalRads: Float, val nominalP: Float) :
     SimpleShaftDescriptor(name, CrankableShaftElement::class, ShaftRender::class, EntityMetaTag.Basic) {
 
-    override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
-    override val rotating = arrayOf(obj.getPart("Shaft"))
+    override val static = arrayOf(obj!!.getPart("Stand"), obj!!.getPart("Cowl"))
+    override val rotating = arrayOf(obj!!.getPart("Shaft"))
 
     override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
         list.add(tr("Player crankable shaft"))

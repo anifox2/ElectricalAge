@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "type=cube": { "model": "eln:block/ghost_block" },
+    "type=floor": { "model": "eln:block/ghost_block" },
+    "type=ladder": { "model": "eln:block/ghost_block" }
+  }
+}

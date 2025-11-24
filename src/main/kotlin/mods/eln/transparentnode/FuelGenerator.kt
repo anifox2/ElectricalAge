@@ -30,7 +30,7 @@ import net.minecraftforge.fluids.FluidUtil
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal val cable: ElectricalCableDescriptor,
+class FuelGeneratorDescriptor(name: String, override var obj: Obj3D?, internal val cable: ElectricalCableDescriptor,
                               internal val nominalPower: Double, internal val maxVoltage: Double,
                               tankCapacityInSecondsAtNominalPower: Double)
     : TransparentNodeDescriptor(name, FuelGeneratorElement::class.java, FuelGeneratorRender::class.java) {

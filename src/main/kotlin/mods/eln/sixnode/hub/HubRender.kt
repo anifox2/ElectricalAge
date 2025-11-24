@@ -6,6 +6,7 @@ import mods.eln.node.six.SixNodeDescriptor
 import mods.eln.node.six.SixNodeElementRender
 import mods.eln.node.six.SixNodeEntity
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.renderer.RenderType
 import net.minecraft.world.entity.player.Player
 
 class HubRender(tileEntity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) : SixNodeElementRender(tileEntity, side, descriptor) {
@@ -14,9 +15,18 @@ class HubRender(tileEntity: SixNodeEntity, side: Direction, descriptor: SixNodeD
     var connectionGrid = BooleanArray(6)
 
     override fun draw() {
-        super.draw()
-        front!!.glRotateOnX()
-        descriptor.draw(connectionGrid)
+        val poseStack = currentPoseStack!!
+        val buffer = currentBuffer!!
+        val light = currentLight
+        val overlay = currentOverlay
+        val consumer = buffer.getBuffer(RenderType.solid())
+
+        poseStack.pushPose()
+        front!!.rotatePoseOnX(poseStack)
+        
+        descriptor.draw(poseStack, consumer, light, overlay, connectionGrid)
+        
+        poseStack.popPose()
     }
 
     override fun drawCables() {

@@ -11,10 +11,10 @@ import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
 import net.minecraft.world.entity.player.Player
 
-class FixedShaftDescriptor(name: String, override val obj: Obj3D) : SimpleShaftDescriptor(
+class FixedShaftDescriptor(name: String, override var obj: Obj3D?) : SimpleShaftDescriptor(
     name, FixedShaftElement::class, ShaftRender::class, EntityMetaTag.Basic
 ) {
-    override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Shaft"))
+    override val static = arrayOf(obj!!.getPart("Stand"), obj!!.getPart("Shaft"))
     override val rotating = emptyArray<Obj3D.Obj3DPart>()
 
     override fun draw(angle: Double) {

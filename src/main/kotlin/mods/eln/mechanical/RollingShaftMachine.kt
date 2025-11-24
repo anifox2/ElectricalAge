@@ -18,12 +18,12 @@ import net.minecraft.world.Container
 import net.minecraft.world.item.ItemStack
 import org.lwjgl.opengl.GL11
 
-class RollingShaftMachineDescriptor (name: String, override val obj: Obj3D) :
+class RollingShaftMachineDescriptor (name: String, override var obj: Obj3D?) :
     SimpleShaftDescriptor(name, RollingShaftMachineElement::class, RollingShaftMachineRender::class, EntityMetaTag.Basic) {
 
-    override val static = arrayOf(obj.getPart("main"))
-    override val rotating = arrayOf(obj.getPart("rot1"))
-    private val reverseRotating = arrayOf(obj.getPart("rot2"))
+    override val static = arrayOf(obj!!.getPart("main"))
+    override val rotating = arrayOf(obj!!.getPart("rot1"))
+    private val reverseRotating = arrayOf(obj!!.getPart("rot2"))
 
     override val sound = "eln:plate_machine"
 

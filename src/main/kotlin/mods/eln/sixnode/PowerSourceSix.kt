@@ -1,5 +1,7 @@
 package mods.eln.sixnode
 
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.GuiHelperContainer
@@ -23,6 +25,7 @@ import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.CurrentSource
 import mods.eln.sim.nbt.NbtElectricalLoad
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.renderer.RenderType
 import net.minecraft.world.entity.player.Player
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
@@ -36,6 +39,11 @@ import java.io.IOException
 class PowerSourceDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, PowerSourceElement::class.java, PowerSourceRender::class.java) {
 
     private var main: Obj3D.Obj3DPart = obj.getPart("main")
+
+    override fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, signal: Boolean) {
+        main.draw(poseStack, consumer, packedLight, packedOverlay)
+    }
+
     fun draw() {
         main.draw()
     }
@@ -188,8 +196,15 @@ class PowerSourceRender(tileEntity: SixNodeEntity, side: Direction, descriptor: 
     var current = 0.0
     override fun draw() {
         super.draw()
-        front!!.glRotateOnX()
-        descriptor.draw()
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+
+        poseStack.pushPose()
+        front!!.rotatePoseOnX(poseStack)
+        descriptor.draw(poseStack, buffer.getBuffer(RenderType.solid()), light, overlay, false)
+        poseStack.popPose()
     }
 
     override fun publishUnserialize(stream: DataInputStream) {

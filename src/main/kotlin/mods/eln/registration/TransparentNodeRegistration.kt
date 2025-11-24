@@ -583,6 +583,7 @@ object TransparentNodeRegistration {
                 Math.PI / 2,
                 Math.PI / 2
             )
+            desc.setDefaultIcon("smallsolarpanel")
             addDescriptor(subId + (id shl 6), desc)
         }
         run {
@@ -594,6 +595,7 @@ object TransparentNodeRegistration {
                 Eln.instance!!.lowVoltageCableDescriptor!!.render, ghostGroup, 0, 1, 0, null, LVSolarU / 4,
                 Eln.solarPanelBasePower * Eln.instance!!.solarPanelPowerFactor, 0.01, Math.PI / 4, Math.PI / 4 * 3
             )
+            desc.setDefaultIcon("smallrotatingsolarpanel")
             addDescriptor(subId + (id shl 6), desc)
         }
         run {
@@ -608,6 +610,7 @@ object TransparentNodeRegistration {
                 Eln.instance!!.meduimVoltageCableDescriptor!!.render, ghostGroup, 1, 1, 0, groundCoordinate, LVSolarU * 2,
                 Eln.solarPanelBasePower * Eln.instance!!.solarPanelPowerFactor * 8, 0.01, Math.PI / 2, Math.PI / 2
             )
+            desc.setDefaultIcon("2x3solarpanel")
             addDescriptor(subId + (id shl 6), desc)
         }
         run {
@@ -632,6 +635,7 @@ object TransparentNodeRegistration {
                 Math.PI / 8 * 3,
                 Math.PI / 8 * 5
             )
+            desc.setDefaultIcon("2x3rotatingsolarpanel")
             addDescriptor(subId + (id shl 6), desc)
         }
     }

@@ -24,6 +24,9 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 import net.minecraft.network.chat.Component
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
+import net.minecraft.client.renderer.RenderType
 
 /**
  * A comparator-alike. It doesn't "compare" anything, though.
@@ -37,9 +40,19 @@ class ScannerDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, Scan
         voltageLevelColor = VoltageLevelColor.SignalVoltage
     }
 
+    override fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, signal: Boolean) {
+        main.draw(poseStack, consumer, packedLight, packedOverlay)
+        leds[0].draw(poseStack, consumer, packedLight, packedOverlay)
+    }
+
     fun draw(mode: ScanMode) {
         main.draw()
         leds[mode.value.toInt()].draw()
+    }
+
+    fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, mode: ScanMode) {
+        main.draw(poseStack, consumer, packedLight, packedOverlay)
+        leds[mode.value.toInt()].draw(poseStack, consumer, packedLight, packedOverlay)
     }
 
     override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
@@ -201,8 +214,15 @@ class ScannerRender(tileEntity: SixNodeEntity, side: Direction, descriptor: SixN
 
     override fun draw() {
         super.draw()
-        front!!.glRotateOnX()
-        (sixNodeDescriptor as ScannerDescriptor).draw(mode)
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+
+        poseStack.pushPose()
+        front!!.rotatePoseOnX(poseStack)
+        (sixNodeDescriptor as ScannerDescriptor).draw(poseStack, buffer.getBuffer(RenderType.solid()), light, overlay, mode)
+        poseStack.popPose()
     }
 
     override fun publishUnserialize(stream: DataInputStream) {

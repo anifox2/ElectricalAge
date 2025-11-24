@@ -23,8 +23,9 @@ class AutoMinerDescriptor(
     AutoMinerElement::class.java,
     AutoMinerRender::class.java
 ) {
-    var obj: Obj3D.Obj3DPart? = null
+    var mainPart: Obj3D.Obj3DPart? = null
     init {
-        this.obj = obj.getPart("main")
+        this.mainPart = obj.getPart("main")
+        this.obj = obj
     }
 }

@@ -9,15 +9,15 @@ import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.IOException
 
-class HolidayCandleDescriptor(name: String, val obj: Obj3D) : TransparentNodeDescriptor(name, FestiveElement::class.java, HolidayCandleRender::class.java) {
+class HolidayCandleDescriptor(name: String, override var obj: Obj3D?) : TransparentNodeDescriptor(name, FestiveElement::class.java, HolidayCandleRender::class.java) {
     private var base: Obj3D.Obj3DPart? = null
     private var glass: Obj3D.Obj3DPart? = null
     private var light: Obj3D.Obj3DPart? = null
 
     init {
-        base = obj.getPart("CandleLamp_Cylinder.001")
-        glass = obj.getPart("Glass_Cylinder.000")
-        light = obj.getPart("LampOn_Cylinder.002")
+        base = obj!!.getPart("CandleLamp_Cylinder.001")
+        glass = obj!!.getPart("Glass_Cylinder.000")
+        light = obj!!.getPart("LampOn_Cylinder.002")
     }
 
     fun draw(front: Direction, powered: Boolean) {

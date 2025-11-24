@@ -11,17 +11,17 @@ import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.IOException
 
-class ChristmasTreeDescriptor(name: String, val obj: Obj3D) : TransparentNodeDescriptor(name, FestiveElement::class.java, ChristmasTreeRender::class.java) {
+class ChristmasTreeDescriptor(name: String, override var obj: Obj3D?) : TransparentNodeDescriptor(name, FestiveElement::class.java, ChristmasTreeRender::class.java) {
     private var star: Obj3D.Obj3DPart? = null
     private var string1: Obj3D.Obj3DPart? = null
     private var string2: Obj3D.Obj3DPart? = null
     private var tree: Obj3D.Obj3DPart? = null
 
     init {
-        star = obj.getPart("StarOn_Star.002")
-        string1 = obj.getPart("Strip1_Star.000")
-        string2 = obj.getPart("Strip2_Star.001")
-        tree = obj.getPart("Tree_Cone.006")
+        star = obj!!.getPart("StarOn_Star.002")
+        string1 = obj!!.getPart("Strip1_Star.000")
+        string2 = obj!!.getPart("Strip2_Star.001")
+        tree = obj!!.getPart("Tree_Cone.006")
         val gg = GhostGroup()
         gg.addRectangle(0, 2, 0, 1, -1, 1)
         gg.addElement(1, 2, 0)

@@ -9,7 +9,7 @@ import mods.eln.sim.ThermalLoadInitializer
 class ThermalHeatExchangerDescriptor(
     name: String,
     val thermalLoad: ThermalLoadInitializer,
-    val obj: Obj3D? = null
+    override var obj: Obj3D? = null
 ) : TransparentNodeDescriptor(
     name,
     ThermalHeatExchangerElement::class.java,

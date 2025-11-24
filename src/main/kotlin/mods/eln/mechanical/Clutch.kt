@@ -78,7 +78,7 @@ open class ClutchPlateItem(
 
 class ClutchPinItem(name: String) : GenericItemUsingDamageDescriptorWithComment(name, tr("Prevents clutches from slipping\nagain after they stop.").split("\n").toTypedArray())
 
-class ClutchDescriptor(name: String, override val obj: Obj3D) : SimpleShaftDescriptor(name, ClutchElement::class, ClutchRender::class, EntityMetaTag.Basic) {
+class ClutchDescriptor(name: String, override var obj: Obj3D?) : SimpleShaftDescriptor(name, ClutchElement::class, ClutchRender::class, EntityMetaTag.Basic) {
     companion object {
         val degToRad = 360.0 / (2 * Math.PI)
     }
@@ -87,13 +87,13 @@ class ClutchDescriptor(name: String, override val obj: Obj3D) : SimpleShaftDescr
     val slipStopSound = "eln:click"
 
     override val static: Array<out Obj3D.Obj3DPart> = arrayOf(
-        obj.getPart("Stand"),
-        obj.getPart("Cowl")
+        obj!!.getPart("Stand"),
+        obj!!.getPart("Cowl")
     )
     override val rotating: Array<out Obj3D.Obj3DPart> = emptyArray()
 
-    val leftShaftPart = obj.getPart("ShaftXN")
-    val rightShaftPart = obj.getPart("ShaftXP")
+    val leftShaftPart = obj!!.getPart("ShaftXN")
+    val rightShaftPart = obj!!.getPart("ShaftXP")
 
     override fun draw(angle: Double) {
         draw(angle, angle)

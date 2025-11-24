@@ -6,6 +6,8 @@ import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.math.Axis
 
 /**
  * Represents the 6 possible directions along the axis of a block.
@@ -157,13 +159,11 @@ enum class LRDU(var dir: Int) {
     companion object {
         @JvmStatic
         fun fromInt(value: Int): LRDU {
-            when (value) {
-                0 -> return Left
-                1 -> return Right
-                2 -> return Down
-                3 -> return Up
+            val values = enumValues<LRDU>()
+            if (value >= 0 && value < values.size) {
+                return values[value]
             }
-            return Left
+            return values[0]
         }
 
         @JvmStatic
@@ -177,8 +177,19 @@ enum class LRDU(var dir: Int) {
                 fromInt(stream.readByte().toInt())
             } catch (e: IOException) {
                 e.printStackTrace()
-                Up
+                LRDU.Up
             }
         }
     }
+
+    fun rotatePoseOnX(poseStack: PoseStack) {
+        when (this) {
+            Left -> {}
+            Up -> poseStack.mulPose(Axis.XP.rotationDegrees(90f))
+            Right -> poseStack.mulPose(Axis.XP.rotationDegrees(180f))
+            Down -> poseStack.mulPose(Axis.XP.rotationDegrees(270f))
+        }
+    }
+
+
 }

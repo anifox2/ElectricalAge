@@ -32,11 +32,37 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities
 import net.minecraftforge.common.util.LazyOptional
 
 import mods.eln.init.Registration
+import mods.eln.node.NodeManager
 
 open class TransparentNodeBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: BlockState) : NodeBlockEntity(type, pos, state), WorldlyContainer, IFluidHandler {
     constructor(pos: BlockPos, state: BlockState) : this(Registration.TRANSPARENT_NODE_BLOCK_ENTITY.get(), pos, state)
     var elementRender: TransparentNodeElementRender? = null
     var elementRenderId: Short = 0
+
+    override fun onBlockPlacedBy(front: Direction?, entityLiving: net.minecraft.world.entity.LivingEntity?, stack: ItemStack) {
+        if (level!!.isClientSide) return
+        
+        val metadata = stack.damageValue
+        val node = TransparentNode()
+        node.elementId = metadata
+        node.coordinate = Coordinate(this)
+        node.level = level
+        
+        try {
+            val descriptor = Eln.transparentNodeItem.getDescriptor(metadata)
+            if (descriptor != null) {
+                 node.element = descriptor.ElementClass.getConstructor(TransparentNode::class.java, TransparentNodeDescriptor::class.java).newInstance(node, descriptor) as TransparentNodeElement
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        
+        NodeManager.instance!!.addNode(node)
+        this.internalNode = node
+        
+        node.onBlockPlacedBy(level!!, Coordinate(this), front ?: Direction.N, entityLiving, stack)
+        // node.onBlockAdded()
+    }
 
     private val fluidHandler: IFluidHandler
         get() {

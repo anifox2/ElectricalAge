@@ -15,69 +15,71 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.item.context.UseOnContext
 import net.minecraft.world.InteractionResult
 import net.minecraft.core.BlockPos
+import java.util.function.Consumer
+import net.minecraftforge.client.extensions.common.IClientItemExtensions
+import mods.eln.client.ElnItemRenderer
 
 class TransparentNodeItem(b: Block?) : GenericItemBlockUsingDamage<TransparentNodeDescriptor>(b!!) {
     
+    override fun initializeClient(consumer: Consumer<IClientItemExtensions>) {
+        consumer.accept(object : IClientItemExtensions {
+            override fun getCustomRenderer(): net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer {
+                return ElnItemRenderer.instance
+            }
+        })
+    }
+
     override fun useOn(context: UseOnContext): InteractionResult {
-        /*
-        val world = context.level
+        val level = context.level
         val player = context.player ?: return InteractionResult.FAIL
         val pos = context.clickedPos
         val side = context.clickedFace
         val stack = context.itemInHand
-        
-        if (world.isRemote) return InteractionResult.SUCCESS // Client side prediction? Or just consume?
 
-        var x = pos.x
-        var y = pos.y
-        var z = pos.z
-        
-        // Logic to adjust position based on side (like standard placement)
-        // But TransparentNodeItem logic seems to do it manually?
-        // "x += v[0]" etc.
-        
-        val descriptor = getDescriptor(stack) ?: return InteractionResult.FAIL
-        val direction = Direction.fromMCDirection(side).inverse()
-        val front = descriptor.getFrontFromPlace(direction, player) ?: return InteractionResult.FAIL
-        
-        val v = intArrayOf(descriptor.spawnDeltaX, descriptor.spawnDeltaY, descriptor.spawnDeltaZ)
-        front.rotateFromXN(net.minecraft.world.phys.Vec3(v[0].toDouble(), v[1].toDouble(), v[2].toDouble())).let {
-            x += it.x.toInt()
-            y += it.y.toInt()
-            z += it.z.toInt()
+        if (level.isClientSide) return InteractionResult.SUCCESS
+
+        var startPos = pos
+        val state = level.getBlockState(pos)
+        if (!state.canBeReplaced(net.minecraft.world.item.context.BlockPlaceContext(context))) {
+            startPos = pos.relative(side)
         }
-        
-        val coord = Coordinate(x, y, z, 0) // TODO: Dimension
+
+        val descriptor = getDescriptor(stack) ?: return InteractionResult.FAIL
+        val direction = Direction.fromIntMinecraftSide(side.ordinal)!!.inverse()
+        val front = descriptor.getFrontFromPlace(direction, player) ?: return InteractionResult.FAIL
+
+        var x = startPos.x
+        var y = startPos.y
+        var z = startPos.z
+
+        val v = intArrayOf(descriptor.spawnDeltaX, descriptor.spawnDeltaY, descriptor.spawnDeltaZ)
+        val offset = front.rotateFromXN(net.minecraft.world.phys.Vec3(v[0].toDouble(), v[1].toDouble(), v[2].toDouble()))
+        x += offset.x.toInt()
+        y += offset.y.toInt()
+        z += offset.z.toInt()
+
+        val targetPos = BlockPos(x, y, z)
+        val coord = Coordinate(x, y, z, level)
+
         var error: String? = null
-        
-        if (descriptor.checkCanPlace(coord, front, world).also { error = it } != null) {
+        if (descriptor.checkCanPlace(coord, front, level).also { error = it } != null) {
             addChatMessage(player, error!!)
             return InteractionResult.FAIL
         }
-        
-        val ghostgroup = descriptor.getGhostGroupFront(front)
-        ghostgroup?.plot(coord, coord, descriptor.ghostGroupUuid)
-        
-        val node = TransparentNode()
-        // node.onBlockPlacedBy(coord, front, player, stack) // This needs to be called after placement or set up
-        
-        // Manual placement
-        val placePos = BlockPos(x, y, z)
-        // We need to set the block. 
-        // But TransparentNodeItem is a BlockItem, so we should use super.place?
-        // But super.place does standard placement. This item seems to have custom offset logic.
-        
-        // If we manually set block, we bypass some checks but that's what the old code did.
-        // world.setBlock(x, y, z, Block.getBlockFromItem(this), node.blockMetadata, 0x03)
-        
-        // We need the block state.
-        val state = this.block.defaultBlockState() // Assuming block is set
-        if (world.setBlock(placePos, state, 3)) {
-             // Handle TileEntity/Node setup
-             // ...
-             return InteractionResult.SUCCESS
+
+        val newState = this.block.defaultBlockState()
+        if (level.setBlock(targetPos, newState, 3)) {
+            val entity = level.getBlockEntity(targetPos) as? TransparentNodeBlockEntity
+            val node = entity?.node as? TransparentNode
+
+            if (node != null) {
+                node.onBlockPlacedBy(level, coord, front, player, stack)
+
+                if (!player.isCreative) stack.shrink(1)
+                return InteractionResult.SUCCESS
+            }
         }
-        */
+
         return InteractionResult.FAIL
     }
 

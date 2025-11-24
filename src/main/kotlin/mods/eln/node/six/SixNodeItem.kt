@@ -13,158 +13,99 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
-//import net.minecraftforge.client.IItemRenderer
-//import net.minecraftforge.client.IItemRenderer.ItemRenderType
-//import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
-//import org.lwjgl.opengl.GL11
+import java.util.function.Consumer
+import net.minecraftforge.client.extensions.common.IClientItemExtensions
+import mods.eln.client.ElnItemRenderer
 
 class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor>(b!!) {
-    /*
-    override fun getMetadata(damageValue: Int): Int {
-        return damageValue
-    }
-
-    /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return True if something happen and false if it don't. This is for ITEMS, not BLOCKS
-     */
-    override fun onItemUse(stack: ItemStack, player: Player, world: World, x: Int, y: Int, z: Int, side: Int, hitX: Float, hitY: Float, hitZ: Float): Boolean {
-        var x = x
-        var y = y
-        var z = z
-        var side = side
-        val block = world.getBlock(x, y, z)
-        if (block === Blocks.snow_layer && world.getBlockMetadata(x, y, z) and 0x7 < 1) {
-            side = 1
-        } else if (block !== Blocks.vine && block !== Blocks.tallgrass && block !== Blocks.deadbush && !block.isReplaceable(world, x, y, z)) {
-            if (side == 0) y--
-            if (side == 1) y++
-            if (side == 2) z--
-            if (side == 3) z++
-            if (side == 4) x--
-            if (side == 5) x++
-        }
-        if (stack.count == 0) return false
-        if (!player.canPlayerEdit(x, y, z, side, stack)) return false
-        if (y == 255 && field_150939_a.material.isSolid) return false
-        val i1 = getMetadata(stack.itemDamage)
-        val metadata = field_150939_a.onBlockPlaced(world, x, y, z, side, hitX, hitY, hitZ, i1)
-        if (placeBlockAt(stack, player, world, x, y, z, side, hitX, hitY, hitZ, metadata)) {
-            world.playSoundEffect((x + 0.5f).toDouble(), (y + 0.5f).toDouble(), (z + 0.5f).toDouble(), field_150939_a.stepSound.func_150496_b(), (field_150939_a.stepSound.getVolume() + 1.0f) / 2.0f, field_150939_a.stepSound.pitch * 0.8f)
-            stack.count -= 1
-        }
-        return true
-    }
-
-    /**
-     * Returns true if the given ItemBlock can be placed on the given side of the given block position.
-     */
-    // func_150936_a <= canPlaceItemBlockOnSide
-    override fun func_150936_a(par1World: World, x: Int, y: Int, z: Int, par5: Int, par6Player: Player, par7ItemStack: ItemStack): Boolean {
-        if (!isStackValidToPlace(par7ItemStack)) return false
-        val vect = intArrayOf(x, y, z)
-        fromIntMinecraftSide(par5)!!.applyTo(vect, 1)
-        val descriptor = getDescriptor(par7ItemStack)
-        if (!descriptor!!.canBePlacedOnSide(par6Player, Coordinate(x, y, z, par1World), fromIntMinecraftSide(par5)!!.inverse)) {
-            return false
-        }
-        if (par1World.getBlock(vect[0], vect[1], vect[2]) === Eln.sixNodeBlock) return true
-        return super.func_150936_a(par1World, x, y, z, par5, par6Player, par7ItemStack)
-    }
-
-    fun isStackValidToPlace(stack: ItemStack?): Boolean {
-        val descriptor = getDescriptor(stack)
-        return descriptor != null
-    }
-
-    override fun placeBlockAt(stack: ItemStack, player: Player, world: World, x: Int, y: Int, z: Int, side: Int, hitX: Float, hitY: Float, hitZ: Float, metadata: Int): Boolean {
-        if (world.isRemote) return false
-        if (!isStackValidToPlace(stack)) return false
-        val direction = fromIntMinecraftSide(side)!!.inverse
-        val blockOld = world.getBlock(x, y, z)
-        val block = Block.getBlockFromItem(this) as SixNodeBlock
-        if (blockOld === Blocks.air || blockOld.isReplaceable(world, x, y, z)) {
-            val coord = Coordinate(x, y, z, world)
-            val descriptor = getDescriptor(stack)
-            var error: String?
-            if (descriptor!!.checkCanPlace(coord, direction, LRDU.Up).also { error = it } != null) {
-                addChatMessage(player, error)
-                return false
+    override fun initializeClient(consumer: Consumer<IClientItemExtensions>) {
+        consumer.accept(object : IClientItemExtensions {
+            override fun getCustomRenderer(): net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer {
+                return ElnItemRenderer.instance
             }
-            if (block.getIfOtherBlockIsSolid(world, x, y, z, direction)) {
-                val ghostgroup = descriptor.getGhostGroup(direction, LRDU.Up)
-                ghostgroup?.plot(coord, coord, descriptor.ghostGroupUuid)
-                val sixNode = SixNode()
-                sixNode.onBlockPlacedBy(world, Coordinate(x, y, z, world), direction, player, stack)
-                sixNode.createSubBlock(stack, direction, player)
-                world.setBlock(x, y, z, block, metadata, 0x03)
-                block.getIfOtherBlockIsSolid(world, x, y, z, direction)
-                block.onBlockPlacedBy(world, x, y, z, fromIntMinecraftSide(side)!!.inverse, player, metadata)
-                return true
+        })
+    }
+
+    override fun useOn(context: net.minecraft.world.item.context.UseOnContext): net.minecraft.world.InteractionResult {
+        val level = context.level
+        val player = context.player ?: return net.minecraft.world.InteractionResult.FAIL
+        val stack = context.itemInHand
+        val pos = context.clickedPos
+        val side = context.clickedFace
+
+        if (level.isClientSide) return net.minecraft.world.InteractionResult.SUCCESS
+
+        val descriptor = getDescriptor(stack) ?: return net.minecraft.world.InteractionResult.FAIL
+
+        // Determine target position
+        var targetPos = pos
+        val state = level.getBlockState(pos)
+        val block = state.block
+
+        var isAddingToExisting = false
+
+        if (block is SixNodeBlock) {
+            isAddingToExisting = true
+        } else if (!state.canBeReplaced(net.minecraft.world.item.context.BlockPlaceContext(context))) {
+            targetPos = pos.relative(side)
+            val targetState = level.getBlockState(targetPos)
+            if (targetState.block is SixNodeBlock) {
+                isAddingToExisting = true
             }
-        } else if (blockOld === block) {
-            val sixNode = (world.getTileEntity(x, y, z) as SixNodeEntity).node as SixNode?
-            if (sixNode == null) {
-                world.setBlockToAir(x, y, z)
-                return false
-            }
-            if (!sixNode.getSideEnable(direction) && block.getIfOtherBlockIsSolid(world, x, y, z, direction)) {
-                sixNode.createSubBlock(stack, direction, player)
-                block.onBlockPlacedBy(world, x, y, z, fromIntMinecraftSide(side)!!.inverse, player, metadata)
-                return true
+        }
+
+        // Check if we can place
+        val direction = fromIntMinecraftSide(side.ordinal)!!.inverse()
+        val coord = Coordinate(targetPos.x, targetPos.y, targetPos.z, level)
+
+        var error: String? = null
+        if (descriptor.checkCanPlace(coord, direction, LRDU.Up).also { error = it } != null) {
+            addChatMessage(player, error!!)
+            return net.minecraft.world.InteractionResult.FAIL
+        }
+
+        // Place logic
+        if (isAddingToExisting) {
+            val entity = level.getBlockEntity(targetPos) as? SixNodeEntity
+            val sixNode = entity?.node as? SixNode
+
+            if (sixNode != null) {
+                // Check if side is free
+                if (!sixNode.getSideEnable(direction)) {
+                    // Add sub block
+                    sixNode.createSubBlock(stack, direction, player)
+                    level.sendBlockUpdated(targetPos, level.getBlockState(targetPos), level.getBlockState(targetPos), 3)
+
+                    if (!player.isCreative) stack.shrink(1)
+                    return net.minecraft.world.InteractionResult.SUCCESS
+                }
             }
         } else {
-            val sixNode = (world.getTileEntity(x, y, z) as SixNodeEntity).node as SixNode?
-            if (sixNode == null) {
-                world.setBlockToAir(x, y, z)
-                return false
-            }
-        }
-        return false
-    }
+            // Place new block
+            val targetState = level.getBlockState(targetPos)
+            if (targetState.isAir || targetState.canBeReplaced(net.minecraft.world.item.context.BlockPlaceContext(context))) {
+                val sixNodeBlock = this.block as SixNodeBlock
+                if (sixNodeBlock.getIfOtherBlockIsSolid(level, targetPos, direction)) {
+                    // Place block
+                    val newState = this.block.defaultBlockState()
+                    if (level.setBlock(targetPos, newState, 3)) {
+                        val entity = level.getBlockEntity(targetPos) as? SixNodeEntity
+                        val sixNode = entity?.node as? SixNode
 
-    override fun handleRenderType(item: ItemStack, type: ItemRenderType): Boolean {
-        return if (getDescriptor(item) == null) false else getDescriptor(item)!!.handleRenderType(item, type)
-    }
+                        if (sixNode != null) {
+                            sixNode.onBlockPlacedBy(level, coord, direction, player, stack)
+                            sixNode.createSubBlock(stack, direction, player)
 
-    override fun shouldUseRenderHelper(type: ItemRenderType, item: ItemStack, helper: ItemRendererHelper): Boolean {
-        return if (!isStackValidToPlace(item)) false else getDescriptor(item)!!.shouldUseRenderHelper(type, item, helper)
-    }
-
-    fun shouldUseRenderHelperEln(type: ItemRenderType?, item: ItemStack?, helper: ItemRendererHelper?): Boolean {
-        return if (!isStackValidToPlace(item)) false else getDescriptor(item)!!.shouldUseRenderHelperEln(type, item, helper)
-    }
-
-    override fun renderItem(type: ItemRenderType, item: ItemStack, vararg data: Any) {
-        if (!isStackValidToPlace(item)) return
-        Minecraft.getInstance().mcProfiler.startSection("SixNodeItem")
-        if (shouldUseRenderHelperEln(type, item, null)) {
-            when (type) {
-                ItemRenderType.ENTITY -> GL11.glRotatef(90f, 0f, 0f, 1f)
-                ItemRenderType.EQUIPPED_FIRST_PERSON -> {
-                    GL11.glRotatef(160f, 0f, 1f, 0f)
-                    GL11.glTranslatef(-0.70f, 1f, -0.7f)
-                    GL11.glScalef(1.8f, 1.8f, 1.8f)
-                    GL11.glRotatef(-90f, 1f, 0f, 0f)
-                }
-                ItemRenderType.EQUIPPED -> {
-                    GL11.glRotatef(180f, 0f, 1f, 0f)
-                    GL11.glTranslatef(-0.70f, 1f, -0.7f)
-                    GL11.glScalef(1.5f, 1.5f, 1.5f)
-                }
-                ItemRenderType.FIRST_PERSON_MAP -> {
-                }
-                ItemRenderType.INVENTORY -> {
-                    GL11.glRotatef(-90f, 0f, 1f, 0f)
-                    GL11.glRotatef(-90f, 1f, 0f, 0f)
-                }
-                else -> {
+                            if (!player.isCreative) stack.shrink(1)
+                            return net.minecraft.world.InteractionResult.SUCCESS
+                        }
+                    }
                 }
             }
         }
-        getDescriptor(item)!!.renderItem(type, item, *data)
-        Minecraft.getInstance().mcProfiler.endSection()
+
+        return net.minecraft.world.InteractionResult.FAIL
     }
-    */
     init {
         //setHasSubtypes(true)
         //unlocalizedName = "SixNodeItem"

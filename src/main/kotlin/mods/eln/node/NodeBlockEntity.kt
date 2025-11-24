@@ -75,19 +75,20 @@ abstract class NodeBlockEntity(type: net.minecraft.world.level.block.entity.Bloc
 
     val node: Node?
         get() {
-            if (level!!.isClientSide) {
+            if (level?.isClientSide == true) {
                 fatal("NodeBlockEntity client side access")
             }
             if (internalNode == null) {
+                if (level == null) return null
                 val nodeFromCoordonate = NodeManager.instance!!.getNodeFromCoordonate(Coordinate(this))
                 if (nodeFromCoordonate is Node) {
                     internalNode = nodeFromCoordonate
                 } else {
-                    println("ASSERT WRONG TYPE public Node getNode " + Coordinate(this))
+                    // println("ASSERT WRONG TYPE public Node getNode " + Coordinate(this))
                 }
                 if (internalNode == null) {
-                    Utils.println("This is actually used?")
-                    add(Coordinate(this))
+                    // Utils.println("This is actually used?")
+                    // add(Coordinate(this))
                 }
             }
             return internalNode
@@ -140,7 +141,7 @@ abstract class NodeBlockEntity(type: net.minecraft.world.level.block.entity.Bloc
     //    return 4096.0 * 4 * 4
     // }
 
-    @Suppress("UNUSED_PARAMETER") fun onBlockPlacedBy(front: Direction?, entityLiving: LivingEntity?, metadata: Int) {}
+    open fun onBlockPlacedBy(front: Direction?, entityLiving: LivingEntity?, stack: net.minecraft.world.item.ItemStack) {}
     open fun tick() {
         if (level!!.isClientSide) return
         if (redstone) {
@@ -151,7 +152,7 @@ abstract class NodeBlockEntity(type: net.minecraft.world.level.block.entity.Bloc
 
     fun onBlockAdded() {
         if (!level!!.isClientSide && node == null) {
-            level!!.removeBlock(worldPosition, false)
+            // level!!.removeBlock(worldPosition, false)
         }
     }
 
@@ -216,9 +217,11 @@ abstract class NodeBlockEntity(type: net.minecraft.world.level.block.entity.Bloc
 
     override fun getUpdateTag(): CompoundTag {
         val tag = super.getUpdateTag()
-        val node = node
-        if (node != null && node.publishPacket != null) {
-             tag.putByteArray("elnData", node.publishPacket!!.toByteArray())
+        if (level != null && !level!!.isClientSide) {
+            val node = node
+            if (node != null && node.publishPacket != null) {
+                tag.putByteArray("elnData", node.publishPacket!!.toByteArray())
+            }
         }
         return tag
     }

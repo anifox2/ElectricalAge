@@ -146,9 +146,11 @@ class SixNodeEntity(pos: net.minecraft.core.BlockPos, state: net.minecraft.world
     }
 
     fun hasVolume(level: net.minecraft.world.level.BlockGetter, pos: net.minecraft.core.BlockPos): Boolean {
-        val node = node as SixNode?
-        if (node != null) {
-            return node.hasVolume()
+        if (this.level != null && !this.level!!.isClientSide) {
+            val node = node as SixNode?
+            if (node != null) {
+                return node.hasVolume()
+            }
         }
         for (e in elementRenderList) {
             if (e != null && e.sixNodeDescriptor.hasVolume()) return true

@@ -27,9 +27,16 @@ class ElectricalSourceRender(
     override fun draw() {
         super.draw()
 
-        front!!.glRotateOnX()
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
 
-        descriptor.draw(voltage >= (Eln.SVU / 2))
+        front!!.rotatePoseOnX(poseStack)
+
+        val consumer = buffer.getBuffer(net.minecraft.client.renderer.RenderType.solid())
+
+        descriptor.draw(poseStack, consumer, light, overlay, voltage >= (Eln.SVU / 2))
     }
 
     override fun publishUnserialize(stream: DataInputStream) {

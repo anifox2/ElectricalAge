@@ -1,5 +1,7 @@
 package mods.eln.cable
 
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
 import mods.eln.misc.LRDUMask
@@ -7,11 +9,23 @@ import mods.eln.node.NodeBase.Companion.isBlockWrappable
 import mods.eln.node.NodeBlockEntity
 import mods.eln.node.six.SixNodeElementRender
 import mods.eln.node.six.SixNodeEntity
-import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.core.BlockPos
+import net.minecraft.world.level.block.entity.BlockEntity
+import org.joml.Matrix3f
+import org.joml.Matrix4f
 import org.lwjgl.opengl.GL11
 
 object CableRender {
+    private fun putVertex(consumer: VertexConsumer, pose: Matrix4f, normal: Matrix3f, x: Float, y: Float, z: Float, u: Float, v: Float, nx: Float, ny: Float, nz: Float, light: Int, overlay: Int) {
+        consumer.vertex(pose, x, y, z)
+            .color(255, 255, 255, 255)
+            .uv(u, v)
+            .overlayCoords(overlay)
+            .uv2(light)
+            .normal(normal, nx, ny, nz)
+            .endVertex()
+    }
+
     @JvmStatic
     fun connectionType(entity: NodeBlockEntity, connectedSide: LRDUMask, side: Direction): CableRenderType {
         var x2: Int
@@ -240,6 +254,64 @@ object CableRender {
         drawBottom: Boolean = false
     ) {
         if (cable == null) return
+    }
+
+    private fun drawQuad(
+        consumer: VertexConsumer,
+        pose: Matrix4f,
+        normal: Matrix3f,
+        light: Int,
+        overlay: Int,
+        v0: FloatArray,
+        v1: FloatArray,
+        v2: FloatArray,
+        v3: FloatArray,
+        nx: Float,
+        ny: Float,
+        nz: Float
+    ) {
+        putVertex(consumer, pose, normal, v0[0], v0[1], v0[2], v0[3], v0[4], nx, ny, nz, light, overlay)
+        putVertex(consumer, pose, normal, v1[0], v1[1], v1[2], v1[3], v1[4], nx, ny, nz, light, overlay)
+        putVertex(consumer, pose, normal, v3[0], v3[1], v3[2], v3[3], v3[4], nx, ny, nz, light, overlay)
+        putVertex(consumer, pose, normal, v2[0], v2[1], v2[2], v2[3], v2[4], nx, ny, nz, light, overlay)
+    }
+
+    private fun drawQuadSimple(
+        consumer: VertexConsumer,
+        pose: Matrix4f,
+        normal: Matrix3f,
+        light: Int,
+        overlay: Int,
+        v0: FloatArray,
+        v1: FloatArray,
+        v2: FloatArray,
+        v3: FloatArray,
+        nx: Float,
+        ny: Float,
+        nz: Float
+    ) {
+        putVertex(consumer, pose, normal, v0[0], v0[1], v0[2], v0[3], v0[4], nx, ny, nz, light, overlay)
+        putVertex(consumer, pose, normal, v1[0], v1[1], v1[2], v1[3], v1[4], nx, ny, nz, light, overlay)
+        putVertex(consumer, pose, normal, v2[0], v2[1], v2[2], v2[3], v2[4], nx, ny, nz, light, overlay)
+        putVertex(consumer, pose, normal, v3[0], v3[1], v3[2], v3[3], v3[4], nx, ny, nz, light, overlay)
+    }
+
+    @JvmStatic
+    fun drawCable(
+        poseStack: PoseStack,
+        consumer: VertexConsumer,
+        light: Int,
+        overlay: Int,
+        cable: CableRenderDescriptor?,
+        connection: LRDUMask,
+        connectionType: CableRenderType,
+        deltaStart: Float = cable!!.widthDiv2 / 2f,
+        drawBottom: Boolean = false
+    ) {
+        if (cable == null) return
+        val pose = poseStack.last().pose()
+        val normal = poseStack.last().normal()
+
         var endLeft = -deltaStart
         var endRight = deltaStart
         var endUp = deltaStart
@@ -290,172 +362,137 @@ object CableRender {
         val height = cable.height
         val tx = 0.25f
         val ty = 0.5f
+
         if (endLeft < startLeft) {
             // Draws top, bottom, and two sides of the cable
-            GL11.glBegin(GL11.GL_QUAD_STRIP)
-            GL11.glNormal3f(0f, 1f, 0f)
-            GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + endLeft)
-            GL11.glVertex3f(0f, cable.widthDiv2, endLeft)
-            GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + startLeft)
-            GL11.glVertex3f(0f, cable.widthDiv2, startLeft)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + endLeft)
-            GL11.glVertex3f(height, cable.widthDiv2, endLeft)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + startLeft)
-            GL11.glVertex3f(height, cable.widthDiv2, startLeft)
-            GL11.glNormal3f(1f, 0f, 0f)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + endLeft)
-            GL11.glVertex3f(height, -cable.widthDiv2, endLeft)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + startLeft)
-            GL11.glVertex3f(height, -cable.widthDiv2, startLeft)
-            GL11.glNormal3f(0f, -1f, 0f)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f - height, ty + endLeft)
-            GL11.glVertex3f(0f, -cable.widthDiv2, endLeft)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f - height, ty + startLeft)
-            GL11.glVertex3f(0f, -cable.widthDiv2, startLeft)
+            // GL_QUAD_STRIP replacement
+            // v0, v1, v2, v3, v4, v5, v6, v7...
+            // Q1: v0, v1, v3, v2
+            // Q2: v2, v3, v5, v4
+            // Q3: v4, v5, v7, v6
+            
+            val v0 = floatArrayOf(0f, cable.widthDiv2, endLeft, tx + (cable.widthDiv2 + height) * 0.5f, ty + endLeft)
+            val v1 = floatArrayOf(0f, cable.widthDiv2, startLeft, tx + (cable.widthDiv2 + height) * 0.5f, ty + startLeft)
+            val v2 = floatArrayOf(height, cable.widthDiv2, endLeft, tx + cable.widthDiv2 * 0.5f, ty + endLeft)
+            val v3 = floatArrayOf(height, cable.widthDiv2, startLeft, tx + cable.widthDiv2 * 0.5f, ty + startLeft)
+            val v4 = floatArrayOf(height, -cable.widthDiv2, endLeft, tx - cable.widthDiv2 * 0.5f, ty + endLeft)
+            val v5 = floatArrayOf(height, -cable.widthDiv2, startLeft, tx - cable.widthDiv2 * 0.5f, ty + startLeft)
+            val v6 = floatArrayOf(0f, -cable.widthDiv2, endLeft, tx - cable.widthDiv2 * 0.5f - height, ty + endLeft)
+            val v7 = floatArrayOf(0f, -cable.widthDiv2, startLeft, tx - cable.widthDiv2 * 0.5f - height, ty + startLeft)
+            
+            // Normal 0, 1, 0
+            drawQuad(consumer, pose, normal, light, overlay, v0, v1, v2, v3, 0f, 1f, 0f)
+            // Normal 1, 0, 0
+            drawQuad(consumer, pose, normal, light, overlay, v2, v3, v4, v5, 1f, 0f, 0f)
+            // Normal 0, -1, 0
+            drawQuad(consumer, pose, normal, light, overlay, v4, v5, v6, v7, 0f, -1f, 0f)
+
             if (drawBottom) {
-                GL11.glNormal3f(0f, 1f, 0f)
-                GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + endLeft)
-                GL11.glVertex3f(0f, cable.widthDiv2, endLeft)
-                GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + startLeft)
-                GL11.glVertex3f(0f, cable.widthDiv2, startLeft)
+                val v8 = floatArrayOf(0f, cable.widthDiv2, endLeft, tx + (cable.widthDiv2 + height) * 0.5f, ty + endLeft)
+                val v9 = floatArrayOf(0f, cable.widthDiv2, startLeft, tx + (cable.widthDiv2 + height) * 0.5f, ty + startLeft)
+                // Normal 0, 1, 0 (Wait, drawBottom usually closes the loop? The original code reuses v0/v1 coords but with same normal? That seems odd for a closed loop. 
+                // Original: GL11.glNormal3f(0f, 1f, 0f); GL11.glVertex3f(0f, cable.widthDiv2, endLeft); ...
+                // It seems to just redraw the first segment? Or maybe it's closing the strip?
+                // Ah, GL_QUAD_STRIP continues. v6, v7 are the last ones.
+                // If drawBottom, it adds 2 more vertices.
+                // v8, v9.
+                // Q4: v6, v7, v9, v8.
+                drawQuad(consumer, pose, normal, light, overlay, v6, v7, v9, v8, 0f, 1f, 0f) // Using 0,1,0 as per original code, though it might be 0,0,-1 or something else depending on geometry.
             }
-            GL11.glEnd()
 
             // Draws end cap
-            GL11.glBegin(GL11.GL_QUADS)
-            GL11.glNormal3f(0f, 0f, -1f)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + endLeft - height)
-            GL11.glVertex3f(0f, -cable.widthDiv2, endLeft)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + endLeft - height)
-            GL11.glVertex3f(0f, cable.widthDiv2, endLeft)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + endLeft)
-            GL11.glVertex3f(height, cable.widthDiv2, endLeft)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + endLeft)
-            GL11.glVertex3f(height, -cable.widthDiv2, endLeft)
-            GL11.glEnd()
+            // GL_QUADS
+            val c0 = floatArrayOf(0f, -cable.widthDiv2, endLeft, tx - cable.widthDiv2 * 0.5f, ty + endLeft - height)
+            val c1 = floatArrayOf(0f, cable.widthDiv2, endLeft, tx + cable.widthDiv2 * 0.5f, ty + endLeft - height)
+            val c2 = floatArrayOf(height, cable.widthDiv2, endLeft, tx + cable.widthDiv2 * 0.5f, ty + endLeft)
+            val c3 = floatArrayOf(height, -cable.widthDiv2, endLeft, tx - cable.widthDiv2 * 0.5f, ty + endLeft)
+            
+            drawQuadSimple(consumer, pose, normal, light, overlay, c0, c1, c2, c3, 0f, 0f, -1f)
         }
+        
+        // Draw Right
         if (endRight > startRight) {
-            GL11.glBegin(GL11.GL_QUAD_STRIP)
-            GL11.glNormal3f(0f, 1f, 0f)
-            GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + startRight)
-            GL11.glVertex3f(0f, cable.widthDiv2, startRight)
-            GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + endRight)
-            GL11.glVertex3f(0f, cable.widthDiv2, endRight)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + startRight)
-            GL11.glVertex3f(height, cable.widthDiv2, startRight)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + endRight)
-            GL11.glVertex3f(height, cable.widthDiv2, endRight)
-            GL11.glNormal3f(1f, 0f, 0f)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + startRight)
-            GL11.glVertex3f(height, -cable.widthDiv2, startRight)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + endRight)
-            GL11.glVertex3f(height, -cable.widthDiv2, endRight)
-            GL11.glNormal3f(0f, -1f, 0f)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f - height, ty + startRight)
-            GL11.glVertex3f(0f, -cable.widthDiv2, startRight)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f - height, ty + endRight)
-            GL11.glVertex3f(0f, -cable.widthDiv2, endRight)
-            if (drawBottom) {
-                GL11.glNormal3f(0f, 1f, 0f)
-                GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + startRight)
-                GL11.glVertex3f(0f, cable.widthDiv2, startRight)
-                GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + endRight)
-                GL11.glVertex3f(0f, cable.widthDiv2, endRight)
-            }
-            GL11.glEnd()
-            GL11.glBegin(GL11.GL_QUADS)
-            GL11.glNormal3f(0f, 0f, 1f)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + endRight)
-            GL11.glVertex3f(height, -cable.widthDiv2, endRight)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + endRight)
-            GL11.glVertex3f(height, cable.widthDiv2, endRight)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + endRight + height)
-            GL11.glVertex3f(0f, cable.widthDiv2, endRight)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + endRight + height)
-            GL11.glVertex3f(0f, -cable.widthDiv2, endRight)
-            GL11.glEnd()
+             val v0 = floatArrayOf(0f, cable.widthDiv2, startRight, tx + (cable.widthDiv2 + height) * 0.5f, ty + startRight)
+             val v1 = floatArrayOf(0f, cable.widthDiv2, endRight, tx + (cable.widthDiv2 + height) * 0.5f, ty + endRight)
+             val v2 = floatArrayOf(height, cable.widthDiv2, startRight, tx + cable.widthDiv2 * 0.5f, ty + startRight)
+             val v3 = floatArrayOf(height, cable.widthDiv2, endRight, tx + cable.widthDiv2 * 0.5f, ty + endRight)
+             val v4 = floatArrayOf(height, -cable.widthDiv2, startRight, tx - cable.widthDiv2 * 0.5f, ty + startRight)
+             val v5 = floatArrayOf(height, -cable.widthDiv2, endRight, tx - cable.widthDiv2 * 0.5f, ty + endRight)
+             val v6 = floatArrayOf(0f, -cable.widthDiv2, startRight, tx - cable.widthDiv2 * 0.5f - height, ty + startRight)
+             val v7 = floatArrayOf(0f, -cable.widthDiv2, endRight, tx - cable.widthDiv2 * 0.5f - height, ty + endRight)
+
+             drawQuad(consumer, pose, normal, light, overlay, v0, v1, v2, v3, 0f, 1f, 0f)
+             drawQuad(consumer, pose, normal, light, overlay, v2, v3, v4, v5, 1f, 0f, 0f)
+             drawQuad(consumer, pose, normal, light, overlay, v4, v5, v6, v7, 0f, -1f, 0f)
+             
+             if (drawBottom) {
+                 val v8 = floatArrayOf(0f, cable.widthDiv2, startRight, tx + (cable.widthDiv2 + height) * 0.5f, ty + startRight)
+                 val v9 = floatArrayOf(0f, cable.widthDiv2, endRight, tx + (cable.widthDiv2 + height) * 0.5f, ty + endRight)
+                 drawQuad(consumer, pose, normal, light, overlay, v6, v7, v9, v8, 0f, 1f, 0f)
+             }
+             
+             // End cap
+             val c0 = floatArrayOf(height, -cable.widthDiv2, endRight, tx - cable.widthDiv2 * 0.5f, ty + endRight)
+             val c1 = floatArrayOf(height, cable.widthDiv2, endRight, tx + cable.widthDiv2 * 0.5f, ty + endRight)
+             val c2 = floatArrayOf(0f, cable.widthDiv2, endRight, tx + cable.widthDiv2 * 0.5f, ty + endRight + height)
+             val c3 = floatArrayOf(0f, -cable.widthDiv2, endRight, tx - cable.widthDiv2 * 0.5f, ty + endRight + height)
+             drawQuadSimple(consumer, pose, normal, light, overlay, c0, c1, c2, c3, 0f, 0f, 1f)
         }
+
         if (endDown < startDown) {
-            GL11.glBegin(GL11.GL_QUAD_STRIP)
-            GL11.glNormal3f(0f, 0f, -1f)
-            GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + endDown)
-            GL11.glVertex3f(0f, endDown, -cable.widthDiv2)
-            GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + startDown)
-            GL11.glVertex3f(0f, startDown, -cable.widthDiv2)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + endDown)
-            GL11.glVertex3f(height, endDown, -cable.widthDiv2)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + startDown)
-            GL11.glVertex3f(height, startDown, -cable.widthDiv2)
-            GL11.glNormal3f(1f, 0f, 0f)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + endDown)
-            GL11.glVertex3f(height, endDown, cable.widthDiv2)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + startDown)
-            GL11.glVertex3f(height, startDown, cable.widthDiv2)
-            GL11.glNormal3f(0f, 0f, 1f)
-            GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + endDown)
-            GL11.glVertex3f(0f, endDown, cable.widthDiv2)
-            GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + startDown)
-            GL11.glVertex3f(0f, startDown, cable.widthDiv2)
-            if (drawBottom) {
-                GL11.glNormal3f(0f, 0f, -1f)
-                GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + endDown)
-                GL11.glVertex3f(0f, endDown, -cable.widthDiv2)
-                GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + startDown)
-                GL11.glVertex3f(0f, startDown, -cable.widthDiv2)
-            }
-            GL11.glEnd()
-            GL11.glBegin(GL11.GL_QUADS)
-            GL11.glNormal3f(0f, -1f, 0f)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + endDown)
-            GL11.glVertex3f(height, endDown, -cable.widthDiv2)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + endDown)
-            GL11.glVertex3f(height, endDown, cable.widthDiv2)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + endDown - height)
-            GL11.glVertex3f(0f, endDown, cable.widthDiv2)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + endDown - height)
-            GL11.glVertex3f(0f, endDown, -cable.widthDiv2)
-            GL11.glEnd()
+             val v0 = floatArrayOf(0f, endDown, -cable.widthDiv2, tx - (cable.widthDiv2 - height) * 0.5f, ty + endDown)
+             val v1 = floatArrayOf(0f, startDown, -cable.widthDiv2, tx - (cable.widthDiv2 - height) * 0.5f, ty + startDown)
+             val v2 = floatArrayOf(height, endDown, -cable.widthDiv2, tx - cable.widthDiv2 * 0.5f, ty + endDown)
+             val v3 = floatArrayOf(height, startDown, -cable.widthDiv2, tx - cable.widthDiv2 * 0.5f, ty + startDown)
+             val v4 = floatArrayOf(height, endDown, cable.widthDiv2, tx + cable.widthDiv2 * 0.5f, ty + endDown)
+             val v5 = floatArrayOf(height, startDown, cable.widthDiv2, tx + cable.widthDiv2 * 0.5f, ty + startDown)
+             val v6 = floatArrayOf(0f, endDown, cable.widthDiv2, tx + (cable.widthDiv2 + height) * 0.5f, ty + endDown)
+             val v7 = floatArrayOf(0f, startDown, cable.widthDiv2, tx + (cable.widthDiv2 + height) * 0.5f, ty + startDown)
+
+             drawQuad(consumer, pose, normal, light, overlay, v0, v1, v2, v3, 0f, 0f, -1f)
+             drawQuad(consumer, pose, normal, light, overlay, v2, v3, v4, v5, 1f, 0f, 0f)
+             drawQuad(consumer, pose, normal, light, overlay, v4, v5, v6, v7, 0f, 0f, 1f)
+             
+             if (drawBottom) {
+                 val v8 = floatArrayOf(0f, endDown, -cable.widthDiv2, tx - (cable.widthDiv2 - height) * 0.5f, ty + endDown)
+                 val v9 = floatArrayOf(0f, startDown, -cable.widthDiv2, tx - (cable.widthDiv2 - height) * 0.5f, ty + startDown)
+                 drawQuad(consumer, pose, normal, light, overlay, v6, v7, v9, v8, 0f, 0f, -1f)
+             }
+             
+             // End cap
+             val c0 = floatArrayOf(height, endDown, -cable.widthDiv2, tx - cable.widthDiv2 * 0.5f, ty + endDown)
+             val c1 = floatArrayOf(height, endDown, cable.widthDiv2, tx + cable.widthDiv2 * 0.5f, ty + endDown)
+             val c2 = floatArrayOf(0f, endDown, cable.widthDiv2, tx + cable.widthDiv2 * 0.5f, ty + endDown - height)
+             val c3 = floatArrayOf(0f, endDown, -cable.widthDiv2, tx - cable.widthDiv2 * 0.5f, ty + endDown - height)
+             drawQuadSimple(consumer, pose, normal, light, overlay, c0, c1, c2, c3, 0f, -1f, 0f)
         }
+
         if (endUp > startUp) {
-            GL11.glBegin(GL11.GL_QUAD_STRIP)
-            GL11.glNormal3f(0f, 0f, -1f)
-            GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + startUp)
-            GL11.glVertex3f(0f, startUp, -cable.widthDiv2)
-            GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + endUp)
-            GL11.glVertex3f(0f, endUp, -cable.widthDiv2)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + startUp)
-            GL11.glVertex3f(height, startUp, -cable.widthDiv2)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + endUp)
-            GL11.glVertex3f(height, endUp, -cable.widthDiv2)
-            GL11.glNormal3f(1f, 0f, 0f)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + startUp)
-            GL11.glVertex3f(height, startUp, cable.widthDiv2)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + endUp)
-            GL11.glVertex3f(height, endUp, cable.widthDiv2)
-            GL11.glNormal3f(0f, 0f, 1f)
-            GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + startUp)
-            GL11.glVertex3f(0f, startUp, cable.widthDiv2)
-            GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + endUp)
-            GL11.glVertex3f(0f, endUp, cable.widthDiv2)
-            if (drawBottom) {
-                GL11.glNormal3f(0f, 0f, -1f)
-                GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + startUp)
-                GL11.glVertex3f(0f, startUp, -cable.widthDiv2)
-                GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + endUp)
-                GL11.glVertex3f(0f, endUp, -cable.widthDiv2)
-            }
-            GL11.glEnd()
-            GL11.glBegin(GL11.GL_QUADS)
-            GL11.glNormal3f(0f, 1f, 0f)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + endUp + height)
-            GL11.glVertex3f(0f, endUp, -cable.widthDiv2)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + endUp + height)
-            GL11.glVertex3f(0f, endUp, cable.widthDiv2)
-            GL11.glTexCoord2f(tx + cable.widthDiv2 * 0.5f, ty + endUp)
-            GL11.glVertex3f(height, endUp, cable.widthDiv2)
-            GL11.glTexCoord2f(tx - cable.widthDiv2 * 0.5f, ty + endUp)
-            GL11.glVertex3f(height, endUp, -cable.widthDiv2)
-            GL11.glEnd()
+             val v0 = floatArrayOf(0f, startUp, -cable.widthDiv2, tx - (cable.widthDiv2 - height) * 0.5f, ty + startUp)
+             val v1 = floatArrayOf(0f, endUp, -cable.widthDiv2, tx - (cable.widthDiv2 - height) * 0.5f, ty + endUp)
+             val v2 = floatArrayOf(height, startUp, -cable.widthDiv2, tx - cable.widthDiv2 * 0.5f, ty + startUp)
+             val v3 = floatArrayOf(height, endUp, -cable.widthDiv2, tx - cable.widthDiv2 * 0.5f, ty + endUp)
+             val v4 = floatArrayOf(height, startUp, cable.widthDiv2, tx + cable.widthDiv2 * 0.5f, ty + startUp)
+             val v5 = floatArrayOf(height, endUp, cable.widthDiv2, tx + cable.widthDiv2 * 0.5f, ty + endUp)
+             val v6 = floatArrayOf(0f, startUp, cable.widthDiv2, tx + (cable.widthDiv2 + height) * 0.5f, ty + startUp)
+             val v7 = floatArrayOf(0f, endUp, cable.widthDiv2, tx + (cable.widthDiv2 + height) * 0.5f, ty + endUp)
+
+             drawQuad(consumer, pose, normal, light, overlay, v0, v1, v2, v3, 0f, 0f, -1f)
+             drawQuad(consumer, pose, normal, light, overlay, v2, v3, v4, v5, 1f, 0f, 0f)
+             drawQuad(consumer, pose, normal, light, overlay, v4, v5, v6, v7, 0f, 0f, 1f)
+             
+             if (drawBottom) {
+                 val v8 = floatArrayOf(0f, startUp, -cable.widthDiv2, tx - (cable.widthDiv2 - height) * 0.5f, ty + startUp)
+                 val v9 = floatArrayOf(0f, endUp, -cable.widthDiv2, tx - (cable.widthDiv2 - height) * 0.5f, ty + endUp)
+                 drawQuad(consumer, pose, normal, light, overlay, v6, v7, v9, v8, 0f, 0f, -1f)
+             }
+             
+             // End cap
+             val c0 = floatArrayOf(0f, endUp, cable.widthDiv2, tx - cable.widthDiv2 * 0.5f, ty + endUp + height)
+             val c1 = floatArrayOf(0f, endUp, -cable.widthDiv2, tx + cable.widthDiv2 * 0.5f, ty + endUp + height)
+             val c2 = floatArrayOf(height, endUp, -cable.widthDiv2, tx + cable.widthDiv2 * 0.5f, ty + endUp)
+             val c3 = floatArrayOf(height, endUp, cable.widthDiv2, tx - cable.widthDiv2 * 0.5f, ty + endUp)
+             drawQuadSimple(consumer, pose, normal, light, overlay, c0, c1, c2, c3, 0f, 1f, 0f)
         }
     }
 

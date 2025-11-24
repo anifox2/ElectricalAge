@@ -14,7 +14,7 @@ class HeatFurnaceDescriptor(
     val val3: Int,
     val val4: Double,
     val thermalLoad: ThermalLoadInitializer,
-    val obj: Obj3D? = null
+    override var obj: Obj3D? = null
 ) : TransparentNodeDescriptor(
     name,
     HeatFurnaceElement::class.java,

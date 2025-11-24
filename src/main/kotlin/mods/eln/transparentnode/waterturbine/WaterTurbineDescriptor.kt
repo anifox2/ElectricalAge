@@ -11,7 +11,7 @@ import net.minecraft.world.item.Item
 
 class WaterTurbineDescriptor(
     name: String?,
-    var obj: Obj3D?,
+    override var obj: Obj3D?,
     var cable: ElectricalCableDescriptor,
     var nominalPower: Double,
     var maxVoltage: Double,

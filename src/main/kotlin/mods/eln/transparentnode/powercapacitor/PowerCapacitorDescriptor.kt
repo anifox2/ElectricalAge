@@ -8,7 +8,7 @@ import mods.eln.misc.SeriesFunction
 
 class PowerCapacitorDescriptor(
     name: String,
-    val obj: Obj3D?,
+    override var obj: Obj3D?,
     val series: SeriesFunction,
     val voltage: Double
 ) : TransparentNodeDescriptor(

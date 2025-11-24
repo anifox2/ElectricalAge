@@ -1,5 +1,7 @@
 package mods.eln.sixnode
 
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import mods.eln.gui.*
@@ -43,6 +45,11 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
     init {
         voltageLevelColor = VoltageLevelColor.fromCable(cable)
         // setDefaultIcon("emergencylamp")
+    }
+
+    override fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, signal: Boolean) {
+        mainCeiling.draw(poseStack, consumer, packedLight, packedOverlay)
+        panelCeiling.draw(poseStack, consumer, packedLight, packedOverlay)
     }
 
     fun draw(onCeiling: Boolean = false, on: Boolean = false, mirrorSign: Boolean = false) {

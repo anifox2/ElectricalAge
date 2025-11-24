@@ -1,5 +1,8 @@
 package mods.eln.sixnode
 
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
+import net.minecraft.client.renderer.RenderType
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.*
@@ -74,6 +77,12 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
     override fun appendHoverText(itemStack: ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<Component>, flag: TooltipFlag) {
         super.appendHoverText(itemStack, level, list, flag)
         function.infos.split("\n").forEach { list.add(Component.literal(it)) }
+    }
+
+    override fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, signal: Boolean) {
+        pins.forEach { it?.draw(poseStack, consumer, packedLight, packedOverlay) }
+        case?.draw(poseStack, consumer, packedLight, packedOverlay)
+        top?.draw(poseStack, consumer, packedLight, packedOverlay)
     }
 }
 
@@ -164,8 +173,15 @@ open class AnalogChipRender(entity: SixNodeEntity, side: Direction, descriptor: 
 
     override fun draw() {
         super.draw()
-        front!!.glRotateOnX()
-        descriptor.draw()
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+
+        poseStack.pushPose()
+        front!!.rotatePoseOnX(poseStack)
+        descriptor.draw(poseStack, buffer.getBuffer(RenderType.solid()), light, overlay, false)
+        poseStack.popPose()
     }
 
     override fun getCableRender(lrdu: LRDU): CableRenderDescriptor? = when (lrdu) {
@@ -580,7 +596,7 @@ class SummingUnit : AnalogFunction() {
 
     internal val gains = arrayOf(1.0, 1.0, 1.0)
 
-    override fun process(inputs: Array<Double?>, deltaTime: Double) =
+    override fun process(inputs: Array<Double?>, deltaTime: Double): Double =
         gains[0] * (inputs[0] ?: 0.0) + gains[1] * (inputs[1] ?: 0.0) + gains[2] * (inputs[2] ?: 0.0)
 
     override fun readFromNBT(nbt: CompoundTag, str: String) {
