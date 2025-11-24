@@ -11,6 +11,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -34,9 +36,18 @@ public class ElectricalTimeoutRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
-        front.glRotateOnX();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
 
-        descriptor.draw(timeoutCounter / timeoutValue);
+        poseStack.pushPose();
+        front.rotatePoseOnX(poseStack);
+
+        descriptor.draw(poseStack, buffer, light, overlay, timeoutCounter / timeoutValue);
+        poseStack.popPose();
     }
 
     @Override

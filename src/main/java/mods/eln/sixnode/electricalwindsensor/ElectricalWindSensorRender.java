@@ -8,6 +8,8 @@ import mods.eln.misc.RcInterpolator;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -29,9 +31,16 @@ public class ElectricalWindSensorRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
-        drawSignalPin(front.right(), new float[]{2, 2, 2, 2});
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
 
-        descriptor.draw(alpha);
+        drawSignalPin(poseStack, buffer, front.right(), new float[]{2, 2, 2, 2});
+
+        descriptor.draw(poseStack, buffer, light, overlay, alpha);
     }
 
     @Override

@@ -10,6 +10,8 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -45,12 +47,15 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
-    void draw(float alpha) {
-        if (baseWall != null) baseWall.draw();
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, float alpha) {
+        if (baseWall != null) baseWall.draw(poseStack, buffer, light, overlay);
         if (anemometer != null) {
-            UtilsClient.disableCulling();
-            anemometer.draw(alpha, 0, 1, 0);
-            UtilsClient.enableCulling();
+            poseStack.pushPose();
+            poseStack.translate(0.5, 0.5, 0.5);
+            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(alpha));
+            poseStack.translate(-0.5, -0.5, -0.5);
+            anemometer.draw(poseStack, buffer, light, overlay);
+            poseStack.popPose();
         }
     }
 

@@ -22,6 +22,7 @@ import static mods.eln.i18n.I18N.tr;
 import mods.eln.sim.IResistorDescriptor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 /**
  * Created by svein on 05/08/15.
@@ -97,24 +98,26 @@ public class ResistorDescriptor extends SixNodeDescriptor implements IResistorDe
         Data.addEnergy(newItemStack());
     }
 
-    void draw(float wiperPos) {
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, float wiperPos) {
         //UtilsClient.disableCulling();
         //UtilsClient.disableTexture();
         //GL11.glRotatef(90, 1, 0, 0);
 
 
-        if (null != Base) Base.draw();
-        if (null != ResistorBaseExtension) ResistorBaseExtension.draw();
-        if (null != ResistorCore) ResistorCore.draw();
-        if (null != Cables) Cables.draw();
+        if (null != Base) Base.draw(poseStack, buffer, light, overlay);
+        if (null != ResistorBaseExtension) ResistorBaseExtension.draw(poseStack, buffer, light, overlay);
+        if (null != ResistorCore) ResistorCore.draw(poseStack, buffer, light, overlay);
+        if (null != Cables) Cables.draw(poseStack, buffer, light, overlay);
 
         if (isRheostat) {
             final float wiperSpread = 0.238f;
             wiperPos = (wiperPos - 0.5f) * wiperSpread * 2;
-            ResistorTrack.draw();
-            GL11.glTranslatef(0, 0, wiperPos);
-            ResistorWiper.draw();
-            // GL11.glTranslatef(-wiperPos, 0, 0);
+            if (ResistorTrack != null) ResistorTrack.draw(poseStack, buffer, light, overlay);
+            
+            poseStack.pushPose();
+            poseStack.translate(0, 0, wiperPos);
+            if (ResistorWiper != null) ResistorWiper.draw(poseStack, buffer, light, overlay);
+            poseStack.popPose();
         }
     }
 

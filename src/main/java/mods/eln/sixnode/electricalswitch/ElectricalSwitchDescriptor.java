@@ -16,7 +16,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.math.Axis;
 
 import java.util.Collections;
 import java.util.List;
@@ -149,46 +151,44 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
     }
     */
 
-    public void draw(float on, float distance, BlockEntity e) {
+    public void draw(float on, float distance, BlockEntity e, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         switch (objType) {
             case Button:
-                if (main != null) main.draw();
+                if (main != null) main.draw(poseStack, buffer, combinedLight, combinedOverlay);
 
-                GL11.glTranslatef(leverTx * on, 0f, 0f);
-                if (lever != null) lever.draw();
+                poseStack.pushPose();
+                poseStack.translate(leverTx * on, 0f, 0f);
+                if (lever != null) lever.draw(poseStack, buffer, combinedLight, combinedOverlay);
+                poseStack.popPose();
 
                 if (on < 0.5f) {
-                    GL11.glColor3f(234f / 255f, 80 / 255f, 0f);
-                    UtilsClient.disableLight();
-                    if (led != null) led.draw();
-                    UtilsClient.enableBlend();
-
-                    if (halo != null) {
-                        if (e == null)
-                            UtilsClient.drawLight(halo);
-                        else
-                            UtilsClient.drawHaloNoLightSetup(halo, 234f / 255f, 80 / 255f, 0f, e, false);
-                    }
-
-                    UtilsClient.disableBlend();
-                    UtilsClient.enableLight();
+                    float r = 234f / 255f;
+                    float g = 80f / 255f;
+                    float b = 0f;
+                    if (led != null) UtilsClient.drawLight(led, poseStack, buffer, combinedLight, combinedOverlay, r, g, b, 1f);
+                    if (halo != null) UtilsClient.drawLight(halo, poseStack, buffer, combinedLight, combinedOverlay, r, g, b, 1f);
                 } else {
-                    if (led != null) led.draw();
+                    if (led != null) led.draw(poseStack, buffer, combinedLight, combinedOverlay);
                 }
                 break;
             case Lever:
-                GL11.glPushMatrix();
+                poseStack.pushPose();
                 if (nominalVoltage <= Eln.MVU) {
-                    GL11.glScaled(0.5f, 0.5f, 0.5f);
+                    poseStack.scale(0.5f, 0.5f, 0.5f);
                 }
 
                 if (main != null)
-                    main.draw();
+                    main.draw(poseStack, buffer, combinedLight, combinedOverlay);
 
-                if (lever != null)
-                    lever.draw(on * (alphaOn - alphaOff) + alphaOff, 0, 1, 0);
+                if (lever != null) {
+                    poseStack.pushPose();
+                    float angle = on * (alphaOn - alphaOff) + alphaOff;
+                    poseStack.mulPose(Axis.YP.rotationDegrees(angle));
+                    lever.draw(poseStack, buffer, combinedLight, combinedOverlay);
+                    poseStack.popPose();
+                }
 
-                GL11.glPopMatrix();
+                poseStack.popPose();
                 break;
 
             default:

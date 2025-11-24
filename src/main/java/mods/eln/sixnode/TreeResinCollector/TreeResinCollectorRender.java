@@ -5,6 +5,8 @@ import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -23,9 +25,17 @@ public class TreeResinCollectorRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
 
-        LRDU.Down.glRotateOnX();
-        descriptor.draw(stock);
+        poseStack.pushPose();
+        LRDU.Down.rotatePoseOnX(poseStack);
+        descriptor.draw(poseStack, buffer, light, overlay, stock);
+        poseStack.popPose();
     }
 
     @Override

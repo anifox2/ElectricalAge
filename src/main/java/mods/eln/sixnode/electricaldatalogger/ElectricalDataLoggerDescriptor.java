@@ -11,7 +11,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -70,46 +71,57 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
-    void draw(DataLogs log, Direction side, LRDU front, int objPosMX, int objPosMZ, byte color) {
-        if (onFloor || side.isY()) front.glRotateOnX();
-        if (!onFloor && side.isNotY()) GL11.glRotatef(90, 1, 0, 0);
-        //GL11.glDisable(GL11.GL_TEXTURE_2D);
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, DataLogs log, Direction side, LRDU front, int objPosMX, int objPosMZ, byte color) {
+        poseStack.pushPose();
+        if (onFloor || side.isY()) front.rotatePoseOnX(poseStack);
+        if (!onFloor && side.isNotY()) poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(90));
+        
         if (main != null) {
-            Utils.setGlColorFromDye(color);
-            main.draw();
-            GL11.glColor3f(1f, 1f, 1f);
+            // Utils.setGlColorFromDye(color);
+            // main.draw();
+            // GL11.glColor3f(1f, 1f, 1f);
+            main.draw(poseStack, buffer, light, overlay);
         }
-        //GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         //Glass (reflections)
-        mods.eln.misc.UtilsClient.INSTANCE.enableBlend();
-        obj.bindTexture("Reflection.png");
-        float rotYaw = Minecraft.getInstance().player.getYRot() / 360.f;
-        float rotPitch = Minecraft.getInstance().player.getXRot() / 180.f;
-        float pos = (((float) Minecraft.getInstance().player.getX()) - ((float) (objPosMX * 2)) + ((float) Minecraft.getInstance().player.getZ()) - ((float) (objPosMZ * 2))) / 24.f;
-        GL11.glColor4f(1, 1, 1, reflc);
-        reflection.draw(rotYaw + pos, rotPitch * 0.857f);
-        mods.eln.misc.UtilsClient.INSTANCE.disableBlend();
+        // mods.eln.misc.UtilsClient.INSTANCE.enableBlend();
+        // obj.bindTexture("Reflection.png");
+        // ...
+        // reflection.draw(rotYaw + pos, rotPitch * 0.857f);
+        // mods.eln.misc.UtilsClient.INSTANCE.disableBlend();
+        
+        if (reflection != null) {
+             // reflection.draw(poseStack, buffer, light, overlay);
+        }
 
         //Plot
         if (log != null) {
-            mods.eln.misc.UtilsClient.INSTANCE.disableLight();
-            // GL11.glPushMatrix();
-            mods.eln.misc.UtilsClient.ledOnOffColor(true);
-            if (led != null) led.draw();
+            // mods.eln.misc.UtilsClient.INSTANCE.disableLight();
+            // mods.eln.misc.UtilsClient.ledOnOffColor(true);
+            if (led != null) {
+                 // UtilsClient.drawLight(poseStack, buffer, led, 0xFF00FF00);
+                 UtilsClient.drawLight(led, poseStack, buffer, light, overlay, 0f, 1f, 0f, 1f);
+            }
 
-            mods.eln.misc.UtilsClient.glDefaultColor();
+            // mods.eln.misc.UtilsClient.glDefaultColor();
 
-            GL11.glTranslatef(tx, ty, tz);
-            GL11.glRotatef(ra, rx, ry, rz);
-            GL11.glScalef(sx, sy, sz);
-            GL11.glColor4f(cr, cg, cb, 1);
-            log.draw(mx, my, textColor);
+            poseStack.pushPose();
+            poseStack.translate(tx, ty, tz);
+            // poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(rx)); // Assuming rx, ry, rz are euler angles or axis?
+            // GL11.glRotatef(ra, rx, ry, rz); -> Angle, x, y, z
+            // poseStack.mulPose(new com.mojang.math.Axis(new org.joml.Vector3f(rx, ry, rz)).rotationDegrees(ra));
+            poseStack.mulPose(new org.joml.Quaternionf().rotationAxis((float)Math.toRadians(ra), rx, ry, rz));
+            
+            poseStack.scale(sx, sy, sz);
+            // GL11.glColor4f(cr, cg, cb, 1);
+            log.draw(poseStack, buffer, light, overlay, mx, my, textColor);
+            poseStack.popPose();
 
-            mods.eln.misc.UtilsClient.glDefaultColor();
+            // mods.eln.misc.UtilsClient.glDefaultColor();
 
-            mods.eln.misc.UtilsClient.INSTANCE.enableLight();
+            // mods.eln.misc.UtilsClient.INSTANCE.enableLight();
         }
+        poseStack.popPose();
     }
 
     @Override

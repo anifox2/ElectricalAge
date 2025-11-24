@@ -236,7 +236,8 @@ class LampSocketElement(_sixNode: SixNode, side: Direction, descriptor: SixNodeD
         lampDescriptor = GenericItemUsingDamageDescriptor.getDescriptor(lamp) as? LampDescriptor
 
         if (lampDescriptor == null) {
-            lampResistor.resistance = Double.POSITIVE_INFINITY
+            // TODO: Review this behavior. Should have no current when no lamp is present
+            lampResistor.highImpedance()
         } else {
             lampDescriptor!!.applyTo(lampResistor)
         }

@@ -15,6 +15,7 @@ import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.Resistor
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.wiki.Data
+import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
@@ -26,6 +27,8 @@ import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.client.renderer.RenderType
 
 class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
     SixNodeDescriptor(name, ElectricalFuseHolderElement::class.java, ElectricalFuseHolderRender::class.java) {
@@ -54,9 +57,9 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
         if (installedFuse != null) {
             if (installedFuse.cableDescriptor != null) {
                 val c = VoltageLevelColor.fromCable(installedFuse.cableDescriptor as ElectricalCableDescriptor)
-                val r = (c.r * 255).toInt()
-                val g = (c.g * 255).toInt()
-                val b = (c.b * 255).toInt()
+                val r = (c.getRed() * 255).toInt()
+                val g = (c.getGreen() * 255).toInt()
+                val b = (c.getBlue() * 255).toInt()
 
                 if (fuseType != null) {
                     val texture = fuseType.getTextureResource() ?: ResourceLocation("eln", "textures/missing.png")

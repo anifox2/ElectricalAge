@@ -14,6 +14,8 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,10 +42,8 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
-    void draw() {
-        UtilsClient.disableCulling();
-        if (main != null) main.draw();
-        UtilsClient.enableCulling();
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay) {
+        if (main != null) main.draw(poseStack, buffer, light, overlay);
     }
 
     @Override

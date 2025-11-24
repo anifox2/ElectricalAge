@@ -38,13 +38,17 @@ class ElectricalFireDetectorRender(tileEntity: SixNodeEntity, side: Direction, d
     }
 
     override fun draw() {
-        
+        super.draw()
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
 
         if (!descriptor.batteryPowered) {
-            drawSignalPin(front!!.right(), descriptor.pinDistance)
+            drawSignalPin(poseStack, buffer, front!!.right(), descriptor.pinDistance)
         }
 
-        descriptor.draw(ledOn)
+        descriptor.draw(poseStack, buffer, light, overlay, ledOn)
     }
 
     override fun publishUnserialize(stream: DataInputStream) {

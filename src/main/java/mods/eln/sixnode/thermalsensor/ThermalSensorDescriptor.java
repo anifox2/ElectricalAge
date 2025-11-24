@@ -12,6 +12,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.List;
 
@@ -60,9 +62,9 @@ public class ThermalSensorDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
-    void draw(boolean renderAdapter) {
-        if (main != null) main.draw();
-        if (renderAdapter && adapter != null) adapter.draw();
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, boolean renderAdapter) {
+        if (main != null) main.draw(poseStack, buffer, light, overlay);
+        if (renderAdapter && adapter != null) adapter.draw(poseStack, buffer, light, overlay);
     }
 
     @Nullable

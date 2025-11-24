@@ -8,6 +8,8 @@ import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.client.gui.screens.Screen;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -44,9 +46,15 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int combinedLight = getCurrentLight();
+        int combinedOverlay = getCurrentOverlay();
 
-        front.glRotateOnX();
-        descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(blockEntity));
+        front.rotatePoseOnX(poseStack);
+        descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(blockEntity), poseStack, buffer, combinedLight, combinedOverlay);
     }
 
     @Override

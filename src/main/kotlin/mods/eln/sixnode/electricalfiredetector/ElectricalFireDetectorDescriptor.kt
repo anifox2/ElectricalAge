@@ -13,6 +13,10 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import org.lwjgl.opengl.GL11
 import java.util.Collections
+import com.mojang.blaze3d.vertex.PoseStack
+import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.client.renderer.RenderType
+import net.minecraft.resources.ResourceLocation
 
 class ElectricalFireDetectorDescriptor(
     name: String,
@@ -40,15 +44,15 @@ class ElectricalFireDetectorDescriptor(
         }
     }
 
-    fun draw(firePresent: Boolean) {
-        detector?.draw()
+    fun draw(poseStack: PoseStack, buffer: MultiBufferSource, light: Int, overlay: Int, firePresent: Boolean) {
+        detector?.draw(poseStack, buffer, light, overlay)
         if (led != null) {
             if (firePresent) {
-                UtilsClient.drawLight(led!!)
+                UtilsClient.drawLight(led!!, poseStack, buffer, light, overlay, 1f, 0f, 0f, 1f)
             } else {
-                GL11.glColor3f(0.5f, 0.5f, 0.5f)
-                led!!.draw()
-                GL11.glColor3f(1f, 1f, 1f)
+                val texture = led!!.getTextureResource() ?: ResourceLocation("eln", "textures/missing.png")
+                val consumer = buffer.getBuffer(RenderType.entityCutout(texture))
+                led!!.drawColored(poseStack, consumer, light, overlay, 128, 128, 128, 255)
             }
         }
     }

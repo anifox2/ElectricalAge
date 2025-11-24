@@ -174,7 +174,7 @@ object ElnPacketHandler {
                 stream.readInt(),
                 stream.readByte().toInt()
             )
-            val node = NodeManager.instance!!.getNodeFromCoordonate(coordinate)
+            val node = NodeManager.instance?.getNodeFromCoordonate(coordinate)
             if (node != null && node.nodeUuid == stream.readUTF()) {
                 node.networkUnserialize(stream, player as? ServerPlayer)
             } else {

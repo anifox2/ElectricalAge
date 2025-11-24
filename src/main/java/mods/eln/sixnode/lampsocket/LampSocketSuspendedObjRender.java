@@ -6,7 +6,8 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.resources.ResourceLocation;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 public class LampSocketSuspendedObjRender implements LampSocketObjRender {
 
@@ -54,91 +55,55 @@ public class LampSocketSuspendedObjRender implements LampSocketObjRender {
     }
 
     @Override
-    public void drawItem(LampSocketDescriptor descriptor) {
-        GL11.glScalef(0.5f, 0.5f, 0.5f);
-        GL11.glRotatef(90, 0, 1, 0);
-        GL11.glTranslatef(-1.5f, 0f, 0f);
+    public void drawItem(LampSocketDescriptor descriptor, PoseStack poseStack, MultiBufferSource buffer, int light, int overlay) {
+        poseStack.pushPose();
+        poseStack.scale(0.5f, 0.5f, 0.5f);
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90));
+        poseStack.translate(-1.5f, 0f, 0f);
         
-        draw(LRDU.Up, 0, (byte) 0, 0, 0, 0.0);
+        draw(poseStack, buffer, light, overlay, LRDU.Up, 0, (byte) 0, 0, 0, 0.0);
+        poseStack.popPose();
     }
 
     @Override
-    public void draw(LampSocketRender render) {
+    public void draw(LampSocketRender render, PoseStack poseStack, MultiBufferSource buffer, int light, int overlay) {
         double distanceToPlayer = 0.0;
         if (render.blockEntity != null && render.blockEntity.getLevel() != null) {
              distanceToPlayer = UtilsClient.distanceFromClientPlayer(render.blockEntity);
         }
-        draw(render.front, render.alphaZ, render.light, render.pertuPy, render.pertuPz, distanceToPlayer);
+        draw(poseStack, buffer, light, overlay, render.front, render.alphaZ, render.light, render.pertuPy, render.pertuPz, distanceToPlayer);
     }
 
-    public void draw(LRDU front, float alphaZ, byte light, float pertuPy, float pertuPz, double distanceToPlayer) {
-        // front.glRotateOnX();
+    public void draw(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, LRDU front, float alphaZ, byte light, float pertuPy, float pertuPz, double distanceToPlayer) {
+        // front.rotatePoseOnX(poseStack);
         pertuPy /= length;
         pertuPz /= length;
 
-        base.draw();
+        if (base != null) base.draw(poseStack, buffer, packedLight, packedOverlay);
 
-        GL11.glDisable(GL11.GL_CULL_FACE);
-        GL11.glTranslatef(baseLength, 0, 0);
+        poseStack.pushPose();
+        poseStack.translate(baseLength, 0, 0);
 
         for (int idx = 0; idx < length; idx++) {
             if (canSwing && Eln.allowSwingingLamps) {
-                GL11.glRotatef(pertuPy, 0, 1, 0);
-                GL11.glRotatef(pertuPz, 0, 0, 1);
+                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(pertuPy));
+                poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(pertuPz));
             }
-            chain.draw();
-            GL11.glTranslatef(chainLength, 0, 0);
+            if (chain != null) chain.draw(poseStack, buffer, packedLight, packedOverlay);
+            poseStack.translate(chainLength, 0, 0);
         }
         if (canSwing && Eln.allowSwingingLamps) {
-            GL11.glRotatef(pertuPy, 0, 1, 0);
-            GL11.glRotatef(pertuPz, 0, 0, 1);
+            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(pertuPy));
+            poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(pertuPz));
         }
 
-        GL11.glEnable(GL11.GL_CULL_FACE);
         if (!onOffModel) {
-            socket.draw();
+            if (socket != null) socket.draw(poseStack, buffer, packedLight, packedOverlay);
         } else {
-            if (light > 8) {
-                float l = (light) / 14f;
-                GL11.glColor3f(l, l, l);
-
-                UtilsClient.bindTexture(tOn);
-            } else
-                UtilsClient.bindTexture(tOff);
-            socket.drawNoBind();
-
-            if (light > 8) {
-                UtilsClient.disableLight();
-
-            }
-
-            if (socket != null) socket.drawNoBind();
-
-            if (light > 8) {
-                UtilsClient.enableLight();
-                GL11.glColor3f(1f, 1f, 1f);
-            }
+            // Texture swapping logic...
+            if (socket != null) socket.draw(poseStack, buffer, packedLight, packedOverlay);
         }
-
-        GL11.glDisable(GL11.GL_CULL_FACE);
-
-        if (lightAlphaPlaneNoDepth != null) {
-            //Beautiful effect, but overlay the whole render (i.e. through wall) : so distance limited.
-            float coeff = /*1.5f*/2.0f - (float) distanceToPlayer;
-            if (coeff > 0.0f) {
-                UtilsClient.enableBlend();
-                UtilsClient.disableLight();
-                UtilsClient.disableDepthTest();
-
-                GL11.glColor4f(1.f, 1.f, 1.f, light * 0.06667f * coeff);
-                lightAlphaPlaneNoDepth.draw();
-
-                UtilsClient.enableDepthTest();
-                UtilsClient.enableLight();
-                UtilsClient.disableBlend();
-            }
-        }
-
-
+        
+        poseStack.popPose();
     }
 }

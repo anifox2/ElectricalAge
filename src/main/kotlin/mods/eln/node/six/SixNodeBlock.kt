@@ -86,15 +86,31 @@ class SixNodeBlock(properties: Properties) : NodeBlock(properties, { pos, state 
         val start = player.eyePosition
         val look = player.lookAngle
         val end = start.add(look.x * 5.0, look.y * 5.0, look.z * 5.0)
-        val hit = level.clip(ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player))
+        
+        // Raytrace against elements to find the correct one
+        var bestHit: BlockHitResult? = null
+        var bestDist = Double.MAX_VALUE
+        var bestSide: Direction? = null
+        
+        for (side in Direction.values()) {
+            if (tileEntity.hasElement(side)) {
+                val shape = SHAPES[side.int]
+                val hit = shape.clip(start, end, pos)
+                if (hit != null) {
+                    val dist = start.distanceToSqr(hit.location)
+                    if (dist < bestDist) {
+                        bestDist = dist
+                        bestHit = hit
+                        bestSide = side
+                    }
+                }
+            }
+        }
 
-        if (hit.type == HitResult.Type.MISS) return false
-        
-        val sideHit = hit.direction
-        
         val sixNode = tileEntity.node as SixNode? ?: return true
         if (sixNode.sixNodeCacheBlock !== Blocks.AIR) {
-            if (!player.isCreative) {
+            // Logic for cached block (if any)
+             if (!player.isCreative) {
                  // val stack = ItemStack(sixNode.sixNodeCacheBlock) 
                  // sixNode.dropItem(stack)
             }
@@ -104,7 +120,9 @@ class SixNodeBlock(properties: Properties) : NodeBlock(properties, { pos, state 
             return false
         }
         
-        if (false == sixNode.playerAskToBreakSubBlock(player as? net.minecraft.server.level.ServerPlayer, fromIntMinecraftSide(sideHit.ordinal)!!)) return false
+        val targetSide = bestSide ?: fromIntMinecraftSide(level.clip(ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player)).direction.ordinal)!!
+
+        if (false == sixNode.playerAskToBreakSubBlock(player as? net.minecraft.server.level.ServerPlayer, targetSide)) return false
         
         return if (sixNode.ifSideRemain) true else super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid)
     }
@@ -144,7 +162,22 @@ class SixNodeBlock(properties: Properties) : NodeBlock(properties, { pos, state 
     }
 
     override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape {
-        return Shapes.block() 
+        val entity = getEntity(level, pos) ?: return Shapes.empty()
+        
+        if (entity.hasVolume(level, pos)) return Shapes.block()
+
+        var shape: VoxelShape = Shapes.empty()
+        for (side in Direction.values()) {
+            if (entity.hasElement(side)) {
+                shape = Shapes.or(shape, SHAPES[side.int])
+            }
+        }
+        
+        if (shape.isEmpty) {
+             return Shapes.block() // Fallback to allow interaction if something went wrong or it's just the block
+        }
+        
+        return shape
     }
 
     fun getIfOtherBlockIsSolid(level: Level, pos: BlockPos, direction: Direction): Boolean {
@@ -169,6 +202,15 @@ class SixNodeBlock(properties: Properties) : NodeBlock(properties, { pos, state 
         get() = "s"
 
     companion object {
+        val SHAPES = arrayOf(
+            Block.box(0.0, 0.0, 0.0, 2.0, 16.0, 16.0), // XN (West)
+            Block.box(14.0, 0.0, 0.0, 16.0, 16.0, 16.0), // XP (East)
+            Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0), // YN (Down)
+            Block.box(0.0, 14.0, 0.0, 16.0, 16.0, 16.0), // YP (Up)
+            Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 2.0), // ZN (North)
+            Block.box(0.0, 0.0, 14.0, 16.0, 16.0, 16.0) // ZP (South)
+        )
+
         fun isIn(value: Double, min: Double, max: Double): Boolean {
             return if (value >= min && value <= max) true else false
         }

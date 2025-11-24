@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalredstoneoutput;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -39,13 +41,12 @@ public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
-    void draw(int redstone) {
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, int redstone) {
         //LRDU.Down.glRotateOnX();
-        if (main != null) main.draw();
+        if (main != null) main.draw(poseStack, buffer, combinedLight, combinedOverlay);
 
         float light = redstone / 15f;
-        GL11.glColor4f(light, light, light, 1f);
-        UtilsClient.drawLight(led);
+        if (led != null) UtilsClient.drawLight(led, poseStack, buffer, combinedLight, combinedOverlay, light, light, light, 1f);
     }
 
     @Override

@@ -14,7 +14,8 @@ import mods.eln.item.ItemDefault.IPlugIn;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -58,20 +59,28 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor implements IPlug
         Data.addSignal(newItemStack());
     }
 
-    void draw(float open, boolean ledOn[]) {
-        if (main != null) main.draw();
-        if (door != null) door.draw((1f - open) * alphaOff, 0f, 1f, 0f);
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, float open, boolean ledOn[]) {
+        if (main != null) main.draw(poseStack, buffer, light, overlay);
+        if (door != null) {
+            poseStack.pushPose();
+            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees((1f - open) * alphaOff));
+            door.draw(poseStack, buffer, light, overlay);
+            poseStack.popPose();
+        }
 
         for (int idx = 0; idx < 8; idx++) {
             if (ledOn[idx]) {
+                int color;
                 if ((idx & 3) == 0)
-                    GL11.glColor3f(0.8f, 0f, 0f);
+                    color = 0xFFCC0000;
                 else
-                    GL11.glColor3f(0f, 0.8f, 0f);
-                UtilsClient.drawLight(led[idx]);
+                    color = 0xFF00CC00;
+                float r = ((color >> 16) & 0xFF) / 255f;
+                float g = ((color >> 8) & 0xFF) / 255f;
+                float b = (color & 0xFF) / 255f;
+                UtilsClient.drawLight(led[idx], poseStack, buffer, light, overlay, r, g, b, 1f);
             } else {
-                GL11.glColor3f(0.3f, 0.3f, 0.3f);
-                led[idx].draw();
+                led[idx].draw(poseStack, buffer, light, overlay);
             }
         }
     }

@@ -17,6 +17,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -49,17 +51,27 @@ public class LampSupplyRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
+
+        poseStack.pushPose();
 
         float[] pinDistances = new float[]{4.98f, 4.98f, 5.98f, 5.98f};
 
         if (side.isY()) {
-            drawPowerPin(front.rotate4PinDistances(pinDistances));
-            front.glRotateOnX();
+            drawPowerPin(poseStack, buffer, light, overlay, front.rotate4PinDistances(pinDistances));
+            front.rotatePoseOnX(poseStack);
         } else {
-            drawPowerPin(pinDistances);
-            LRDU.Down.glRotateOnX();
+            drawPowerPin(poseStack, buffer, light, overlay, pinDistances);
+            LRDU.Down.rotatePoseOnX(poseStack);
         }
-        descriptor.draw(interpolator.get());
+        descriptor.draw(poseStack, buffer, light, overlay, interpolator.get());
+        
+        poseStack.popPose();
     }
 
     @Override

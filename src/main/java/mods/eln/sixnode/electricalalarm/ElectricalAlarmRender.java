@@ -14,6 +14,9 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 
@@ -37,15 +40,24 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
 
+        poseStack.pushPose();
 
         if (side.isY()) {
-            front.right().glRotateOnX();
-            drawSignalPin(LRDU.Down, descriptor.pinDistance);
+            front.right().rotatePoseOnX(poseStack);
+            drawSignalPin(poseStack, buffer, LRDU.Down, descriptor.pinDistance);
         } else {
-            drawSignalPin(front, descriptor.pinDistance);
+            drawSignalPin(poseStack, buffer, front, descriptor.pinDistance);
         }
-        descriptor.draw(warm, rotAlpha);
+        descriptor.draw(poseStack, buffer, light, overlay, warm, rotAlpha);
+        
+        poseStack.popPose();
     }
 
     @Override

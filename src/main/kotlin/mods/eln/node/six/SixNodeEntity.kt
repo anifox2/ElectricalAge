@@ -200,6 +200,15 @@ class SixNodeEntity(pos: net.minecraft.core.BlockPos, state: net.minecraft.world
         node.onBlockPlacedBy(level!!, Coordinate(this), front ?: Direction.N, entityLiving, stack)
     }
 
+    fun hasElement(side: Direction): Boolean {
+        if (level?.isClientSide == true) {
+            return elementRenderList[side.int] != null
+        } else {
+            val n = node as? SixNode ?: return false
+            return n.sideElementList[side.int] != null
+        }
+    }
+
     companion object {
         const val singleTargetId = 2
     }

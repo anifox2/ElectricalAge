@@ -11,6 +11,8 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,15 +42,18 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
-    void draw(boolean state, EntitySensorFilterDescriptor filter) {
-        if (detector != null) detector.draw();
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, boolean state, EntitySensorFilterDescriptor filter) {
+        if (detector != null) detector.draw(poseStack, buffer, light, overlay);
         if (state) {
+            float r, g, b;
             if (filter == null) {
-                GL11.glColor3f(1f, 1f, 0f);
+                r = 1f; g = 1f; b = 0f;
             } else {
-                filter.glColor();
+                r = filter.r; g = filter.g; b = filter.b;
             }
-            UtilsClient.drawLight(haloMask);
+            if (haloMask != null) {
+                UtilsClient.drawLight(haloMask, poseStack, buffer, light, overlay, r, g, b, 1f);
+            }
         }
     }
 

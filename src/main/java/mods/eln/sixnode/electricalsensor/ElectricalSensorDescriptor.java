@@ -1,6 +1,8 @@
 package mods.eln.sixnode.electricalsensor;
 
 import mods.eln.Eln;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -32,8 +34,8 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
-    void draw() {
-        if (main != null) main.draw();
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+        if (main != null) main.draw(poseStack, buffer, combinedLight, combinedOverlay);
     }
 
     @Override

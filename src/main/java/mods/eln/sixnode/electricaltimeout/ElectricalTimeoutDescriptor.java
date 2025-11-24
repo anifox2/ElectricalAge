@@ -9,7 +9,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,15 +53,20 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
-    void draw(float left) {
-        if (main != null) main.draw();
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, float left) {
+        if (main != null) main.draw(poseStack, buffer, light, overlay);
         if (rot != null) {
-            rot.draw(rotEnd + (rotStart - rotEnd) * left, 1f, 0f, 0f);
+            poseStack.pushPose();
+            poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(rotEnd + (rotStart - rotEnd) * left));
+            rot.draw(poseStack, buffer, light, overlay);
+            poseStack.popPose();
         }
         if (led != null) {
-            UtilsClient.ledOnOffColor(left != 0f);
-            UtilsClient.drawLight(led);
-            GL11.glColor3f(1f, 1f, 1f);
+            int color = left != 0f ? 0xFF00B200 : 0xFFB20000;
+            float r = ((color >> 16) & 0xFF) / 255f;
+            float g = ((color >> 8) & 0xFF) / 255f;
+            float b = (color & 0xFF) / 255f;
+            UtilsClient.drawLight(led, poseStack, buffer, light, overlay, r, g, b, 1f);
         }
     }
 

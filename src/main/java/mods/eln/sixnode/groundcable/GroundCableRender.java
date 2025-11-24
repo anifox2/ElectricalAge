@@ -15,6 +15,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -38,12 +40,22 @@ public class GroundCableRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
+
+        poseStack.pushPose();
 
         if (side.isY()) {
-            front.glRotateOnX();
+            front.rotatePoseOnX(poseStack);
         }
 
-        descriptor.draw();
+        descriptor.draw(poseStack, buffer, light, overlay);
+        
+        poseStack.popPose();
     }
 
     @Override

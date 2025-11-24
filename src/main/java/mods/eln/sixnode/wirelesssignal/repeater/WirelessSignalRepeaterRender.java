@@ -7,6 +7,8 @@ import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 public class WirelessSignalRepeaterRender extends SixNodeElementRender {
 
@@ -25,7 +27,14 @@ public class WirelessSignalRepeaterRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
-        front.glRotateOnX();
-        descriptor.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int combinedLight = getCurrentLight();
+        int combinedOverlay = getCurrentOverlay();
+
+        front.rotatePoseOnX(poseStack);
+        descriptor.draw(poseStack, buffer, combinedLight, combinedOverlay);
     }
 }

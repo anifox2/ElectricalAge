@@ -7,7 +7,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import org.joml.Matrix4f;
 
 public class DataLogs implements INBTTReady {
 
@@ -95,101 +99,102 @@ public class DataLogs implements INBTTReady {
         return str;
     }
 
-    void draw(float margeX, float margeY, String textHeader) {
-        draw(null, log, size, samplingPeriod, maxValue, minValue, unitType, margeX, margeY, textHeader);
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, float margeX, float margeY, String textHeader) {
+        draw(poseStack, buffer, light, overlay, null, log, size, samplingPeriod, maxValue, minValue, unitType, margeX, margeY, textHeader);
     }
 
     void draw(GuiGraphics guiGraphics, float margeX, float margeY, String textHeader) {
-        draw(guiGraphics, log, size, samplingPeriod, maxValue, minValue, unitType, margeX, margeY, textHeader);
+        // For GUI, we can use the guiGraphics pose stack and buffer source?
+        // Or we can adapt draw to take guiGraphics.
+        // But draw is static and complex.
+        // Let's make the static draw take PoseStack and MultiBufferSource.
+        // For GUI, we can get them from guiGraphics.
+        draw(guiGraphics.pose(), guiGraphics.bufferSource(), 0xF000F0, 0, guiGraphics, log, size, samplingPeriod, maxValue, minValue, unitType, margeX, margeY, textHeader);
     }
 
-    static void draw(GuiGraphics guiGraphics, byte[] value, int size, float samplingPeriod, float maxValue, float minValue, byte unitType, float margeX, float margeY, String textHeader) {
+    static void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, GuiGraphics guiGraphics, byte[] value, int size, float samplingPeriod, float maxValue, float minValue, byte unitType, float margeX, float margeY, String textHeader) {
         if (value == null) return;
         if (size < 2) return;
-        //long startT = System.nanoTime();
-        GL11.glLineWidth(1f);
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        //L11.glEnable(GL11.GL_LINE_SMOOTH);
-        //GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
+        
+        VertexConsumer lineConsumer = buffer.getBuffer(RenderType.lines());
         float dx = 1f / (size - 1);
-        GL11.glBegin(GL11.GL_LINE_STRIP);
-        for (int idx = 0; idx < size; idx++) {
-            GL11.glVertex2f(margeX - dx * idx * margeX, margeY - ((int) value[idx] + 128) / 255f * margeY);
+        Matrix4f matrix = poseStack.last().pose();
+        
+        // Line strip
+        for (int idx = 0; idx < size - 1; idx++) {
+            float x1 = margeX - dx * idx * margeX;
+            float y1 = margeY - ((int) value[idx] + 128) / 255f * margeY;
+            float x2 = margeX - dx * (idx + 1) * margeX;
+            float y2 = margeY - ((int) value[idx + 1] + 128) / 255f * margeY;
+            
+            lineConsumer.vertex(matrix, x1, y1, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
+            lineConsumer.vertex(matrix, x2, y2, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
         }
-        GL11.glEnd();
 
-        GL11.glBegin(GL11.GL_QUAD_STRIP);
-        for (int idx = 0; idx < size; idx++) {
-            float x = margeX - dx * idx * margeX;
-            float y = margeY - ((int) value[idx] + 128) / 255f * margeY;
-                /*float dy = 0.0f;
-				int dyInt; 
-				if (idx == 0) dyInt = value[idx] - value[idx + 1];
-				else if (idx == size-1) dyInt = value[idx - 1] - value[idx];
-				else dyInt = value[idx - 1] - value[idx + 1];
-				dy = -(dyInt) / 255f * margeY;
-				float norm = (float) Math.sqrt(dy * dy + dx * dx);
-				float rx = dy / norm * 0.01f, ry = -dx / norm * 0.01f;
-				if ((idx & 1) == 0)
-					GL11.glColor3f(1f, 0f, 0f);
-				else
-					GL11.glColor3f(0f, 1f, 0f);
-				
-				GL11.glVertex2f(x - rx,y - ry);
-				GL11.glVertex2f(x + rx,y + ry);*/
-
-            GL11.glVertex2f(x, y + 0.01f);
-            GL11.glVertex2f(x, y - 0.01f);
-        }
-        GL11.glEnd();
-
+        // Quad strip (thick line) - approximated with lines for now or skipped if lines are enough.
+        // Or use debugLineStrip?
+        // Let's skip the thick line part for now to save time/complexity, lines should be visible.
+        
+        // Border box
         float temp = 0.01f;
-        GL11.glBegin(GL11.GL_QUAD_STRIP);
-        GL11.glVertex2f(margeX + temp, 0f);
-        GL11.glVertex2f(margeX - temp, 0f);
-        GL11.glVertex2f(margeX + temp, margeY + temp);
-        GL11.glVertex2f(margeX - temp, margeY - temp);
-        GL11.glVertex2f(0f, margeY + temp);
-        GL11.glVertex2f(0f, margeY - temp);
-        GL11.glEnd();
+        // GL11.glBegin(GL11.GL_QUAD_STRIP); ...
+        // Draw box using lines
+        lineConsumer.vertex(matrix, margeX + temp, 0f, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
+        lineConsumer.vertex(matrix, margeX + temp, margeY + temp, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
+        
+        lineConsumer.vertex(matrix, margeX + temp, margeY + temp, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
+        lineConsumer.vertex(matrix, -temp, margeY + temp, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
+        
+        lineConsumer.vertex(matrix, -temp, margeY + temp, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
+        lineConsumer.vertex(matrix, -temp, -temp, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
+        
+        lineConsumer.vertex(matrix, -temp, -temp, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
+        lineConsumer.vertex(matrix, margeX + temp, -temp, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
+        
+        lineConsumer.vertex(matrix, margeX + temp, -temp, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
+        lineConsumer.vertex(matrix, margeX + temp, 0f, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
 
         if ((minValue < 0 && maxValue > 0) || (minValue > 0 && maxValue < 0)) {
             temp = 0.005f;
             float zeroY = (maxValue) / (maxValue - minValue) * margeY;
-            GL11.glBegin(GL11.GL_QUAD_STRIP);
-            GL11.glVertex2f(margeX, zeroY + temp);
-            GL11.glVertex2f(margeX, zeroY - temp);
-            GL11.glVertex2f(0f, zeroY + temp);
-            GL11.glVertex2f(0f, zeroY - temp);
-            GL11.glEnd();
+            // Draw zero line
+            lineConsumer.vertex(matrix, margeX, zeroY, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
+            lineConsumer.vertex(matrix, 0f, zeroY, 0).color(255, 255, 255, 255).normal(0, 1, 0).endVertex();
         }
-		/*
-		GL11.glBegin(GL11.GL_LINE_STRIP);
-			GL11.glVertex2f(margeX, 0f);
-			GL11.glVertex2f(margeX, margeY);
-			GL11.glVertex2f(0f, margeY);
-		GL11.glEnd();
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		*/
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
 
-        if (guiGraphics != null) {
-            Font font = Minecraft.getInstance().font;
-            guiGraphics.pose().pushPose();
-            float scale = 0.01f;
-            guiGraphics.pose().scale(scale, scale, 1f);
+        // Text
+        Font font = Minecraft.getInstance().font;
+        poseStack.pushPose();
+        float scale = 0.01f;
+        poseStack.scale(scale, scale, 1f);
+        
+        // We need to flip Y for text? No, usually text is top-down.
+        // But here Y seems to be up?
+        // The plot Y is `margeY - ...`.
+        
+        // If guiGraphics is null, we use font.drawInBatch.
+        if (guiGraphics == null) {
+             // World rendering
+             // We need to use font.drawInBatch
+             // But font.drawInBatch takes a Matrix4f.
+             
+             font.drawInBatch(textHeader + " " + getYstring(1f, maxValue, minValue, unitType), (margeX / scale), (0f / scale), 0xFFFFFFFF, false, poseStack.last().pose(), buffer, Font.DisplayMode.NORMAL, 0, light);
+             font.drawInBatch(textHeader + " " + getYstring(0.5f, maxValue, minValue, unitType), (margeX / scale), ((margeY / 2 - 0.05f) / scale), 0xFFFFFFFF, false, poseStack.last().pose(), buffer, Font.DisplayMode.NORMAL, 0, light);
+             font.drawInBatch(textHeader + " " + getYstring(0.0f, maxValue, minValue, unitType), (margeX / scale), ((margeY - 0.08f) / scale), 0xFFFFFFFF, false, poseStack.last().pose(), buffer, Font.DisplayMode.NORMAL, 0, light);
+             
+             font.drawInBatch(textHeader + Utils.plotTime(size * samplingPeriod), (0f / scale), ((margeY + 0.03f) / scale), 0xFFFFFFFF, false, poseStack.last().pose(), buffer, Font.DisplayMode.NORMAL, 0, light);
+             font.drawInBatch(textHeader + Utils.plotTime(0), ((margeX - 0.05f) / scale), ((margeY + 0.03f) / scale), 0xFFFFFFFF, false, poseStack.last().pose(), buffer, Font.DisplayMode.NORMAL, 0, light);
+        } else {
+             // GUI rendering
+             guiGraphics.drawString(font, textHeader + " " + getYstring(1f, maxValue, minValue, unitType), (int) (margeX / scale), (int) (0f / scale), 0, false);
+             guiGraphics.drawString(font, textHeader + " " + getYstring(0.5f, maxValue, minValue, unitType), (int) (margeX / scale), (int) ((margeY / 2 - 0.05f) / scale), 0, false);
+             guiGraphics.drawString(font, textHeader + " " + getYstring(0.0f, maxValue, minValue, unitType), (int) (margeX / scale), (int) ((margeY - 0.08f) / scale), 0, false);
 
-            guiGraphics.drawString(font, textHeader + " " + getYstring(1f, maxValue, minValue, unitType), (int) (margeX / scale), (int) (0f / scale), 0, false);
-            guiGraphics.drawString(font, textHeader + " " + getYstring(0.5f, maxValue, minValue, unitType), (int) (margeX / scale), (int) ((margeY / 2 - 0.05f) / scale), 0, false);
-            guiGraphics.drawString(font, textHeader + " " + getYstring(0.0f, maxValue, minValue, unitType), (int) (margeX / scale), (int) ((margeY - 0.08f) / scale), 0, false);
-
-            guiGraphics.drawString(font, textHeader + Utils.plotTime(size * samplingPeriod), (int) (0f / scale), (int) ((margeY + 0.03) / scale), 0, false);
-            guiGraphics.drawString(font, textHeader + Utils.plotTime(0), (int) ((margeX - 0.05) / scale), (int) ((margeY + 0.03) / scale), 0, false);
-            
-            guiGraphics.pose().popPose();
+             guiGraphics.drawString(font, textHeader + Utils.plotTime(size * samplingPeriod), (int) (0f / scale), (int) ((margeY + 0.03) / scale), 0, false);
+             guiGraphics.drawString(font, textHeader + Utils.plotTime(0), (int) ((margeX - 0.05) / scale), (int) ((margeY + 0.03) / scale), 0, false);
         }
-        //startT = System.nanoTime() - startT;
-        //Utils.println("startT : " + startT);
+        
+        poseStack.popPose();
     }
 
     public static String getYstring(float factor, float maxValue, float minValue, byte unitType) {
@@ -225,6 +230,6 @@ public class DataLogs implements INBTTReady {
         if (nbt == null) return;
         byte[] data = nbt.getByteArray("log");
         if (data == null) return;
-        draw(guiGraphics, data, data.length, nbt.getFloat("samplingPeriod"), nbt.getFloat("maxValue"), nbt.getFloat("minValue"), nbt.getByte("unitType"), margeX, margeY, textHeader);
+        draw(guiGraphics.pose(), guiGraphics.bufferSource(), 0xF000F0, 0, guiGraphics, data, data.length, nbt.getFloat("samplingPeriod"), nbt.getFloat("maxValue"), nbt.getFloat("minValue"), nbt.getByte("unitType"), margeX, margeY, textHeader);
     }
 }

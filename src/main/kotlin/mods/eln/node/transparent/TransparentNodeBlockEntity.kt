@@ -58,7 +58,7 @@ open class TransparentNodeBlockEntity(type: BlockEntityType<*>, pos: BlockPos, s
             e.printStackTrace()
         }
         
-        NodeManager.instance!!.addNode(node)
+        NodeManager.instance?.addNode(node)
         this.internalNode = node
         
         node.onBlockPlacedBy(level!!, Coordinate(this), front ?: Direction.N, entityLiving, stack)

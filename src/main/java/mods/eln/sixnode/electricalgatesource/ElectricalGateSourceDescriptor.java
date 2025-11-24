@@ -12,7 +12,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -65,8 +66,8 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
         autoReset = true;
     }
 
-    void draw(float factor, float distance, BlockEntity e) {
-        render.draw(factor, distance, e);
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, float factor, float distance, BlockEntity e) {
+        render.draw(poseStack, buffer, light, overlay, factor, distance, e);
     }
 
     @Override

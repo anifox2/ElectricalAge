@@ -10,7 +10,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -61,22 +62,27 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
         Data.addUtilities(newItemStack());
     }
 
-    void draw(boolean warm, float rotAlpha) {
-        if (warm) UtilsClient.bindTexture(onTexture);
-        else UtilsClient.bindTexture(offTexture);
-        if (main != null) main.drawNoBind();
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, boolean warm, float rotAlpha) {
+        // Texture switching not fully supported yet with MultiBufferSource without modifying Obj3DPart
+        // if (warm) UtilsClient.bindTexture(onTexture);
+        // else UtilsClient.bindTexture(offTexture);
+        
+        if (main != null) main.draw(poseStack, buffer, light, overlay);
+        
         if (rot != null) {
-            GL11.glDisable(GL11.GL_CULL_FACE);
-            GL11.glColor3f(1.0f, 1.0f, 1.0f);
-            if (warm) UtilsClient.disableLight();
-            else GL11.glDisable(GL11.GL_LIGHTING);
-            rot.drawNoBind(rotAlpha, 1f, 0f, 0f);
-            if (warm) UtilsClient.enableLight();
-            else GL11.glEnable(GL11.GL_LIGHTING);
-            GL11.glEnable(GL11.GL_CULL_FACE);
+            // GL11.glDisable(GL11.GL_CULL_FACE);
+            // GL11.glColor3f(1.0f, 1.0f, 1.0f);
+            
+            int rotLight = light;
+            if (warm) rotLight = 15728880; // Max light
+            
+            rot.draw(poseStack, buffer, rotLight, overlay, rotAlpha, 1f, 0f, 0f);
+            
+            // GL11.glEnable(GL11.GL_CULL_FACE);
         }
         if (lightPart != null) {
-            UtilsClient.drawLightNoBind(lightPart);
+            // UtilsClient.drawLightNoBind(lightPart);
+            UtilsClient.drawLight(lightPart, poseStack, buffer, light, overlay, 1f, 0f, 0f, 1f);
         }
     }
 

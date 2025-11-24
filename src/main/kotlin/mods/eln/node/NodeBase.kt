@@ -199,7 +199,7 @@ abstract class NodeBase {
                     for (lrdu in LRDU.values()) {
                         val elementSide = direction.applyLRDU(lrdu)
                         val otherBlockPos = emptyBlockPos.offset(elementSide.toMCDirection().normal)
-                        val otherNode = NodeManager.instance!!.getNodeFromCoordonate(Coordinate(otherBlockPos, coordinate.dimension))
+                        val otherNode = NodeManager.instance?.getNodeFromCoordonate(Coordinate(otherBlockPos, coordinate.dimension))
                             ?: continue
                         val otherDirection = elementSide.inverse()
                         val otherLRDU = otherDirection.getLRDUGoingTo(direction)!!.inverse()

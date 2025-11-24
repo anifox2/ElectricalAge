@@ -180,7 +180,7 @@ class GridLink : INBTTReady {
 
         fun getElementFromCoordinate(coord: Coordinate?): GridElement? {
             if (coord == null) return null
-            val element = NodeManager.instance!!.getTransparentNodeFromCoordinate(coord)
+            val element = NodeManager.instance?.getTransparentNodeFromCoordinate(coord)
             if (element is GridElement) {
                 return element
             } else {

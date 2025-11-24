@@ -19,9 +19,9 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -50,19 +50,29 @@ public class BatteryChargerRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
 
-        drawPowerPin(descriptor.pinDistance);
+        poseStack.pushPose();
+
+        drawPowerPin(poseStack, buffer, light, overlay, new float[]{(float)descriptor.pinDistance, (float)descriptor.pinDistance, (float)descriptor.pinDistance, (float)descriptor.pinDistance, (float)descriptor.pinDistance, (float)descriptor.pinDistance});
 
         if (side.isY()) {
-            front.right().glRotateOnX();
+            front.right().rotatePoseOnX(poseStack);
         }
 
-        drawItemStack(stacks[0], 0.1875, 0.15625, 0.15625, alpha, 0.2f);
-        drawItemStack(stacks[1], 0.1875, 0.15625, -0.15625, alpha, 0.2f);
-        drawItemStack(stacks[2], 0.1875, -0.15625, 0.15625, alpha, 0.2f);
-        drawItemStack(stacks[3], 0.1875, -0.15625, -0.15625, alpha, 0.2f);
+        drawItemStack(poseStack, buffer, light, overlay, stacks[0], 0.1875, 0.15625, 0.15625, alpha, 0.2f);
+        drawItemStack(poseStack, buffer, light, overlay, stacks[1], 0.1875, 0.15625, -0.15625, alpha, 0.2f);
+        drawItemStack(poseStack, buffer, light, overlay, stacks[2], 0.1875, -0.15625, 0.15625, alpha, 0.2f);
+        drawItemStack(poseStack, buffer, light, overlay, stacks[3], 0.1875, -0.15625, -0.15625, alpha, 0.2f);
 
-        descriptor.draw(batteryPresence, charged);
+        descriptor.draw(poseStack, buffer, light, overlay, batteryPresence, charged);
+        
+        poseStack.popPose();
     }
 
     @Override
@@ -71,19 +81,19 @@ public class BatteryChargerRender extends SixNodeElementRender {
         if (alpha > 360) alpha -= 360;
     }
 
-    public void drawItemStack(ItemStack stack, double x, double y, double z, float roty, float scale) {
+    public void drawItemStack(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, ItemStack stack, double x, double y, double z, float roty, float scale) {
         if (stack == null || stack.isEmpty()) return;
 
-        GL11.glPushMatrix();
-        GL11.glTranslatef((float) x, (float) y, (float) z);
-        GL11.glRotatef(90, 0f, 1f, 0f);
-        GL11.glRotatef(roty, 0, 1, 0);
-        GL11.glScalef(scale, scale, scale);
-        GL11.glTranslatef(0.0f, -0.25f, 0.0f);
+        poseStack.pushPose();
+        poseStack.translate((float) x, (float) y, (float) z);
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90));
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(roty));
+        poseStack.scale(scale, scale, scale);
+        poseStack.translate(0.0f, -0.25f, 0.0f);
         
-        Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.FIXED, 0xF000F0, OverlayTexture.NO_OVERLAY, new PoseStack(), Minecraft.getInstance().renderBuffers().bufferSource(), blockEntity.getLevel(), 0);
+        Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.FIXED, light, overlay, poseStack, buffer, blockEntity.getLevel(), 0);
         
-        GL11.glPopMatrix();
+        poseStack.popPose();
     }
 
     @Nullable

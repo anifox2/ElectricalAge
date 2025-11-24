@@ -80,7 +80,7 @@ abstract class NodeBlockEntity(type: net.minecraft.world.level.block.entity.Bloc
             }
             if (internalNode == null) {
                 if (level == null) return null
-                val nodeFromCoordonate = NodeManager.instance!!.getNodeFromCoordonate(Coordinate(this))
+                val nodeFromCoordonate = NodeManager.instance?.getNodeFromCoordonate(Coordinate(this))
                 if (nodeFromCoordonate is Node) {
                     internalNode = nodeFromCoordonate
                 } else {

@@ -1,5 +1,6 @@
 package mods.eln.node.six
 
+import com.mojang.blaze3d.vertex.PoseStack
 import mods.eln.cable.CableRender
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.cable.CableRenderType
@@ -21,6 +22,7 @@ import mods.eln.sound.SoundCommand
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.Container
+import net.minecraft.client.renderer.MultiBufferSource
 import org.lwjgl.opengl.GL11
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
@@ -38,31 +40,33 @@ abstract class SixNodeElementRender(@JvmField var blockEntity: SixNodeEntity, @J
         needRedraw = true
     }
 
-    fun drawPowerPin(d: FloatArray?) {
-        drawPowerPin(front, d)
+    fun drawPowerPin(poseStack: PoseStack, buffer: MultiBufferSource, d: FloatArray?) {
+        drawPowerPin(poseStack, buffer, front, d)
     }
 
-    fun drawPowerPin(front: LRDU?, d: FloatArray?) {
+    fun drawPowerPin(poseStack: PoseStack, buffer: MultiBufferSource, front: LRDU?, d: FloatArray?) {
         if (distanceFromClientPlayer(blockEntity) > 20) return
-        GL11.glColor3f(0f, 0f, 0f)
-        drawConnectionPinSixNode(front!!, d!!, 1.8f, 0.9f)
-        GL11.glColor3f(1f, 1f, 1f)
+        val light = currentLight
+        val overlay = currentOverlay
+        UtilsClient.drawConnectionPinSixNode(poseStack, buffer, light, overlay, front!!, d!!, 1.8f, 0.9f)
     }
 
-    fun drawPowerPinWhite(front: LRDU?, d: FloatArray?) {
+    fun drawPowerPinWhite(poseStack: PoseStack, buffer: MultiBufferSource, front: LRDU?, d: FloatArray?) {
         if (distanceFromClientPlayer(blockEntity) > 20) return
-        drawConnectionPinSixNode(front!!, d!!, 1.8f, 0.9f)
+        val light = currentLight
+        val overlay = currentOverlay
+        UtilsClient.drawConnectionPinSixNode(poseStack, buffer, light, overlay, front!!, d!!, 1.8f, 0.9f)
     }
 
-    fun drawSignalPin(d: FloatArray?) {
-        drawSignalPin(front, d)
+    fun drawSignalPin(poseStack: PoseStack, buffer: MultiBufferSource, d: FloatArray?) {
+        drawSignalPin(poseStack, buffer, front, d)
     }
 
-    fun drawSignalPin(front: LRDU?, d: FloatArray?) {
+    fun drawSignalPin(poseStack: PoseStack, buffer: MultiBufferSource, front: LRDU?, d: FloatArray?) {
         if (distanceFromClientPlayer(blockEntity) > 20) return
-        GL11.glColor3f(0f, 0f, 0f)
-        drawConnectionPinSixNode(front!!, d!!, 0.9f, 0.9f)
-        GL11.glColor3f(1f, 1f, 1f)
+        val light = currentLight
+        val overlay = currentOverlay
+        UtilsClient.drawConnectionPinSixNode(poseStack, buffer, light, overlay, front!!, d!!, 0.9f, 0.9f)
     }
 
     var needRedraw = false
@@ -334,5 +338,28 @@ abstract class SixNodeElementRender(@JvmField var blockEntity: SixNodeEntity, @J
         this.currentBuffer = buffer
         this.currentLight = packedLight
         this.currentOverlay = packedOverlay
+    }
+
+    fun drawPowerPin(poseStack: PoseStack, buffer: MultiBufferSource, light: Int, overlay: Int, d: FloatArray?) {
+        drawPowerPin(poseStack, buffer, light, overlay, front, d)
+    }
+
+    fun drawPowerPin(poseStack: PoseStack, buffer: MultiBufferSource, light: Int, overlay: Int, front: LRDU?, d: FloatArray?) {
+        if (distanceFromClientPlayer(blockEntity) > 20) return
+        // Black color for the pin base?
+        // GL11.glColor3f(0f, 0f, 0f)
+        UtilsClient.drawConnectionPinSixNode(poseStack, buffer, light, overlay, front!!, d!!, 1.8f, 0.9f)
+        // GL11.glColor3f(1f, 1f, 1f)
+    }
+
+    fun drawSignalPin(poseStack: PoseStack, buffer: MultiBufferSource, light: Int, overlay: Int, d: FloatArray?) {
+        drawSignalPin(poseStack, buffer, light, overlay, front, d)
+    }
+
+    fun drawSignalPin(poseStack: PoseStack, buffer: MultiBufferSource, light: Int, overlay: Int, front: LRDU?, d: FloatArray?) {
+        if (distanceFromClientPlayer(blockEntity) > 20) return
+        // GL11.glColor3f(0f, 0f, 0f)
+        UtilsClient.drawConnectionPinSixNode(poseStack, buffer, light, overlay, front!!, d!!, 0.9f, 0.9f)
+        // GL11.glColor3f(1f, 1f, 1f)
     }
 }

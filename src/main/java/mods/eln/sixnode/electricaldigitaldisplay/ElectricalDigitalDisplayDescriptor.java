@@ -14,6 +14,11 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
@@ -62,58 +67,64 @@ public class ElectricalDigitalDisplayDescriptor extends SixNodeDescriptor {
         else GL11.glColor3f(0.0f, 0.0f, 0.0f);
     }
 
-    void draw(int value, boolean strobe, Style style) { draw(value, strobe, style, 0, 0); }
-    void draw(int value, boolean strobe, Style style, int dye) { draw(value, strobe, style, dye, 0); }
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, int value, boolean strobe, Style style) { draw(poseStack, buffer, light, overlay, value, strobe, style, 0, 0); }
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, int value, boolean strobe, Style style, int dye) { draw(poseStack, buffer, light, overlay, value, strobe, style, dye, 0); }
 
-    void draw(int value, boolean strobe, Style style, int dye, int dotconfig) {
-        if(value < 0) value = 0;
-        if(value > 9999) value = 9999;
-        if(dotconfig < 0) dotconfig = 0;
-        if(dotconfig > 255) dotconfig = 255;
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, int value, boolean strobe, Style style, int dye, int dotconfig) {
+        if (base != null) base.draw(poseStack, buffer, light, overlay);
+        if (glass != null) glass.draw(poseStack, buffer, light, overlay);
 
-        switch(style) {
-            case LED:
-                obj.bindTexture("Digits_LED.png");
-                break;
+        float r, g, b;
+        if (dye == 0) {
+            r = 1f; g = 0f; b = 0f;
+        } else {
+            float[] color = net.minecraft.world.item.DyeColor.byId(dye).getTextureDiffuseColors();
+            r = color[0]; g = color[1]; b = color[2];
         }
+        int ri = (int)(r * 255);
+        int gi = (int)(g * 255);
+        int bi = (int)(b * 255);
+        int ai = 255;
 
-        UtilsClient.disableLight();
-        GL11.glColor3f(0.95f, 0.0f, 0.0f);
-        int divisor = 1;
-        for(int i = 0; i < 4; i++) {
-            if(strobe) {
-                digits[i].draw(10.0f/16.0f, 0.0f);
-            } else {
-                digits[i].draw((value / divisor) % 10 / 16.0f, 0.0f);
+        ResourceLocation texture = digits[0].getTextureResource();
+        if (texture == null) texture = new ResourceLocation("eln", "textures/missing.png");
+        VertexConsumer consumer = buffer.getBuffer(RenderType.entityCutout(texture));
+
+        if (strobe) {
+            int digit;
+            digit = value % 10;
+            digits[0].drawColored(poseStack, consumer, light, overlay, digit / 16.f, 0f, ri, gi, bi, ai);
+            digit = (value / 10) % 10;
+            digits[1].drawColored(poseStack, consumer, light, overlay, digit / 16.f, 0f, ri, gi, bi, ai);
+            digit = (value / 100) % 10;
+            digits[2].drawColored(poseStack, consumer, light, overlay, digit / 16.f, 0f, ri, gi, bi, ai);
+            digit = (value / 1000) % 10;
+            digits[3].drawColored(poseStack, consumer, light, overlay, digit / 16.f, 0f, ri, gi, bi, ai);
+
+            for (int i = 0; i < 5; i++) {
+                if (((dotconfig >> i) & 1) != 0) {
+                    dots[i].drawColored(poseStack, consumer, light, overlay, ri, gi, bi, ai);
+                }
             }
-            divisor *= 10;
+            for (int i = 0; i < 3; i++) {
+                if (((dotconfig >> (i + 5)) & 1) != 0) {
+                    colons[i].drawColored(poseStack, consumer, light, overlay, ri, gi, bi, ai);
+                }
+            }
+        } else {
+            int dimRi = (int)(r * 0.1f * 255);
+            int dimGi = (int)(g * 0.1f * 255);
+            int dimBi = (int)(b * 0.1f * 255);
+            for (int i = 0; i < 4; i++) {
+                digits[i].drawColored(poseStack, consumer, light, overlay, 10 / 16.f, 0f, dimRi, dimGi, dimBi, ai);
+            }
+            for (int i = 0; i < 5; i++) {
+                dots[i].drawColored(poseStack, consumer, light, overlay, dimRi, dimGi, dimBi, ai);
+            }
+            for (int i = 0; i < 3; i++) {
+                colons[i].drawColored(poseStack, consumer, light, overlay, dimRi, dimGi, dimBi, ai);
+            }
         }
-
-        if(!strobe) {
-            int i;
-            for(i = 0; i < 5; i++) {
-                bitToColor(dotconfig & (1 << i));
-                dots[i].draw();
-            }
-            for(i = 0; i < 3; i++) {
-                bitToColor(dotconfig & (1 << (5 + i)));
-                colons[i].draw();
-            }
-        }
-
-        Utils.setGlColorFromDye(dye);
-        UtilsClient.enableLight();
-        base.draw();
-
-        GL11.glColor3f(1.0f, 1.0f, 1.0f);
-        UtilsClient.enableBlend();
-        obj.bindTexture("Reflection.png");
-        LocalPlayer player = Minecraft.getInstance().player;
-        float normYaw = player.getYRot() / 360.0f;
-        float normPitch = player.getXRot() / 180.0f;
-        float offset = (((float) player.getX()) + ((float) player.getZ())) / 64.0f;
-        glass.draw(normYaw + offset, normPitch * 0.875f);
-        UtilsClient.disableBlend();
     }
 
 }

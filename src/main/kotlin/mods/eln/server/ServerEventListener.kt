@@ -100,7 +100,7 @@ class ServerEventListener {
         val dimId = Utils.getDimensionId(level)
         loadedWorlds.remove(dimId)
         try {
-            NodeManager.instance!!.unload(dimId)
+            NodeManager.instance?.unload(dimId)
             Eln.ghostManager?.unload(dimId)
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -165,7 +165,7 @@ class ServerEventListener {
     companion object {
         fun readFromEaWorldNBT(nbt: CompoundTag) {
             try {
-                NodeManager.instance!!.loadFromNbt(nbt.getCompound("nodes"))
+                NodeManager.instance?.loadFromNbt(nbt.getCompound("nodes"))
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -179,7 +179,7 @@ class ServerEventListener {
         fun writeToEaWorldNBT(nbt: CompoundTag?, dim: Int) {
             if (nbt == null) return
             try {
-                NodeManager.instance!!.saveToNbt(Utils.getOrCreateCompound(nbt, "nodes"), dim)
+                NodeManager.instance?.saveToNbt(Utils.getOrCreateCompound(nbt, "nodes"), dim)
             } catch (e: Exception) {
                 e.printStackTrace()
             }

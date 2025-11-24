@@ -1,5 +1,8 @@
 package mods.eln.sixnode.electricalbreaker;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.math.Axis;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
@@ -75,10 +78,14 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
     }
     */
 
-    public void draw(float on, float distance) {
-        if (main != null) main.draw();
+    public void draw(float on, float distance, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+        if (main != null) main.draw(poseStack, buffer, combinedLight, combinedOverlay);
         if (lever != null) {
-            lever.draw(on * (alphaOn - alphaOff) + alphaOff, 0, 1, 0);
+            poseStack.pushPose();
+            float angle = on * (alphaOn - alphaOff) + alphaOff;
+            poseStack.mulPose(Axis.YP.rotationDegrees(angle));
+            lever.draw(poseStack, buffer, combinedLight, combinedOverlay);
+            poseStack.popPose();
         }
     }
 

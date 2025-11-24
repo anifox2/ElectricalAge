@@ -7,6 +7,8 @@ import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -28,10 +30,16 @@ public class ElectricalRedstoneOutputRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int combinedLight = getCurrentLight();
+        int combinedOverlay = getCurrentOverlay();
 
-        drawSignalPin(front.right(), descriptor.pinDistance);
+        drawSignalPin(poseStack, buffer, combinedLight, combinedOverlay, front.right(), descriptor.pinDistance);
 
-        descriptor.draw(redOutput);
+        descriptor.draw(poseStack, buffer, combinedLight, combinedOverlay, redOutput);
     }
 
     @Override

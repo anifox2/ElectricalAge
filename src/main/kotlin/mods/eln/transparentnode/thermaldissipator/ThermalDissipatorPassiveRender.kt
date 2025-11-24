@@ -16,4 +16,9 @@ class ThermalDissipatorPassiveRender(
         front!!.glRotateXnRef()
         descriptor.draw()
     }
+
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        front!!.rotateXnRef(poseStack)
+        descriptor.draw(poseStack, bufferSource, packedLight, packedOverlay)
+    }
 }

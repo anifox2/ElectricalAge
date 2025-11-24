@@ -24,6 +24,7 @@ import net.minecraft.world.item.TooltipFlag
 import net.minecraft.network.chat.Component
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
+import net.minecraft.client.renderer.MultiBufferSource
 
 class DiodeDescriptor(
     name: String,
@@ -42,10 +43,10 @@ class DiodeDescriptor(
 
     var descriptor: String? = null
 
-    override fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, signal: Boolean) {
-        base?.draw(poseStack, consumer, packedLight, packedOverlay)
-        diodeCables?.draw(poseStack, consumer, packedLight, packedOverlay)
-        diodeCore?.draw(poseStack, consumer, packedLight, packedOverlay)
+    fun draw(poseStack: PoseStack, buffer: MultiBufferSource, light: Int, overlay: Int) {
+        base?.draw(poseStack, buffer, light, overlay)
+        diodeCables?.draw(poseStack, buffer, light, overlay)
+        diodeCore?.draw(poseStack, buffer, light, overlay)
     }
 
     init {
@@ -111,11 +112,5 @@ class DiodeDescriptor(
         super.addRealismContext(list)
         list.add(tr("Works, with the caveat that it's delayed a sim tick"))
         return RealisticEnum.IDEAL
-    }
-
-    fun draw() {
-        base?.draw()
-        diodeCables?.draw()
-        diodeCore?.draw()
     }
 }

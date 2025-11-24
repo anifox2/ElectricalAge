@@ -22,6 +22,7 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateInput
 import mods.eln.wiki.Data
+import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
@@ -224,7 +225,7 @@ class ElectricalVuMeterRender(tileEntity: SixNodeEntity, side: Direction, descri
         val light = currentLight
         val overlay = currentOverlay
         
-        drawSignalPin(front, descriptor.pinDistance)
+        drawSignalPin(poseStack, buffer, front, descriptor.pinDistance)
         if (side == Direction.YP || side == Direction.YN) {
             front!!.right().rotatePoseOnX(poseStack)
         }

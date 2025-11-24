@@ -10,7 +10,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.tags.BlockTags;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,14 +40,18 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
-    void draw(float factor) {
-        if (main != null) main.draw();
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, float factor) {
+        if (main != null) main.draw(poseStack, buffer, light, overlay);
         if (fill != null) {
             if (factor > 1f) factor = 1f;
             factor = (1f - factor);
-            GL11.glTranslatef(0f, 0f, factor * emptyT);
-            GL11.glScalef(1f - factor * (1f - emptyS), 1f - factor * (1f - emptyS), 1f);
-            fill.draw();
+            
+            poseStack.pushPose();
+            poseStack.translate(0f, 0f, factor * emptyT);
+            float scale = 1f - factor * (1f - emptyS);
+            poseStack.scale(scale, scale, 1f);
+            fill.draw(poseStack, buffer, light, overlay);
+            poseStack.popPose();
         }
     }
 

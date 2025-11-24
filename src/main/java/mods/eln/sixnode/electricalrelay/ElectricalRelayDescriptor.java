@@ -12,7 +12,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.RenderType;
 
 import java.util.Collections;
 import java.util.List;
@@ -85,18 +89,27 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
     }
 
 
-    void draw(float factor) {
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, float factor) {
         //UtilsClient.disableBlend();
-        UtilsClient.disableCulling();
-        GL11.glScalef(0.5f, 0.5f, 0.5f);
-        if (main != null) main.draw();
-        if (relay0 != null) relay0.draw(factor * (r0rOn - r0rOff) + r0rOff, 0f, 0f, 1f);
-        if (relay1 != null) relay1.draw(factor * (r1rOn - r1rOff) + r1rOff, 0f, 0f, 1f);
-        GL11.glPushMatrix();
-        voltageLevelColor.setGLColor();
-        if (backplate != null) backplate.draw();
-        GL11.glPopMatrix();
-        UtilsClient.enableCulling();
+        //UtilsClient.disableCulling();
+        poseStack.pushPose();
+        poseStack.scale(0.5f, 0.5f, 0.5f);
+        if (main != null) main.draw(poseStack, buffer, light, overlay);
+        if (relay0 != null) relay0.draw(poseStack, buffer, light, overlay, factor * (r0rOn - r0rOff) + r0rOff, 0f, 0f, 1f);
+        if (relay1 != null) relay1.draw(poseStack, buffer, light, overlay, factor * (r1rOn - r1rOff) + r1rOff, 0f, 0f, 1f);
+        
+        if (backplate != null) {
+            ResourceLocation texture = backplate.getTextureResource();
+            if (texture == null) texture = new ResourceLocation("eln", "textures/missing.png");
+            VertexConsumer consumer = buffer.getBuffer(RenderType.entityCutout(texture));
+            backplate.drawColored(poseStack, consumer, light, overlay, 
+                (int)(voltageLevelColor.getRed()*255), 
+                (int)(voltageLevelColor.getGreen()*255), 
+                (int)(voltageLevelColor.getBlue()*255), 
+                255);
+        }
+        poseStack.popPose();
+        //UtilsClient.enableCulling();
     }
 
     @Nullable

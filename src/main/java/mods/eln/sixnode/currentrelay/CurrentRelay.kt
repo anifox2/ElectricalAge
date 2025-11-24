@@ -131,18 +131,7 @@ class CurrentRelayDescriptor(
             .forEach(tooltip::add)
     }
 
-    fun draw(factor: Float) {
-        disableCulling()
-        GL11.glScalef(0.5f, 0.5f, 0.5f)
-        main.draw()
-        relay0.draw(factor * (r0rOn - r0rOff) + r0rOff, 0f, 0f, 1f)
-        relay1.draw(factor * (r1rOn - r1rOff) + r1rOff, 0f, 0f, 1f)
-        GL11.glPushMatrix()
-        voltageLevelColor.setGLColor()
-        backplate.draw()
-        GL11.glPopMatrix()
-        enableCulling()
-    }
+
 
     fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, factor: Float) {
         poseStack.pushPose()
@@ -408,23 +397,19 @@ class CurrentRelayRender(
 
     override fun draw() {
         super.draw()
-        drawSignalPin(front, floatArrayOf(2.5f, 2.5f, 2.5f, 2.5f))
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+
+        drawSignalPin(poseStack, buffer, light, overlay, floatArrayOf(2.5f, 2.5f, 2.5f, 2.5f))
         
-        val poseStack = currentPoseStack
-        val buffer = currentBuffer
-        if (poseStack != null && buffer != null) {
-            val light = currentLight
-            val overlay = currentOverlay
-            val consumer = buffer.getBuffer(net.minecraft.client.renderer.RenderType.solid())
-            
-            poseStack.pushPose()
-            front!!.rotatePoseOnX(poseStack)
-            currentRelayDescriptor.draw(poseStack, consumer, light, overlay, interpolator.get())
-            poseStack.popPose()
-        } else {
-            front!!.glRotateOnX()
-            currentRelayDescriptor.draw(interpolator.get())
-        }
+        val consumer = buffer.getBuffer(net.minecraft.client.renderer.RenderType.solid())
+        
+        poseStack.pushPose()
+        front!!.rotatePoseOnX(poseStack)
+        currentRelayDescriptor.draw(poseStack, consumer, light, overlay, interpolator.get())
+        poseStack.popPose()
     }
 
     override fun refresh(deltaT: Float) {

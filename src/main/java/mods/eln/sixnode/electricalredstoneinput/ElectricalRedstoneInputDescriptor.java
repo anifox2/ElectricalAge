@@ -12,7 +12,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,13 +41,13 @@ public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
-    void draw(int redstone) {
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, int redstone) {
         //LRDU.Down.glRotateOnX();
-        if (main != null) main.draw();
+        if (main != null) main.draw(poseStack, buffer, light, overlay);
 
-        float light = redstone / 15f;
-        GL11.glColor4f(light, light, light, 1f);
-        UtilsClient.drawLight(led);
+        float lightVal = redstone / 15f;
+        // GL11.glColor4f(light, light, light, 1f);
+        UtilsClient.drawLight(led, poseStack, buffer, light, overlay, lightVal, lightVal, lightVal, 1f);
     }
 
     @Override

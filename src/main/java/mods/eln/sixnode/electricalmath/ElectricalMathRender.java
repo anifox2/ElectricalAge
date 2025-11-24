@@ -11,7 +11,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -62,6 +63,12 @@ public class ElectricalMathRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
 
         float[] pinDistances = null;
         if (side.isY()) {
@@ -71,22 +78,19 @@ public class ElectricalMathRender extends SixNodeElementRender {
         }
 
         if (UtilsClient.distanceFromClientPlayer(blockEntity) < 15) {
-            GL11.glColor3f(0, 0, 0);
-            UtilsClient.drawConnectionPinSixNode(front, pinDistances, 1.8f, 1.35f);
-            GL11.glColor3f(1, 0, 0);
-            UtilsClient.drawConnectionPinSixNode(front.right(), pinDistances, 1.8f, 1.35f);
-            GL11.glColor3f(0, 1, 0);
-            UtilsClient.drawConnectionPinSixNode(front.inverse(), pinDistances, 1.8f, 1.35f);
-            GL11.glColor3f(0, 0, 1);
-            UtilsClient.drawConnectionPinSixNode(front.left(), pinDistances, 1.8f, 1.35f);
-            GL11.glColor3f(1, 1, 1);
+            UtilsClient.drawConnectionPinSixNode(poseStack, buffer, light, overlay, front, pinDistances, 1.8f, 1.35f, 0xFF000000);
+            UtilsClient.drawConnectionPinSixNode(poseStack, buffer, light, overlay, front.right(), pinDistances, 1.8f, 1.35f, 0xFFFF0000);
+            UtilsClient.drawConnectionPinSixNode(poseStack, buffer, light, overlay, front.inverse(), pinDistances, 1.8f, 1.35f, 0xFF00FF00);
+            UtilsClient.drawConnectionPinSixNode(poseStack, buffer, light, overlay, front.left(), pinDistances, 1.8f, 1.35f, 0xFF0000FF);
         }
 
+        poseStack.pushPose();
         if (side.isY()) {
-            front.left().glRotateOnX();
+            front.left().rotatePoseOnX(poseStack);
         }
 
-        descriptor.draw(interpolator.get(), ledOn);
+        descriptor.draw(poseStack, buffer, light, overlay, interpolator.get(), ledOn);
+        poseStack.popPose();
     }
 
     @Override

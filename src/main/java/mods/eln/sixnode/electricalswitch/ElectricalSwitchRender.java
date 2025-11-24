@@ -10,6 +10,8 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -35,14 +37,20 @@ public class ElectricalSwitchRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int combinedLight = getCurrentLight();
+        int combinedOverlay = getCurrentOverlay();
 
-        front.glRotateOnX();
+        front.rotatePoseOnX(poseStack);
         if (descriptor.signalSwitch) {
-            drawSignalPin(LRDU.Left, descriptor.pinDistance);
-            drawSignalPin(LRDU.Right, descriptor.pinDistance);
+            drawSignalPin(poseStack, buffer, combinedLight, combinedOverlay, LRDU.Left, descriptor.pinDistance);
+            drawSignalPin(poseStack, buffer, combinedLight, combinedOverlay, LRDU.Right, descriptor.pinDistance);
         } else {
-            drawPowerPin(LRDU.Left, descriptor.pinDistance);
-            drawPowerPin(LRDU.Right, descriptor.pinDistance);
+            drawPowerPin(poseStack, buffer, combinedLight, combinedOverlay, LRDU.Left, descriptor.pinDistance);
+            drawPowerPin(poseStack, buffer, combinedLight, combinedOverlay, LRDU.Right, descriptor.pinDistance);
         }
         
         BlockEntity te = blockEntity;
@@ -50,7 +58,7 @@ public class ElectricalSwitchRender extends SixNodeElementRender {
         if (te != null && te.getLevel() != null) {
              distance = UtilsClient.distanceFromClientPlayer(te.getLevel(), te.getBlockPos().getX(), te.getBlockPos().getY(), te.getBlockPos().getZ());
         }
-        descriptor.draw(interpol.get(), distance, te);
+        descriptor.draw(interpol.get(), distance, te, poseStack, buffer, combinedLight, combinedOverlay);
     }
 
     @Override

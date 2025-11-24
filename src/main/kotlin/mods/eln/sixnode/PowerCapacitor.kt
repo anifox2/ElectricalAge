@@ -46,10 +46,12 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.item.ItemDisplayContext
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
+import net.minecraft.client.renderer.MultiBufferSource
 import org.lwjgl.opengl.GL11
 import java.util.HashMap
 import kotlin.math.abs
 import kotlin.math.pow
+import com.mojang.math.Axis
 
 class PowerCapacitorSixDescriptor(name: String,
                                   obj: Obj3D,
@@ -99,7 +101,7 @@ class PowerCapacitorSixDescriptor(name: String,
         CapacitorCore?.draw(poseStack, consumer, packedLight, packedOverlay)
     }
 
-    override fun draw(poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+    fun draw(poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         if (null != Base) Base!!.draw(poseStack, buffer, packedLight, packedOverlay)
         if (null != CapacitorCables) CapacitorCables!!.draw(poseStack, buffer, packedLight, packedOverlay)
         if (null != CapacitorCore) CapacitorCore!!.draw(poseStack, buffer, packedLight, packedOverlay)

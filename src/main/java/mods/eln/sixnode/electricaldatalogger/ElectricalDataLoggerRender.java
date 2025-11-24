@@ -12,7 +12,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -45,7 +46,14 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
     public void draw() {
         super.draw();
         if (this.blockEntity == null) return;
-        descriptor.draw(this.log, side, front, this.blockEntity.getBlockPos().getX(), this.blockEntity.getBlockPos().getZ(), color);
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
+
+        descriptor.draw(poseStack, buffer, light, overlay, this.log, side, front, this.blockEntity.getBlockPos().getX(), this.blockEntity.getBlockPos().getZ(), color);
     }
 
 	/*

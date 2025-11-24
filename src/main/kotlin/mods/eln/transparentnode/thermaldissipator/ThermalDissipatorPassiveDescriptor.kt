@@ -48,4 +48,8 @@ class ThermalDissipatorPassiveDescriptor(
     fun draw() {
         main?.draw()
     }
+
+    fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        main?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+    }
 }

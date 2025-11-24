@@ -9,6 +9,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -30,6 +32,15 @@ public class ElectricalWatchRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
+
+        poseStack.pushPose();
+
         long time;
         if (upToDate)
             time = getTileEntity().getLevel().getGameTime();
@@ -38,9 +49,11 @@ public class ElectricalWatchRender extends SixNodeElementRender {
         time += 6000;
         time %= 24000;
 
-        front.glRotateOnX();
+        front.rotatePoseOnX(poseStack);
 
-        descriptor.draw(time / 12000f, (time % 1000) / 1000f, upToDate);
+        descriptor.draw(poseStack, buffer, light, overlay, time / 12000f, (time % 1000) / 1000f, upToDate);
+        
+        poseStack.popPose();
     }
 
     @Override

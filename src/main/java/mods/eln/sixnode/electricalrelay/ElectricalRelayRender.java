@@ -13,6 +13,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -39,11 +41,22 @@ public class ElectricalRelayRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
-        //UtilsClient.enableDepthTest();
-        drawSignalPin(front, new float[]{2.5f, 2.5f, 2.5f, 2.5f});
-        front.glRotateOnX();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
 
-        descriptor.draw(interpolator.get());
+        poseStack.pushPose();
+
+        //UtilsClient.enableDepthTest();
+        drawSignalPin(poseStack, buffer, light, overlay, front, new float[]{2.5f, 2.5f, 2.5f, 2.5f});
+        front.rotatePoseOnX(poseStack);
+
+        descriptor.draw(poseStack, buffer, light, overlay, interpolator.get());
+        
+        poseStack.popPose();
     }
 
     @Override

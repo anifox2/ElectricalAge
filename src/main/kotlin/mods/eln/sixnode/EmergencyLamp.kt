@@ -20,6 +20,7 @@ import mods.eln.sim.process.destruct.VoltageStateWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.transparentnode.LampSupplyElement
 import net.minecraft.client.gui.components.Button
+import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag

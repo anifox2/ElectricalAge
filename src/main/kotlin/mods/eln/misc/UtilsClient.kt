@@ -226,6 +226,7 @@ object UtilsClient {
         // TODO: Modern rendering
     }
 
+    @JvmStatic
     fun drawLight(part: Obj3DPart?, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int, r: Float, g: Float, b: Float, a: Float) {
         if (part == null) return
         // Use a lightmap-ignoring render type (like lightning or beacon beam, or custom)
@@ -289,6 +290,16 @@ object UtilsClient {
     @JvmStatic
     fun drawConnectionPinSixNode(front: mods.eln.misc.LRDU, dList: FloatArray, w: Float, h: Float) {
         // TODO: Modern rendering
+    }
+
+    @JvmStatic
+    fun drawConnectionPinSixNode(poseStack: PoseStack, buffer: MultiBufferSource, light: Int, overlay: Int, front: mods.eln.misc.LRDU, dList: FloatArray, w: Float, h: Float) {
+        // TODO: Implement pin rendering
+    }
+
+    @JvmStatic
+    fun drawConnectionPinSixNode(poseStack: PoseStack, buffer: MultiBufferSource, light: Int, overlay: Int, front: mods.eln.misc.LRDU, dList: FloatArray, w: Float, h: Float, color: Int) {
+        // TODO: Implement pin rendering with color
     }
 
     fun mc(): Minecraft {

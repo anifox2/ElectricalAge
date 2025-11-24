@@ -89,7 +89,7 @@ class GhostManager {
     }
 
     fun removeGhostNode(c: Coordinate?) {
-        val node = NodeManager.instance!!.getNodeFromCoordonate(c) ?: return
+        val node = NodeManager.instance?.getNodeFromCoordonate(c) ?: return
         node.onBreakBlock()
     }
 

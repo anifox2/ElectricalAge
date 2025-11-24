@@ -1,5 +1,7 @@
 package mods.eln.sixnode.wirelesssignal.rx;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -67,12 +69,12 @@ public class WirelessSignalRxDescriptor extends SixNodeDescriptor {
     }
     */
 
-    public void draw(boolean connection) {
-        if (main != null) main.draw();
+    public void draw(boolean connection, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+        if (main != null) main.draw(poseStack, buffer, combinedLight, combinedOverlay);
 
         if (led != null) {
-            UtilsClient.ledOnOffColor(connection);
-            UtilsClient.drawLight(led);
+            java.awt.Color color = UtilsClient.ledOnOffColorC(connection);
+            UtilsClient.drawLight(led, poseStack, buffer, combinedLight, combinedOverlay, color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f, 1f);
         }
     }
 

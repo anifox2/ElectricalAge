@@ -7,6 +7,8 @@ import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
@@ -29,9 +31,16 @@ public class WirelessSignalTxRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
-        drawSignalPin(new float[]{2, 2, 2, 2});
-        front.glRotateOnX();
-        descriptor.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int combinedLight = getCurrentLight();
+        int combinedOverlay = getCurrentOverlay();
+
+        drawSignalPin(poseStack, buffer, combinedLight, combinedOverlay, new float[]{2, 2, 2, 2});
+        front.rotatePoseOnX(poseStack);
+        descriptor.draw(poseStack, buffer, combinedLight, combinedOverlay);
     }
 
     @Override

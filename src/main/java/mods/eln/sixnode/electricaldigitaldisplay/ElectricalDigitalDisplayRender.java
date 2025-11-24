@@ -8,6 +8,8 @@ import mods.eln.misc.Utils;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
@@ -43,8 +45,15 @@ public class ElectricalDigitalDisplayRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
-        drawSignalPin(front.inverse(), descriptor.pinDistance);
-        descriptor.draw((int) (min + current * (max - min)), strobe, style, dye, (int) (dots * descriptor.DOT_STATES));
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
+
+        drawSignalPin(poseStack, buffer, front.inverse(), descriptor.pinDistance);
+        descriptor.draw(poseStack, buffer, light, overlay, (int) (min + current * (max - min)), strobe, style, dye, (int) (dots * descriptor.DOT_STATES));
     }
 
     @Override

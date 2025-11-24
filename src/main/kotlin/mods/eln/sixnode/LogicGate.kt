@@ -27,6 +27,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.renderer.MultiBufferSource
 import org.lwjgl.opengl.GL11
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
@@ -59,7 +60,6 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
         top?.draw(poseStack, buffer, packedLight, packedOverlay)
     }
 
-    // ...existing code...
     override fun getFrontFromPlace(side: Direction, player: Player): LRDU? =
         super.getFrontFromPlace(side, player)!!.left()
 
@@ -71,7 +71,6 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
     */
 
     override fun appendHoverText(itemStack: ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<Component>, flag: net.minecraft.world.item.TooltipFlag) {
-// ...existing code...
         super.appendHoverText(itemStack, level, list, flag)
         function.infos.split("\n").forEach { list.add(Component.literal(it)) }
     }

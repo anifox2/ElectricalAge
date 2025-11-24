@@ -10,7 +10,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -40,9 +41,19 @@ public class ResistorRender extends SixNodeElementRender {
 
     @Override
     public void draw() {
-        GL11.glRotatef(90, 1, 0, 0);
-        front.glRotateOnX();
-        descriptor.draw(wiperPos);
+        super.draw();
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
+
+        poseStack.pushPose();
+        poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(90));
+        front.rotatePoseOnX(poseStack);
+        descriptor.draw(poseStack, buffer, light, overlay, wiperPos);
+        poseStack.popPose();
     }
 
     @Nullable

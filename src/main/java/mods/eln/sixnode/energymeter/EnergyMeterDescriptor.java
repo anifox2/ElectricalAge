@@ -8,7 +8,9 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
@@ -50,10 +52,10 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
         Data.addWiring(newItemStack());
     }
 
-    public void draw(double energy, double time, int energyUnit, int timeUnit, boolean drawAll) {
+    public void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, double energy, double time, int energyUnit, int timeUnit, boolean drawAll) {
         // UtilsClient.disableCulling();
-        base.draw();
-        powerDisk.draw(-(float) energy, 0f, 1f, 0f);
+        base.draw(poseStack, buffer, light, overlay);
+        powerDisk.draw(poseStack, buffer, light, overlay, -(float) energy, 0f, 1f, 0f);
 
         {// render energy
             float ox = 0.20859f, oy = 0.15625f, oz = 0;
@@ -71,21 +73,21 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
                     else
                         rot = 0.5 - energy;
                     rot *= 36;
-                    GL11.glPushMatrix();
-                    GL11.glTranslatef(ox, oy, oz);
-                    GL11.glRotatef((float) rot, 0f, 0f, 1f);
-                    GL11.glTranslatef(-ox, -oy, -oz);
-                    energySignWheel.draw();
-                    GL11.glPopMatrix();
+                    poseStack.pushPose();
+                    poseStack.translate(ox, oy, oz);
+                    poseStack.mulPose(Axis.ZP.rotationDegrees((float) rot));
+                    poseStack.translate(-ox, -oy, -oz);
+                    energySignWheel.draw(poseStack, buffer, light, overlay);
+                    poseStack.popPose();
                 }
                 if (energyUnitWheel != null) {
                     double rot = energyUnit * 36;
-                    GL11.glPushMatrix();
-                    GL11.glTranslatef(ox, oy, oz);
-                    GL11.glRotatef((float) rot, 0f, 0f, 1f);
-                    GL11.glTranslatef(-ox, -oy, -oz);
-                    energyUnitWheel.draw();
-                    GL11.glPopMatrix();
+                    poseStack.pushPose();
+                    poseStack.translate(ox, oy, oz);
+                    poseStack.mulPose(Axis.ZP.rotationDegrees((float) rot));
+                    poseStack.translate(-ox, -oy, -oz);
+                    energyUnitWheel.draw(poseStack, buffer, light, overlay);
+                    poseStack.popPose();
                 }
 
                 energy = Math.max(0.0, Math.abs(energy));
@@ -112,12 +114,12 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
                     oldRot = rot;
                     rot *= 36;
-                    GL11.glPushMatrix();
-                    GL11.glTranslatef(ox, oy, oz);
-                    GL11.glRotatef((float) rot, 0f, 0f, 1f);
-                    GL11.glTranslatef(-ox, -oy, -oz);
-                    energyNumberWheel[idx].draw();
-                    GL11.glPopMatrix();
+                    poseStack.pushPose();
+                    poseStack.translate(ox, oy, oz);
+                    poseStack.mulPose(Axis.ZP.rotationDegrees((float) rot));
+                    poseStack.translate(-ox, -oy, -oz);
+                    energyNumberWheel[idx].draw(poseStack, buffer, light, overlay);
+                    poseStack.popPose();
 
                     energy /= 10.0;
                 }
@@ -133,12 +135,12 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
             if (drawAll) {
                 if (timeUnitWheel != null) {
                     double rot = timeUnit * 36;
-                    GL11.glPushMatrix();
-                    GL11.glTranslatef(ox, oy, oz);
-                    GL11.glRotatef((float) rot, 0f, 0f, 1f);
-                    GL11.glTranslatef(-ox, -oy, -oz);
-                    timeUnitWheel.draw();
-                    GL11.glPopMatrix();
+                    poseStack.pushPose();
+                    poseStack.translate(ox, oy, oz);
+                    poseStack.mulPose(Axis.ZP.rotationDegrees((float) rot));
+                    poseStack.translate(-ox, -oy, -oz);
+                    timeUnitWheel.draw(poseStack, buffer, light, overlay);
+                    poseStack.popPose();
                 }
 
                 time = Math.max(0.0, Math.abs(time));
@@ -167,12 +169,12 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
                     oldRot = rot;
                     rot *= 36;
-                    GL11.glPushMatrix();
-                    GL11.glTranslatef(ox, oy, oz);
-                    GL11.glRotatef((float) rot, 0f, 0f, 1f);
-                    GL11.glTranslatef(-ox, -oy, -oz);
-                    timeNumberWheel[idx].draw();
-                    GL11.glPopMatrix();
+                    poseStack.pushPose();
+                    poseStack.translate(ox, oy, oz);
+                    poseStack.mulPose(Axis.ZP.rotationDegrees((float) rot));
+                    poseStack.translate(-ox, -oy, -oz);
+                    timeNumberWheel[idx].draw(poseStack, buffer, light, overlay);
+                    poseStack.popPose();
 
                     time /= 10.0;
                 }

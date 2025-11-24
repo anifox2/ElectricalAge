@@ -20,7 +20,7 @@ class NodeServer {
         if (event.phase != TickEvent.Phase.START) return
         val server = ServerLifecycleHooks.getCurrentServer()
         if (server != null) {
-            for (node in NodeManager.instance!!.nodeList) {
+            for (node in NodeManager.instance?.nodeList ?: emptyList()) {
                 if (node.needPublish) {
                     node.publishToAllPlayer()
                 }
@@ -33,7 +33,7 @@ class NodeServer {
                     container = player.containerMenu as INodeContainer
                     openContainerNode = container.node
                 }
-                for (node in NodeManager.instance!!.nodeList) {
+                for (node in NodeManager.instance?.nodeList ?: emptyList()) {
                     if (node === openContainerNode) {
                         if (counter % (1 + container!!.refreshRateDivider) == 0) node.publishToPlayer(player)
                     }

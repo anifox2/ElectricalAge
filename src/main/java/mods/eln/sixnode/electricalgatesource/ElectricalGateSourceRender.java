@@ -13,6 +13,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -38,14 +40,23 @@ public class ElectricalGateSourceRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
-        drawSignalPin(front, new float[]{3, 3, 3, 3});
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
 
+        drawSignalPin(poseStack, buffer, front, new float[]{3, 3, 3, 3});
+
+        poseStack.pushPose();
         if (side.isY()) {
-            front.glRotateOnX();
+            front.rotatePoseOnX(poseStack);
         } else {
-            LRDU.Down.glRotateOnX();
+            LRDU.Down.rotatePoseOnX(poseStack);
         }
-        descriptor.draw(interpolator.get(), UtilsClient.distanceFromClientPlayer(this.getTileEntity()), getTileEntity());
+        descriptor.draw(poseStack, buffer, light, overlay, interpolator.get(), UtilsClient.distanceFromClientPlayer(this.getTileEntity()), getTileEntity());
+        poseStack.popPose();
     }
 
     @Override

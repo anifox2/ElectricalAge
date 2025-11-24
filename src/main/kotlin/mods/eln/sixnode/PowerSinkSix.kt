@@ -41,8 +41,8 @@ class PowerSinkDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, Po
 
     private var main: Obj3D.Obj3DPart = obj.getPart("main")
 
-    override fun draw(poseStack: PoseStack, consumer: VertexConsumer, packedLight: Int, packedOverlay: Int, signal: Boolean) {
-        main.draw(poseStack, consumer, packedLight, packedOverlay)
+    fun draw(poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        main.draw(poseStack, buffer, packedLight, packedOverlay)
     }
 
     fun draw() {

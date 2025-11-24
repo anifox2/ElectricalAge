@@ -12,6 +12,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,21 +51,21 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
         Data.addLight(new ItemStack(item, 1));
     }
 
-    public void draw(float openFactor) {
-        if (base != null) base.draw();
+    public void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, float openFactor) {
+        if (base != null) base.draw(poseStack, buffer, light, overlay);
         //UtilsClient.drawLight(led);
-        UtilsClient.disableCulling();
+        //UtilsClient.disableCulling();
         //UtilsClient.disableDepthTest();
-        UtilsClient.enableBlend();
-        obj.bindTexture("Glass.png");
+        //UtilsClient.enableBlend();
+        //obj.bindTexture("Glass.png");
         float rotYaw = Minecraft.getInstance().player.getYRot() / 360.f;
         float rotPitch = Minecraft.getInstance().player.getXRot() / 180.f;
         float pos = (((float) Minecraft.getInstance().player.getX()) + ((float) Minecraft.getInstance().player.getZ())) / 64.f;
         if (window != null)
-            window.draw((1f - openFactor) * windowOpenAngle, 0f, 0f, 1f, rotYaw + pos + (openFactor * 0.5f), rotPitch * 0.65f);
-        UtilsClient.disableBlend();
+            window.draw(poseStack, buffer, light, overlay, (1f - openFactor) * windowOpenAngle, 0f, 0f, 1f, rotYaw + pos + (openFactor * 0.5f), rotPitch * 0.65f);
+        //UtilsClient.disableBlend();
         //UtilsClient.enableDepthTest();
-        UtilsClient.enableCulling();
+        //UtilsClient.enableCulling();
     }
 
     /*

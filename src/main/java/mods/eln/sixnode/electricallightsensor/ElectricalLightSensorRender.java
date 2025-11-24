@@ -7,6 +7,8 @@ import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 public class ElectricalLightSensorRender extends SixNodeElementRender {
 
@@ -20,13 +22,24 @@ public class ElectricalLightSensorRender extends SixNodeElementRender {
     @Override
     public void draw() {
         super.draw();
-        drawSignalPin(front.right(), descriptor.pinDistance);
+        PoseStack poseStack = getCurrentPoseStack();
+        if (poseStack == null) return;
+        MultiBufferSource buffer = getCurrentBuffer();
+        if (buffer == null) return;
+        int light = getCurrentLight();
+        int overlay = getCurrentOverlay();
+
+        poseStack.pushPose();
+
+        drawSignalPin(poseStack, buffer, light, overlay, front.right(), descriptor.pinDistance);
 
         if (side.isY()) {
-            front.glRotateOnX();
+            front.rotatePoseOnX(poseStack);
         }
 
-        descriptor.draw();
+        descriptor.draw(poseStack, buffer, light, overlay);
+        
+        poseStack.popPose();
     }
 
     @Override

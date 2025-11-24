@@ -10,6 +10,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,8 +32,8 @@ public class GroundCableDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
-    void draw() {
-        if (main != null) main.draw();
+    void draw(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay) {
+        if (main != null) main.draw(poseStack, buffer, light, overlay);
     }
 
     @Override
