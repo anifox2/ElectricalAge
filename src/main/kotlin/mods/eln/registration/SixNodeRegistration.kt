@@ -170,9 +170,10 @@ object SixNodeRegistration {
         run<Unit> {
             subId = 0
             val localName = I18N.TR_NAME(I18N.Type.NONE, "Signal Cable")
-            val render = CableRenderDescriptor("eln", "sprites/cable.png", 0.95f, 0.95f)
+            val render = CableRenderDescriptor("eln", "textures/block/signalcable.png", 0.95f, 0.95f)
             Eln.instance!!.stdCableRenderSignal = render
             desc = ElectricalCableDescriptor(localName, render, "For signal transmission.", true)
+            desc.iconName = "signalcable"
             Eln.instance!!.signalCableDescriptor = desc
             desc.setPhysicalConstantLikeNormalCable(
                 Eln.SVU, Eln.SVP, 0.02 / 50 * Eln.gateOutputCurrent / Eln.SVII, Eln.SVU * 1.3,
@@ -184,9 +185,10 @@ object SixNodeRegistration {
         run<Unit> {
             subId = 4
             val localName = I18N.TR_NAME(I18N.Type.NONE, "Low Voltage Cable")
-            val render = CableRenderDescriptor("eln", "sprites/cable.png", 1.95f, 0.95f)
+            val render = CableRenderDescriptor("eln", "textures/block/lowvoltagecable.png", 1.95f, 0.95f)
             Eln.instance!!.stdCableRender50V = render
             desc = ElectricalCableDescriptor(localName, render, "For low voltage with high current.", false)
+            desc.iconName = "lowvoltagecable"
             Eln.instance!!.lowVoltageCableDescriptor = desc
             desc.setPhysicalConstantLikeNormalCable(
                 Eln.LVU, Eln.instance!!.LVP(), 0.2 / 20, Eln.LVU * 1.3, Eln.instance!!.LVP() * 1.2, 20.0, Eln.cableWarmLimit,
@@ -205,9 +207,10 @@ object SixNodeRegistration {
         run<Unit> {
             subId = 8
             val localName = I18N.TR_NAME(I18N.Type.NONE, "Medium Voltage Cable")
-            val render = CableRenderDescriptor("eln", "sprites/cable.png", 2.95f, 0.95f)
+            val render = CableRenderDescriptor("eln", "textures/block/mediumvoltagecable.png", 2.95f, 0.95f)
             Eln.instance!!.stdCableRender200V = render
             desc = ElectricalCableDescriptor(localName, render, "miaou", false)
+            desc.iconName = "mediumvoltagecable"
             Eln.instance!!.meduimVoltageCableDescriptor = desc
             desc.setPhysicalConstantLikeNormalCable(
                 Eln.MVU, Eln.instance!!.MVP(), 0.10 / 20, Eln.MVU * 1.3, Eln.instance!!.MVP() * 1.2, 30.0, Eln.cableWarmLimit,
@@ -218,9 +221,10 @@ object SixNodeRegistration {
         run<Unit> {
             subId = 12
             val localName = I18N.TR_NAME(I18N.Type.NONE, "High Voltage Cable")
-            val render = CableRenderDescriptor("eln", "sprites/cable.png", 3.95f, 1.95f)
+            val render = CableRenderDescriptor("eln", "textures/block/highvoltagecable.png", 3.95f, 1.95f)
             Eln.instance!!.stdCableRender800V = render
             desc = ElectricalCableDescriptor(localName, render, "miaou2", false)
+            desc.iconName = "highvoltagecable"
             Eln.instance!!.highVoltageCableDescriptor = desc
             desc.setPhysicalConstantLikeNormalCable(
                 Eln.HVU, Eln.instance!!.HVP(), 0.025 * 5 / 4 / 20, Eln.HVU * 1.3, Eln.instance!!.HVP() * 1.2, 40.0,
@@ -233,9 +237,10 @@ object SixNodeRegistration {
         run<Unit> {
             subId = 16
             val localName = I18N.TR_NAME(I18N.Type.NONE, "Very High Voltage Cable")
-            val render = CableRenderDescriptor("eln", "sprites/cablevhv.png", 3.95f, 1.95f)
+            val render = CableRenderDescriptor("eln", "textures/block/veryhighvoltagecable.png", 3.95f, 1.95f)
             Eln.instance!!.stdCableRender3200V = render
             desc = ElectricalCableDescriptor(localName, render, "miaou2", false)
+            desc.iconName = "veryhighvoltagecable"
             Eln.instance!!.veryHighVoltageCableDescriptor = desc
             desc.setPhysicalConstantLikeNormalCable(
                 Eln.VVU, Eln.instance!!.VVP(), 0.025 * 5 / 4 / 20 / 8, Eln.VVU * 1.3, Eln.instance!!.VVP() * 1.2, 40.0,
@@ -247,7 +252,7 @@ object SixNodeRegistration {
         run<Unit> {
             subId = 24
             val localName = I18N.TR_NAME(I18N.Type.NONE, "Creative Cable")
-            val render = CableRenderDescriptor("eln", "sprites/cablecreative.png", 8.0f, 4.0f)
+            val render = CableRenderDescriptor("eln", "textures/block/creativecable.png", 8.0f, 4.0f)
             Eln.instance!!.stdCableRenderCreative = render
             desc = ElectricalCableDescriptor(
                 localName, render, "Experience the power of " +
@@ -265,7 +270,7 @@ object SixNodeRegistration {
         run<Unit> {
             subId = 20
             val localName = I18N.TR_NAME(I18N.Type.NONE, "Signal Bus Cable")
-            val render = CableRenderDescriptor("eln", "sprites/cable.png", 3.95f, 3.95f)
+            val render = CableRenderDescriptor("eln", "block/signalbuscable.png", 3.95f, 3.95f)
             Eln.instance!!.stdCableRenderSignalBus = render
             desc = ElectricalCableDescriptor(localName, render, "For transmitting many signals.", true)
             Eln.instance!!.signalBusCableDescriptor = desc
@@ -284,7 +289,7 @@ object SixNodeRegistration {
         run<Unit> {
             subId = 0
             val localName = I18N.TR_NAME(I18N.Type.NONE, "Low Current Cable")
-            val render = CableRenderDescriptor("eln", "sprites/currentcable.png", 1.9f, 0.9f)
+            val render = CableRenderDescriptor("eln", "block/lowcurrentcable.png", 1.9f, 0.9f)
             Eln.instance!!.lowCurrentCableRender = render
             desc = CurrentCableDescriptor(localName, render, "Current based electrical cable")
             desc.setPhysicalConstantLikeNormalCable(5.0)
@@ -294,7 +299,7 @@ object SixNodeRegistration {
         run<Unit> {
             subId = 1
             val localName = I18N.TR_NAME(I18N.Type.NONE, "Medium Current Cable")
-            val render = CableRenderDescriptor("eln", "sprites/currentcable.png", 2.9f, 1.9f)
+            val render = CableRenderDescriptor("eln", "block/mediumcurrentcable.png", 2.9f, 1.9f)
             Eln.instance!!.mediumCurrentCableRender = render
             desc = CurrentCableDescriptor(localName, render, "Current based electrical cable")
             desc.setPhysicalConstantLikeNormalCable(20.0)
@@ -304,7 +309,7 @@ object SixNodeRegistration {
         run<Unit> {
             subId = 2
             val localName = I18N.TR_NAME(I18N.Type.NONE, "High Current Cable")
-            val render = CableRenderDescriptor("eln", "sprites/currentcable.png", 3.9f, 1.9f)
+            val render = CableRenderDescriptor("eln", "block/highcurrentcable.png", 3.9f, 1.9f)
             Eln.instance!!.highCurrentCableRender = render
             desc = CurrentCableDescriptor(localName, render, "Current based electrical cable")
             desc.setPhysicalConstantLikeNormalCable(100.0)
@@ -342,7 +347,7 @@ object SixNodeRegistration {
     private fun registerConduit(id: Int) {
         val subId = 0
         val name = I18N.TR_NAME(I18N.Type.NONE, "Conduit")
-        val desc = ConduitCableDescriptor(name, CableRenderDescriptor("eln", "sprites/conduit.png", 4f, 4f))
+        val desc = ConduitCableDescriptor(name, CableRenderDescriptor("eln", "block/conduit.png", 4f, 4f))
         addDescriptor(subId + (id shl 6), desc)
     }
 
@@ -355,7 +360,7 @@ object SixNodeRegistration {
             name = "Removed from mod Copper Thermal Cable"
             val desc = ThermalCableDescriptor(
                 name, (1000 - 20).toDouble(), -200.0, 500.0, 2000.0, 2.0, 400.0, 0.1,
-                CableRenderDescriptor("eln", "sprites/tex_thermalcablebase.png", 4f, 4f), "Miaou !"
+                CableRenderDescriptor("eln", "block/copperthermalcable.png", 4f, 4f), "Miaou !"
             )
             desc.addToData(false)
             desc.setDefaultIcon("empty-texture")
@@ -367,7 +372,7 @@ object SixNodeRegistration {
             name = I18N.TR_NAME(I18N.Type.NONE, "Copper Thermal Cable")
             val desc = ThermalCableDescriptor(
                 name, (1000 - 20).toDouble(), -200.0, 500.0, 2000.0, 2.0, 10.0, 0.1,
-                CableRenderDescriptor("eln", "sprites/tex_thermalcablebase.png", 4f, 4f), "Miaou !"
+                CableRenderDescriptor("eln", "block/copperthermalcable.png", 4f, 4f), "Miaou !"
             )
             addDescriptor(subId + (id shl 6), desc)
         }

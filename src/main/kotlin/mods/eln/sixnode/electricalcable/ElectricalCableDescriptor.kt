@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component
 import mods.eln.i18n.I18N.tr
 import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.Level
+import mods.eln.node.NodeBase
 
 open class ElectricalCableDescriptor(
     name: String,
@@ -40,6 +41,10 @@ open class ElectricalCableDescriptor(
         this.thermalC = 1.0
         this.thermalWarmLimit = 100.0
         this.thermalCoolLimit = -100.0
+    }
+
+    override fun getNodeMask(): Int {
+        return if (signalWire) NodeBase.maskElectricalGate else NodeBase.maskElectricalPower
     }
 
     override fun applyTo(electricalLoad: ElectricalLoad, rsFactor: Double) {

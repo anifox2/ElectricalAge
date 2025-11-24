@@ -202,7 +202,7 @@ abstract class NodeBase {
                         val otherNode = NodeManager.instance?.getNodeFromCoordonate(Coordinate(otherBlockPos, coordinate.dimension))
                             ?: continue
                         val otherDirection = elementSide.inverse()
-                        val otherLRDU = otherDirection.getLRDUGoingTo(direction)!!.inverse()
+                        val otherLRDU = otherDirection.getLRDUGoingTo(direction)!!
                         if (this is SixNode || otherNode is SixNode) {
                             tryConnectTwoNode(this, direction, lrdu, otherNode, otherDirection, otherLRDU)
                         }

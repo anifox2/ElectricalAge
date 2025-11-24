@@ -152,7 +152,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     private val itemStackDamageId: Int
     open fun networkSerialize(stream: DataOutputStream) {
         try {
-            stream.writeByte(sixNode!!.lrduElementMask[side]!!.mask + (front.dir shl 4))
+            stream.writeByte((sixNode!!.lrduElementMask[side]!!.mask or sixNode!!.lrduCubeMask[side]!!.mask) + (front.dir shl 4))
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -193,6 +193,16 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
      * @return True if we've done something, otherwise false.
      */
     open fun onBlockActivated(entityPlayer: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+        val stack = entityPlayer.mainHandItem
+        if (Eln.multiMeterElement != null && Eln.multiMeterElement!!.checkSameItemStack(stack)) {
+             if (!entityPlayer.level().isClientSide) {
+                 val msg = multiMeterString()
+                 if (msg.isNotEmpty()) {
+                     Utils.addChatMessage(entityPlayer, msg)
+                 }
+             }
+             return true
+        }
         return onBlockActivatedRotate(entityPlayer)
     }
 
