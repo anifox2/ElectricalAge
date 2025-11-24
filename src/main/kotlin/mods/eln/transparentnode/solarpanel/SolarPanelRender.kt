@@ -3,7 +3,8 @@ package mods.eln.transparentnode.solarpanel
 import mods.eln.node.transparent.TransparentNodeBlockEntity
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeElementRender
-import org.lwjgl.opengl.GL11
+import com.mojang.blaze3d.vertex.PoseStack
+import net.minecraft.client.renderer.MultiBufferSource
 
 class SolarPanelRender(
     tileEntity: TransparentNodeBlockEntity,
@@ -11,11 +12,13 @@ class SolarPanelRender(
 ) : TransparentNodeElementRender(tileEntity, descriptor) {
 
     override fun draw() {
+        // Legacy draw method, kept for compatibility if needed, but should not be called by new renderer
+    }
+
+    override fun render(poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         val descriptor = transparentNodedescriptor as SolarPanelDescriptor
         
-        front?.glRotateXnRef()
-
-        descriptor.main?.draw()
+        front?.rotateXnRef(poseStack)
 
         val world = tileEntity.level ?: return
         val time = world.dayTime % 24000
@@ -32,11 +35,6 @@ class SolarPanelRender(
             if (angle > 90f) angle = 90f
         }
 
-        if (descriptor.panel != null) {
-            GL11.glPushMatrix()
-            GL11.glRotatef(angle, 1f, 0f, 0f)
-            descriptor.panel!!.draw()
-            GL11.glPopMatrix()
-        }
+        descriptor.draw(poseStack, bufferSource, packedLight, packedOverlay, angle)
     }
 }

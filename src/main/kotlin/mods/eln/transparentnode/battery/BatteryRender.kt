@@ -9,6 +9,8 @@ import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.entity.player.Player
 import java.io.DataInputStream
 import java.io.IOException
+import com.mojang.blaze3d.vertex.PoseStack
+import net.minecraft.client.renderer.MultiBufferSource
 
 class BatteryRender(tileEntity: TransparentNodeBlockEntity, descriptor: TransparentNodeDescriptor) : TransparentNodeElementRender(tileEntity, descriptor) {
     var energy = 0f
@@ -40,5 +42,10 @@ class BatteryRender(tileEntity: TransparentNodeBlockEntity, descriptor: Transpar
 
     override fun newGuiDraw(side: Direction, player: Player): Screen {
         return BatteryGuiDraw(this)
+    }
+
+    override fun render(poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        front?.rotateXnRef(poseStack)
+        descriptor.draw(poseStack, bufferSource, packedLight, packedOverlay, plus, minus)
     }
 }

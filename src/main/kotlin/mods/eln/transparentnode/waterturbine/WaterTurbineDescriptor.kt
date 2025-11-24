@@ -44,5 +44,16 @@ class WaterTurbineDescriptor(
         generator?.draw()
         wheel?.draw(alpha, 1f, 0f, 0f)
     }
+
+    fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int, alpha: Float) {
+        support?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        generator?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        if (wheel != null) {
+            poseStack.pushPose()
+            poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(alpha))
+            wheel!!.draw(poseStack, bufferSource, packedLight, packedOverlay)
+            poseStack.popPose()
+        }
+    }
 }
 

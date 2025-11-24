@@ -81,6 +81,21 @@ class BatteryDescriptor(
         }
     }
 
+    fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int, plus: Boolean, minus: Boolean) {
+        when (renderType) {
+            0 -> {
+                if (modelPart == null) return
+                modelPart!!.draw(poseStack, bufferSource, packedLight, packedOverlay)
+            }
+            1 -> {
+                if (main != null) main!!.draw(poseStack, bufferSource, packedLight, packedOverlay)
+                if (plugPlus != null && plus) plugPlus!!.draw(poseStack, bufferSource, packedLight, packedOverlay)
+                if (plusMinus != null && minus) plusMinus!!.draw(poseStack, bufferSource, packedLight, packedOverlay)
+                if (battery != null) battery!!.draw(poseStack, bufferSource, packedLight, packedOverlay)
+            }
+        }
+    }
+
     /*
     override fun setParent(item: Item, damage: Int) {
         super.setParent(item, damage)

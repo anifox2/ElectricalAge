@@ -32,6 +32,10 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeBlock
     @JvmField
     var front: Direction? = null
     var grounded = false
+    var currentPoseStack: com.mojang.blaze3d.vertex.PoseStack? = null
+    var currentBuffer: net.minecraft.client.renderer.MultiBufferSource? = null
+    var currentLight: Int = 0
+    var currentOverlay: Int = 0
     @Throws(IOException::class)
     protected fun unserializeItemStackToItemEntity(stream: DataInputStream?, old: ItemEntity?): ItemEntity? {
         return unserializeItemStackToItemEntity(stream!!, old, tileEntity)
@@ -45,6 +49,12 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeBlock
         val vec = inverse.toMCDirection().normal
         GL11.glTranslatef(vec.x * 0.5f, vec.y * 0.5f, vec.z * 0.5f)
         inverse.glRotateXnRef()
+    }
+
+    fun glCableTransform(poseStack: com.mojang.blaze3d.vertex.PoseStack, inverse: Direction) {
+        val vec = inverse.toMCDirection().normal
+        poseStack.translate(vec.x * 0.5f, vec.y * 0.5f, vec.z * 0.5f)
+        inverse.rotateXnRef(poseStack)
     }
 
     abstract fun draw()
@@ -154,25 +164,23 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeBlock
         return null
     }
 
-    fun drawCable(side: Direction, render: CableRenderDescriptor?, connection: LRDUMask, renderPreProcess: CableRenderType?): CableRenderType? {
-        return this.drawCable(side, render, connection, renderPreProcess, false)
-    }
-
-    fun drawCable(side: Direction, render: CableRenderDescriptor?, connection: LRDUMask, renderPreProcess: CableRenderType?, drawBottom: Boolean): CableRenderType? {
+    fun drawCable(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int, side: Direction, render: CableRenderDescriptor?, connection: LRDUMask, renderPreProcess: CableRenderType?, drawBottom: Boolean = false): CableRenderType? {
         var renderPreProcess = renderPreProcess
         if (render == null) return renderPreProcess
         if (renderPreProcess == null) renderPreProcess = CableRender.connectionType(tileEntity, connection, side)
-        GL11.glPushMatrix()
-        glCableTransform(side)
-        render.bindCableTexture()
+
+        poseStack.pushPose()
+        glCableTransform(poseStack, side)
+
+        val consumer = bufferSource.getBuffer(net.minecraft.client.renderer.RenderType.entityCutout(render.cableTexture))
+
         for (lrdu in LRDU.values()) {
-            setGlColorFromDye(renderPreProcess.otherdry[lrdu.toInt()])
+            val color = net.minecraft.world.item.DyeColor.byId(renderPreProcess.otherdry[lrdu.toInt()]).textureDiffuseColors
             if (!connection[lrdu]) continue
             maskTempDraw.set(1 shl lrdu.toInt())
-            CableRender.drawCable(render, maskTempDraw, renderPreProcess, render.widthDiv2 / 2f, drawBottom)
+            CableRender.drawCable(poseStack, consumer, packedLight, packedOverlay, render, maskTempDraw, renderPreProcess, render.widthDiv2 / 2f, drawBottom, color[0], color[1], color[2], 1f)
         }
-        GL11.glPopMatrix()
-        GL11.glColor3f(1f, 1f, 1f)
+        poseStack.popPose()
         return renderPreProcess
     }
 

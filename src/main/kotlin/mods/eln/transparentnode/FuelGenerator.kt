@@ -67,12 +67,13 @@ class FuelGeneratorDescriptor(name: String, override var obj: Obj3D?, internal v
         voltageLevelColor = VoltageLevelColor.fromCable(cable)
     }
 
-    fun draw(on: Boolean = false) {
-        main?.draw()
+    fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, buffer: net.minecraft.client.renderer.MultiBufferSource, combinedLight: Int, combinedOverlay: Int, on: Boolean = false) {
+        main?.draw(poseStack, buffer, combinedLight, combinedOverlay)
         if (on) {
-            UtilsClient.drawLight(switch)
+            // Full brightness for light
+            switch?.draw(poseStack, buffer, 15728880, combinedOverlay)
         } else {
-            switch?.draw()
+            switch?.draw(poseStack, buffer, combinedLight, combinedOverlay)
         }
     }
 
@@ -224,9 +225,16 @@ class FuelGeneratorRender(tileEntity: TransparentNodeBlockEntity, descriptor: Tr
     }
 
     override fun draw() {
-        renderPreProcess = drawCable(Direction.YN, descriptor.cableRenderDescriptor, eConn, renderPreProcess)
-        front!!.glRotateZnRef()
-        descriptor.draw(on)
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+        renderPreProcess = drawCable(poseStack, buffer, light, overlay, Direction.YN, descriptor.cableRenderDescriptor, eConn, renderPreProcess)
+        
+        poseStack.pushPose()
+        glCableTransform(poseStack, front!!)
+        descriptor.draw(poseStack, buffer, light, overlay, on)
+        poseStack.popPose()
     }
 
     override fun cameraDrawOptimisation(): Boolean = false

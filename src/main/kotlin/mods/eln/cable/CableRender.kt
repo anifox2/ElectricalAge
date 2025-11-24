@@ -16,9 +16,9 @@ import org.joml.Matrix4f
 import org.lwjgl.opengl.GL11
 
 object CableRender {
-    private fun putVertex(consumer: VertexConsumer, pose: Matrix4f, normal: Matrix3f, x: Float, y: Float, z: Float, u: Float, v: Float, nx: Float, ny: Float, nz: Float, light: Int, overlay: Int) {
+    private fun putVertex(consumer: VertexConsumer, pose: Matrix4f, normal: Matrix3f, x: Float, y: Float, z: Float, u: Float, v: Float, nx: Float, ny: Float, nz: Float, light: Int, overlay: Int, r: Float, g: Float, b: Float, a: Float) {
         consumer.vertex(pose, x, y, z)
-            .color(255, 255, 255, 255)
+            .color(r, g, b, a)
             .uv(u, v)
             .overlayCoords(overlay)
             .uv2(light)
@@ -245,16 +245,7 @@ object CableRender {
         return connectionTypeBuild
     }
 
-    @JvmStatic
-    fun drawCable(
-        cable: CableRenderDescriptor?,
-        connection: LRDUMask,
-        connectionType: CableRenderType,
-        deltaStart: Float = cable!!.widthDiv2 / 2f,
-        drawBottom: Boolean = false
-    ) {
-        if (cable == null) return
-    }
+
 
     private fun drawQuad(
         consumer: VertexConsumer,
@@ -268,12 +259,13 @@ object CableRender {
         v3: FloatArray,
         nx: Float,
         ny: Float,
-        nz: Float
+        nz: Float,
+        r: Float, g: Float, b: Float, a: Float
     ) {
-        putVertex(consumer, pose, normal, v0[0], v0[1], v0[2], v0[3], v0[4], nx, ny, nz, light, overlay)
-        putVertex(consumer, pose, normal, v1[0], v1[1], v1[2], v1[3], v1[4], nx, ny, nz, light, overlay)
-        putVertex(consumer, pose, normal, v3[0], v3[1], v3[2], v3[3], v3[4], nx, ny, nz, light, overlay)
-        putVertex(consumer, pose, normal, v2[0], v2[1], v2[2], v2[3], v2[4], nx, ny, nz, light, overlay)
+        putVertex(consumer, pose, normal, v0[0], v0[1], v0[2], v0[3], v0[4], nx, ny, nz, light, overlay, r, g, b, a)
+        putVertex(consumer, pose, normal, v1[0], v1[1], v1[2], v1[3], v1[4], nx, ny, nz, light, overlay, r, g, b, a)
+        putVertex(consumer, pose, normal, v3[0], v3[1], v3[2], v3[3], v3[4], nx, ny, nz, light, overlay, r, g, b, a)
+        putVertex(consumer, pose, normal, v2[0], v2[1], v2[2], v2[3], v2[4], nx, ny, nz, light, overlay, r, g, b, a)
     }
 
     private fun drawQuadSimple(
@@ -288,12 +280,13 @@ object CableRender {
         v3: FloatArray,
         nx: Float,
         ny: Float,
-        nz: Float
+        nz: Float,
+        r: Float, g: Float, b: Float, a: Float
     ) {
-        putVertex(consumer, pose, normal, v0[0], v0[1], v0[2], v0[3], v0[4], nx, ny, nz, light, overlay)
-        putVertex(consumer, pose, normal, v1[0], v1[1], v1[2], v1[3], v1[4], nx, ny, nz, light, overlay)
-        putVertex(consumer, pose, normal, v2[0], v2[1], v2[2], v2[3], v2[4], nx, ny, nz, light, overlay)
-        putVertex(consumer, pose, normal, v3[0], v3[1], v3[2], v3[3], v3[4], nx, ny, nz, light, overlay)
+        putVertex(consumer, pose, normal, v0[0], v0[1], v0[2], v0[3], v0[4], nx, ny, nz, light, overlay, r, g, b, a)
+        putVertex(consumer, pose, normal, v1[0], v1[1], v1[2], v1[3], v1[4], nx, ny, nz, light, overlay, r, g, b, a)
+        putVertex(consumer, pose, normal, v2[0], v2[1], v2[2], v2[3], v2[4], nx, ny, nz, light, overlay, r, g, b, a)
+        putVertex(consumer, pose, normal, v3[0], v3[1], v3[2], v3[3], v3[4], nx, ny, nz, light, overlay, r, g, b, a)
     }
 
     @JvmStatic
@@ -306,7 +299,8 @@ object CableRender {
         connection: LRDUMask,
         connectionType: CableRenderType,
         deltaStart: Float = cable!!.widthDiv2 / 2f,
-        drawBottom: Boolean = false
+        drawBottom: Boolean = false,
+        r: Float = 1f, g: Float = 1f, b: Float = 1f, a: Float = 1f
     ) {
         if (cable == null) return
         val pose = poseStack.last().pose()
@@ -381,23 +375,16 @@ object CableRender {
             val v7 = floatArrayOf(0f, -cable.widthDiv2, startLeft, tx - cable.widthDiv2 * 0.5f - height, ty + startLeft)
             
             // Normal 0, 1, 0
-            drawQuad(consumer, pose, normal, light, overlay, v0, v1, v2, v3, 0f, 1f, 0f)
+            drawQuad(consumer, pose, normal, light, overlay, v0, v1, v2, v3, 0f, 1f, 0f, r, g, b, a)
             // Normal 1, 0, 0
-            drawQuad(consumer, pose, normal, light, overlay, v2, v3, v4, v5, 1f, 0f, 0f)
+            drawQuad(consumer, pose, normal, light, overlay, v2, v3, v4, v5, 1f, 0f, 0f, r, g, b, a)
             // Normal 0, -1, 0
-            drawQuad(consumer, pose, normal, light, overlay, v4, v5, v6, v7, 0f, -1f, 0f)
+            drawQuad(consumer, pose, normal, light, overlay, v4, v5, v6, v7, 0f, -1f, 0f, r, g, b, a)
 
             if (drawBottom) {
                 val v8 = floatArrayOf(0f, cable.widthDiv2, endLeft, tx + (cable.widthDiv2 + height) * 0.5f, ty + endLeft)
                 val v9 = floatArrayOf(0f, cable.widthDiv2, startLeft, tx + (cable.widthDiv2 + height) * 0.5f, ty + startLeft)
-                // Normal 0, 1, 0 (Wait, drawBottom usually closes the loop? The original code reuses v0/v1 coords but with same normal? That seems odd for a closed loop. 
-                // Original: GL11.glNormal3f(0f, 1f, 0f); GL11.glVertex3f(0f, cable.widthDiv2, endLeft); ...
-                // It seems to just redraw the first segment? Or maybe it's closing the strip?
-                // Ah, GL_QUAD_STRIP continues. v6, v7 are the last ones.
-                // If drawBottom, it adds 2 more vertices.
-                // v8, v9.
-                // Q4: v6, v7, v9, v8.
-                drawQuad(consumer, pose, normal, light, overlay, v6, v7, v9, v8, 0f, 1f, 0f) // Using 0,1,0 as per original code, though it might be 0,0,-1 or something else depending on geometry.
+                drawQuad(consumer, pose, normal, light, overlay, v6, v7, v9, v8, 0f, 1f, 0f, r, g, b, a)
             }
 
             // Draws end cap
@@ -407,7 +394,7 @@ object CableRender {
             val c2 = floatArrayOf(height, cable.widthDiv2, endLeft, tx + cable.widthDiv2 * 0.5f, ty + endLeft)
             val c3 = floatArrayOf(height, -cable.widthDiv2, endLeft, tx - cable.widthDiv2 * 0.5f, ty + endLeft)
             
-            drawQuadSimple(consumer, pose, normal, light, overlay, c0, c1, c2, c3, 0f, 0f, -1f)
+            drawQuadSimple(consumer, pose, normal, light, overlay, c0, c1, c2, c3, 0f, 0f, -1f, r, g, b, a)
         }
         
         // Draw Right
@@ -421,14 +408,14 @@ object CableRender {
              val v6 = floatArrayOf(0f, -cable.widthDiv2, startRight, tx - cable.widthDiv2 * 0.5f - height, ty + startRight)
              val v7 = floatArrayOf(0f, -cable.widthDiv2, endRight, tx - cable.widthDiv2 * 0.5f - height, ty + endRight)
 
-             drawQuad(consumer, pose, normal, light, overlay, v0, v1, v2, v3, 0f, 1f, 0f)
-             drawQuad(consumer, pose, normal, light, overlay, v2, v3, v4, v5, 1f, 0f, 0f)
-             drawQuad(consumer, pose, normal, light, overlay, v4, v5, v6, v7, 0f, -1f, 0f)
+             drawQuad(consumer, pose, normal, light, overlay, v0, v1, v2, v3, 0f, 1f, 0f, r, g, b, a)
+             drawQuad(consumer, pose, normal, light, overlay, v2, v3, v4, v5, 1f, 0f, 0f, r, g, b, a)
+             drawQuad(consumer, pose, normal, light, overlay, v4, v5, v6, v7, 0f, -1f, 0f, r, g, b, a)
              
              if (drawBottom) {
                  val v8 = floatArrayOf(0f, cable.widthDiv2, startRight, tx + (cable.widthDiv2 + height) * 0.5f, ty + startRight)
                  val v9 = floatArrayOf(0f, cable.widthDiv2, endRight, tx + (cable.widthDiv2 + height) * 0.5f, ty + endRight)
-                 drawQuad(consumer, pose, normal, light, overlay, v6, v7, v9, v8, 0f, 1f, 0f)
+                 drawQuad(consumer, pose, normal, light, overlay, v6, v7, v9, v8, 0f, 1f, 0f, r, g, b, a)
              }
              
              // End cap
@@ -436,7 +423,7 @@ object CableRender {
              val c1 = floatArrayOf(height, cable.widthDiv2, endRight, tx + cable.widthDiv2 * 0.5f, ty + endRight)
              val c2 = floatArrayOf(0f, cable.widthDiv2, endRight, tx + cable.widthDiv2 * 0.5f, ty + endRight + height)
              val c3 = floatArrayOf(0f, -cable.widthDiv2, endRight, tx - cable.widthDiv2 * 0.5f, ty + endRight + height)
-             drawQuadSimple(consumer, pose, normal, light, overlay, c0, c1, c2, c3, 0f, 0f, 1f)
+             drawQuadSimple(consumer, pose, normal, light, overlay, c0, c1, c2, c3, 0f, 0f, 1f, r, g, b, a)
         }
 
         if (endDown < startDown) {
@@ -449,14 +436,14 @@ object CableRender {
              val v6 = floatArrayOf(0f, endDown, cable.widthDiv2, tx + (cable.widthDiv2 + height) * 0.5f, ty + endDown)
              val v7 = floatArrayOf(0f, startDown, cable.widthDiv2, tx + (cable.widthDiv2 + height) * 0.5f, ty + startDown)
 
-             drawQuad(consumer, pose, normal, light, overlay, v0, v1, v2, v3, 0f, 0f, -1f)
-             drawQuad(consumer, pose, normal, light, overlay, v2, v3, v4, v5, 1f, 0f, 0f)
-             drawQuad(consumer, pose, normal, light, overlay, v4, v5, v6, v7, 0f, 0f, 1f)
+             drawQuad(consumer, pose, normal, light, overlay, v0, v1, v2, v3, 0f, 1f, 0f, r, g, b, a)
+             drawQuad(consumer, pose, normal, light, overlay, v2, v3, v4, v5, 1f, 0f, 0f, r, g, b, a)
+             drawQuad(consumer, pose, normal, light, overlay, v4, v5, v6, v7, 0f, -1f, 0f, r, g, b, a)
              
              if (drawBottom) {
                  val v8 = floatArrayOf(0f, endDown, -cable.widthDiv2, tx - (cable.widthDiv2 - height) * 0.5f, ty + endDown)
                  val v9 = floatArrayOf(0f, startDown, -cable.widthDiv2, tx - (cable.widthDiv2 - height) * 0.5f, ty + startDown)
-                 drawQuad(consumer, pose, normal, light, overlay, v6, v7, v9, v8, 0f, 0f, -1f)
+                 drawQuad(consumer, pose, normal, light, overlay, v6, v7, v9, v8, 0f, 0f, -1f, r, g, b, a)
              }
              
              // End cap
@@ -464,7 +451,7 @@ object CableRender {
              val c1 = floatArrayOf(height, endDown, cable.widthDiv2, tx + cable.widthDiv2 * 0.5f, ty + endDown)
              val c2 = floatArrayOf(0f, endDown, cable.widthDiv2, tx + cable.widthDiv2 * 0.5f, ty + endDown - height)
              val c3 = floatArrayOf(0f, endDown, -cable.widthDiv2, tx - cable.widthDiv2 * 0.5f, ty + endDown - height)
-             drawQuadSimple(consumer, pose, normal, light, overlay, c0, c1, c2, c3, 0f, -1f, 0f)
+             drawQuadSimple(consumer, pose, normal, light, overlay, c0, c1, c2, c3, 0f, -1f, 0f, r, g, b, a)
         }
 
         if (endUp > startUp) {
@@ -477,14 +464,14 @@ object CableRender {
              val v6 = floatArrayOf(0f, startUp, cable.widthDiv2, tx + (cable.widthDiv2 + height) * 0.5f, ty + startUp)
              val v7 = floatArrayOf(0f, endUp, cable.widthDiv2, tx + (cable.widthDiv2 + height) * 0.5f, ty + endUp)
 
-             drawQuad(consumer, pose, normal, light, overlay, v0, v1, v2, v3, 0f, 0f, -1f)
-             drawQuad(consumer, pose, normal, light, overlay, v2, v3, v4, v5, 1f, 0f, 0f)
-             drawQuad(consumer, pose, normal, light, overlay, v4, v5, v6, v7, 0f, 0f, 1f)
+             drawQuad(consumer, pose, normal, light, overlay, v0, v1, v2, v3, 0f, 0f, -1f, r, g, b, a)
+             drawQuad(consumer, pose, normal, light, overlay, v2, v3, v4, v5, 1f, 0f, 0f, r, g, b, a)
+             drawQuad(consumer, pose, normal, light, overlay, v4, v5, v6, v7, 0f, 0f, 1f, r, g, b, a)
              
              if (drawBottom) {
                  val v8 = floatArrayOf(0f, startUp, -cable.widthDiv2, tx - (cable.widthDiv2 - height) * 0.5f, ty + startUp)
                  val v9 = floatArrayOf(0f, endUp, -cable.widthDiv2, tx - (cable.widthDiv2 - height) * 0.5f, ty + endUp)
-                 drawQuad(consumer, pose, normal, light, overlay, v6, v7, v9, v8, 0f, 0f, -1f)
+                 drawQuad(consumer, pose, normal, light, overlay, v6, v7, v9, v8, 0f, 0f, -1f, r, g, b, a)
              }
              
              // End cap
@@ -492,63 +479,66 @@ object CableRender {
              val c1 = floatArrayOf(0f, endUp, -cable.widthDiv2, tx + cable.widthDiv2 * 0.5f, ty + endUp + height)
              val c2 = floatArrayOf(height, endUp, -cable.widthDiv2, tx + cable.widthDiv2 * 0.5f, ty + endUp)
              val c3 = floatArrayOf(height, endUp, cable.widthDiv2, tx - cable.widthDiv2 * 0.5f, ty + endUp)
-             drawQuadSimple(consumer, pose, normal, light, overlay, c0, c1, c2, c3, 0f, 1f, 0f)
+             drawQuadSimple(consumer, pose, normal, light, overlay, c0, c1, c2, c3, 0f, 1f, 0f, r, g, b, a)
         }
     }
 
+
+
     @JvmStatic
-    fun drawNode(cable: CableRenderDescriptor, connection: LRDUMask, connectionType: CableRenderType?) {
+    fun drawNode(
+        poseStack: PoseStack,
+        consumer: VertexConsumer,
+        light: Int,
+        overlay: Int,
+        cable: CableRenderDescriptor,
+        connection: LRDUMask,
+        connectionType: CableRenderType?,
+        r: Float = 1f, g: Float = 1f, b: Float = 1f, a: Float = 1f
+    ) {
         if (connection.mask == 0 || (connection[LRDU.Left] || connection[LRDU.Right]) && (connection[LRDU.Down] || connection[LRDU.Up]) || connection.mask == 1 || connection.mask == 2 || connection.mask == 4 || connection.mask == 8) {
             val widthDiv2 = cable.widthDiv2 + 1.0f / 16.0f
             val height = cable.height + 1.0f / 16.0f
             val tx = 0.75f
             val ty = 0.5f
-            GL11.glColor4d(1.0, 1.0, 1.0, 1.0)
+            
+            val pose = poseStack.last().pose()
+            val normal = poseStack.last().normal()
 
-            // Renders the top and two sides of the node cap
-            GL11.glBegin(GL11.GL_QUAD_STRIP)
-            GL11.glNormal3f(0f, 1f, 0f)
-            GL11.glTexCoord2f(tx + (widthDiv2 + cable.height + 1.0f / 16.0f) * 0.5f, ty - widthDiv2)
-            GL11.glVertex3f(0f, widthDiv2, -widthDiv2)
-            GL11.glTexCoord2f(tx + (widthDiv2 + cable.height + 1.0f / 16.0f) * 0.5f, ty + widthDiv2)
-            GL11.glVertex3f(0f, widthDiv2, widthDiv2)
-            GL11.glTexCoord2f(tx + widthDiv2 * 0.5f, ty - widthDiv2)
-            GL11.glVertex3f(height, widthDiv2, -widthDiv2)
-            GL11.glTexCoord2f(tx + widthDiv2 * 0.5f, ty + widthDiv2)
-            GL11.glVertex3f(height, widthDiv2, widthDiv2)
-            GL11.glNormal3f(1f, 0f, 0f)
-            GL11.glTexCoord2f(tx - widthDiv2 * 0.5f, ty - widthDiv2)
-            GL11.glVertex3f(height, -widthDiv2, -widthDiv2)
-            GL11.glTexCoord2f(tx - widthDiv2 * 0.5f, ty + widthDiv2)
-            GL11.glVertex3f(height, -widthDiv2, widthDiv2)
-            GL11.glNormal3f(0f, -1f, 0f)
-            GL11.glTexCoord2f(tx - (widthDiv2 + cable.height + 1.0f / 16.0f) * 0.5f, ty - widthDiv2)
-            GL11.glVertex3f(0f, -widthDiv2, -widthDiv2)
-            GL11.glTexCoord2f(tx - (widthDiv2 + cable.height + 1.0f / 16.0f) * 0.5f, ty + widthDiv2)
-            GL11.glVertex3f(0f, -widthDiv2, widthDiv2)
-            GL11.glEnd()
+            // Quad 1 (Top)
+            val q1v0 = floatArrayOf(0f, widthDiv2, -widthDiv2, tx + (widthDiv2 + cable.height + 1.0f / 16.0f) * 0.5f, ty - widthDiv2)
+            val q1v1 = floatArrayOf(0f, widthDiv2, widthDiv2, tx + (widthDiv2 + cable.height + 1.0f / 16.0f) * 0.5f, ty + widthDiv2)
+            val q1v2 = floatArrayOf(height, widthDiv2, -widthDiv2, tx + widthDiv2 * 0.5f, ty - widthDiv2)
+            val q1v3 = floatArrayOf(height, widthDiv2, widthDiv2, tx + widthDiv2 * 0.5f, ty + widthDiv2)
+            drawQuad(consumer, pose, normal, light, overlay, q1v0, q1v1, q1v3, q1v2, 0f, 1f, 0f, r, g, b, a)
 
-            // Renders remaining 2 sides of the node cap
-            GL11.glBegin(GL11.GL_QUADS)
-            GL11.glNormal3f(0f, 0f, -1f)
-            GL11.glTexCoord2f(tx - widthDiv2 * 0.5f, ty - widthDiv2 - cable.height - 1.0f / 16.0f)
-            GL11.glVertex3f(0f, -widthDiv2, -widthDiv2)
-            GL11.glTexCoord2f(tx + widthDiv2 * 0.5f, ty - widthDiv2 - cable.height - 1.0f / 16.0f)
-            GL11.glVertex3f(0f, widthDiv2, -widthDiv2)
-            GL11.glTexCoord2f(tx + widthDiv2 * 0.5f, ty - widthDiv2)
-            GL11.glVertex3f(height, widthDiv2, -widthDiv2)
-            GL11.glTexCoord2f(tx - widthDiv2 * 0.5f, ty - widthDiv2)
-            GL11.glVertex3f(height, -widthDiv2, -widthDiv2)
-            GL11.glNormal3f(0f, 0f, 1f)
-            GL11.glTexCoord2f(tx - widthDiv2 * 0.5f, ty + widthDiv2)
-            GL11.glVertex3f(height, -widthDiv2, widthDiv2)
-            GL11.glTexCoord2f(tx + widthDiv2 * 0.5f, ty + widthDiv2)
-            GL11.glVertex3f(height, widthDiv2, widthDiv2)
-            GL11.glTexCoord2f(tx + widthDiv2 * 0.5f, ty + widthDiv2 + cable.height + 1.0f / 16.0f)
-            GL11.glVertex3f(0f, widthDiv2, widthDiv2)
-            GL11.glTexCoord2f(tx - widthDiv2 * 0.5f, ty + widthDiv2 + cable.height + 1.0f / 16.0f)
-            GL11.glVertex3f(0f, -widthDiv2, widthDiv2)
-            GL11.glEnd()
+            // Quad 2 (Right)
+            val q2v0 = q1v2
+            val q2v1 = q1v3
+            val q2v2 = floatArrayOf(height, -widthDiv2, -widthDiv2, tx - widthDiv2 * 0.5f, ty - widthDiv2)
+            val q2v3 = floatArrayOf(height, -widthDiv2, widthDiv2, tx - widthDiv2 * 0.5f, ty + widthDiv2)
+            drawQuad(consumer, pose, normal, light, overlay, q2v0, q2v1, q2v3, q2v2, 1f, 0f, 0f, r, g, b, a)
+
+            // Quad 3 (Bottom)
+            val q3v0 = q2v2
+            val q3v1 = q2v3
+            val q3v2 = floatArrayOf(0f, -widthDiv2, -widthDiv2, tx - (widthDiv2 + cable.height + 1.0f / 16.0f) * 0.5f, ty - widthDiv2)
+            val q3v3 = floatArrayOf(0f, -widthDiv2, widthDiv2, tx - (widthDiv2 + cable.height + 1.0f / 16.0f) * 0.5f, ty + widthDiv2)
+            drawQuad(consumer, pose, normal, light, overlay, q3v0, q3v1, q3v3, q3v2, 0f, -1f, 0f, r, g, b, a)
+
+            // Back
+            val b0 = floatArrayOf(0f, -widthDiv2, -widthDiv2, tx - widthDiv2 * 0.5f, ty - widthDiv2 - cable.height - 1.0f / 16.0f)
+            val b1 = floatArrayOf(0f, widthDiv2, -widthDiv2, tx + widthDiv2 * 0.5f, ty - widthDiv2 - cable.height - 1.0f / 16.0f)
+            val b2 = floatArrayOf(height, widthDiv2, -widthDiv2, tx + widthDiv2 * 0.5f, ty - widthDiv2)
+            val b3 = floatArrayOf(height, -widthDiv2, -widthDiv2, tx - widthDiv2 * 0.5f, ty - widthDiv2)
+            drawQuad(consumer, pose, normal, light, overlay, b0, b1, b2, b3, 0f, 0f, -1f, r, g, b, a)
+
+            // Front
+            val f0 = floatArrayOf(height, -widthDiv2, widthDiv2, tx - widthDiv2 * 0.5f, ty + widthDiv2)
+            val f1 = floatArrayOf(height, widthDiv2, widthDiv2, tx + widthDiv2 * 0.5f, ty + widthDiv2)
+            val f2 = floatArrayOf(0f, widthDiv2, widthDiv2, tx + widthDiv2 * 0.5f, ty + widthDiv2 + cable.height + 1.0f / 16.0f)
+            val f3 = floatArrayOf(0f, -widthDiv2, widthDiv2, tx - widthDiv2 * 0.5f, ty + widthDiv2 + cable.height + 1.0f / 16.0f)
+            drawQuad(consumer, pose, normal, light, overlay, f0, f1, f2, f3, 0f, 0f, 1f, r, g, b, a)
         }
     }
 }

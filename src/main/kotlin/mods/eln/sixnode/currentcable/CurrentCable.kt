@@ -9,6 +9,7 @@ import mods.eln.item.BrushDescriptor
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
 import mods.eln.misc.RealisticEnum
+import mods.eln.misc.Utils
 import mods.eln.misc.Utils.addChatMessage
 import mods.eln.misc.Utils.isPlayerUsingWrench
 import mods.eln.misc.Utils.plotAmpere
@@ -18,7 +19,7 @@ import mods.eln.misc.Utils.plotUIP
 import mods.eln.misc.Utils.plotValue
 import mods.eln.misc.Utils.plotVolt
 import mods.eln.misc.Utils.renderSubSystemWaila
-import mods.eln.misc.UtilsClient.setGlColorFromDye
+import mods.eln.misc.UtilsClient
 import mods.eln.misc.UtilsClient.bindTexture
 import mods.eln.misc.VoltageLevelColor
 import mods.eln.node.NodeBase
@@ -263,21 +264,25 @@ class CurrentCableRender(tileEntity: SixNodeEntity?, side: Direction?, descripto
     }
 
     override fun draw() {
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+
         Minecraft.getInstance().profiler.push("ECable")
-        setGlColorFromDye(color, 1.0f)
-        bindTexture(descriptor.render!!.cableTexture)
-        glListCall()
-        GL11.glColor3f(1f, 1f, 1f)
+        
+        val rgb = UtilsClient.getDyeColor(color)
+        val texture = descriptor.render!!.cableTexture
+        val consumer = buffer.getBuffer(net.minecraft.client.renderer.RenderType.entitySolid(texture))
+
+        CableRender.drawCable(poseStack, consumer, light, overlay, descriptor.render!!, connectedSide, CableRender.connectionType(this, side), descriptor.render!!.widthDiv2 / 2.0f, false, rgb[0], rgb[1], rgb[2], 1f)
+        CableRender.drawNode(poseStack, consumer, light, overlay, descriptor.render!!, connectedSide, CableRender.connectionType(this, side), rgb[0], rgb[1], rgb[2], 1f)
+
         Minecraft.getInstance().profiler.pop()
     }
 
-    override fun glListDraw() {
-        CableRender.drawCable(descriptor.render!!, connectedSide, CableRender.connectionType(this, side))
-        CableRender.drawNode(descriptor.render!!, connectedSide, CableRender.connectionType(this, side))
-    }
-
     override fun glListEnable(): Boolean {
-        return true
+        return false
     }
 
     override fun publishUnserialize(stream: DataInputStream) {

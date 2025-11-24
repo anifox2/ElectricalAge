@@ -95,21 +95,30 @@ class ClutchDescriptor(name: String, override var obj: Obj3D?) : SimpleShaftDesc
     val leftShaftPart = obj!!.getPart("ShaftXN")
     val rightShaftPart = obj!!.getPart("ShaftXP")
 
+    override fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, buffer: net.minecraft.client.renderer.MultiBufferSource, combinedLight: Int, combinedOverlay: Int, angle: Double) {
+        draw(poseStack, buffer, combinedLight, combinedOverlay, angle, angle)
+    }
+
+    fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, buffer: net.minecraft.client.renderer.MultiBufferSource, combinedLight: Int, combinedOverlay: Int, leftAngle: Double, rightAngle: Double) {
+        static.forEach { it.draw(poseStack, buffer, combinedLight, combinedOverlay) }
+
+        poseStack.pushPose()
+        poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees((leftAngle * degToRad).toFloat()))
+        leftShaftPart.draw(poseStack, buffer, combinedLight, combinedOverlay)
+        poseStack.popPose()
+
+        poseStack.pushPose()
+        poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees((rightAngle * degToRad).toFloat()))
+        rightShaftPart.draw(poseStack, buffer, combinedLight, combinedOverlay)
+        poseStack.popPose()
+    }
+
     override fun draw(angle: Double) {
-        draw(angle, angle)
+        // Deprecated
     }
 
     fun draw(leftAngle: Double, rightAngle: Double) {
-        static.forEach { it.draw() }
-
-        preserveMatrix {
-            GL11.glRotated(leftAngle * degToRad, 0.0, 0.0, 1.0)
-            leftShaftPart.draw()
-        }
-        preserveMatrix {
-            GL11.glRotated(rightAngle * degToRad, 0.0, 0.0, 1.0)
-            rightShaftPart.draw()
-        }
+        // Deprecated
     }
 }
 
@@ -470,32 +479,38 @@ class ClutchRender(entity: TransparentNodeBlockEntity, desc_: TransparentNodeDes
         volumeSetting.step(deltaT)
     }
 
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        poseStack.pushPose()
+        front!!.rotateXnRef(poseStack)
+        val angSign = when (front) {
+            Direction.XP, Direction.ZP -> 1.0
+            else -> -1.0
+        }
+        desc.draw(poseStack, bufferSource, packedLight, packedOverlay, lAngle * angSign, rAngle * angSign)
+        poseStack.popPose()
+
+        if (cableRefresh) {
+            cableRefresh = false
+            connectionType = CableRender.connectionType(tileEntity, eConn, front!!.down())
+        }
+
+        poseStack.pushPose()
+        glCableTransform(poseStack, front!!.down())
+        
+        val texture = cableRender!!.cableTexture
+        val consumer = bufferSource.getBuffer(net.minecraft.client.renderer.RenderType.entitySolid(texture))
+
+        for (lrdu in LRDU.values()) {
+            val rgb = UtilsClient.getDyeColor(connectionType!!.otherdry[lrdu.toInt()])
+            if (!eConn.get(lrdu)) continue
+            mask.set(1.shl(lrdu.ordinal))
+            CableRender.drawCable(poseStack, consumer, packedLight, packedOverlay, cableRender, mask, connectionType!!, cableRender!!.widthDiv2 / 2f, false, rgb[0], rgb[1], rgb[2], 1f)
+        }
+        poseStack.popPose()
+    }
+
     override fun draw() {
-        preserveMatrix {
-            front!!.glRotateXnRef()
-            val angSign = when (front) {
-                Direction.XP, Direction.ZP -> 1.0
-                else -> -1.0
-            }
-            desc.draw(lAngle * angSign, rAngle * angSign)
-        }
-
-        preserveMatrix {
-            if (cableRefresh) {
-                cableRefresh = false;
-                connectionType = CableRender.connectionType(tileEntity, eConn, front!!.down())
-            }
-
-            glCableTransform(front!!.down());
-            cableRender!!.bindCableTexture();
-
-            for (lrdu in LRDU.values()) {
-                UtilsClient.setGlColorFromDye(connectionType!!.otherdry[lrdu.toInt()])
-                if (!eConn.get(lrdu)) continue
-                mask.set(1.shl(lrdu.ordinal))
-                CableRender.drawCable(cableRender, mask, connectionType!!)
-            }
-        }
+        // Deprecated
     }
 
     inner class ClutchLoopedSound(sound: String, coord: Coordinate) : LoopedSound(sound, coord) {

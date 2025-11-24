@@ -31,27 +31,31 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
 
     open fun preDraw() {}
 
-    open fun draw(angle: Double) {
+    open fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, buffer: net.minecraft.client.renderer.MultiBufferSource, combinedLight: Int, combinedOverlay: Int, angle: Double) {
         preDraw()
         for (part in static) {
-            part.draw()
+            part.draw(poseStack, buffer, combinedLight, combinedOverlay)
         }
         if(rotating.isNotEmpty()) {
-            preserveMatrix {
-                assert(rotating.isNotEmpty())
-                val bb = rotating[0].boundingBox()
-                val centre = bb.centre()
-                val ox = centre.x
-                val oy = centre.y
-                val oz = centre.z
-                GL11.glTranslated(ox, oy, oz)
-                GL11.glRotatef(((angle * 360) / 2.0 / Math.PI).toFloat(), 0f, 0f, 1f)
-                GL11.glTranslated(-ox, -oy, -oz)
-                for (part in rotating) {
-                    part.draw()
-                }
+            poseStack.pushPose()
+            assert(rotating.isNotEmpty())
+            val bb = rotating[0].boundingBox()
+            val centre = bb.centre()
+            val ox = centre.x
+            val oy = centre.y
+            val oz = centre.z
+            poseStack.translate(ox, oy, oz)
+            poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(((angle * 360) / 2.0 / Math.PI).toFloat()))
+            poseStack.translate(-ox, -oy, -oz)
+            for (part in rotating) {
+                part.draw(poseStack, buffer, combinedLight, combinedOverlay)
             }
+            poseStack.popPose()
         }
+    }
+
+    open fun draw(angle: Double) {
+        // Deprecated
     }
 }
 
@@ -119,43 +123,53 @@ open class ShaftRender(entity: TransparentNodeBlockEntity, desc: TransparentNode
     /**
      * By default, call the descriptor's draw function and nothing else.
      */
-    override fun draw() {
-        draw {}
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        render(poseStack, bufferSource, packedLight, packedOverlay) {}
     }
 
     /**
      * But, optionally, do some more drawing in the block context.
      */
-    fun draw(extra: () -> Unit) {
-        preserveMatrix {
-            front!!.glRotateXnRef()
-            if (front == Direction.XP || front == Direction.ZP)
-                desc.draw(angle)
-            else
-                desc.draw(-angle)
+    fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int, extra: () -> Unit) {
+        poseStack.pushPose()
+        front!!.rotateXnRef(poseStack)
+        if (front == Direction.XP || front == Direction.ZP)
+            desc.draw(poseStack, bufferSource, packedLight, packedOverlay, angle)
+        else
+            desc.draw(poseStack, bufferSource, packedLight, packedOverlay, -angle)
 
-            extra()
-        }
+        extra()
+        poseStack.popPose()
 
         if (cableRender != null) {
-            preserveMatrix {
-                if (cableRefresh) {
-                    cableRefresh = false
-                    connectionType = CableRender.connectionType(tileEntity, eConn, front!!.down())
-                }
-
-                glCableTransform(front!!.down())
-                cableRender!!.bindCableTexture()
-
-                for (lrdu in LRDU.values()) {
-                    UtilsClient.setGlColorFromDye(connectionType!!.otherdry[lrdu.toInt()])
-                    if (!eConn.get(lrdu)) continue
-                    if (lrdu != front!!.down().getLRDUGoingTo(front!!) && lrdu.inverse() != front!!.down().getLRDUGoingTo(front!!)) continue
-                    mask.set(1.shl(lrdu.ordinal))
-                    CableRender.drawCable(cableRender, mask, connectionType!!)
-                }
+            if (cableRefresh) {
+                cableRefresh = false
+                connectionType = CableRender.connectionType(tileEntity, eConn, front!!.down())
             }
+
+            poseStack.pushPose()
+            glCableTransform(poseStack, front!!.down())
+            
+            val texture = cableRender!!.cableTexture
+            val consumer = bufferSource.getBuffer(net.minecraft.client.renderer.RenderType.entitySolid(texture))
+
+            for (lrdu in LRDU.values()) {
+                val rgb = UtilsClient.getDyeColor(connectionType!!.otherdry[lrdu.toInt()])
+                if (!eConn.get(lrdu)) continue
+                if (lrdu != front!!.down().getLRDUGoingTo(front!!) && lrdu.inverse() != front!!.down().getLRDUGoingTo(front!!)) continue
+                mask.set(1.shl(lrdu.ordinal))
+                CableRender.drawCable(poseStack, consumer, packedLight, packedOverlay, cableRender, mask, connectionType!!, cableRender!!.widthDiv2 / 2f, false, rgb[0], rgb[1], rgb[2], 1f)
+            }
+            poseStack.popPose()
         }
+    }
+
+    override fun draw() {
+        // Deprecated
+    }
+
+    fun draw(extra: () -> Unit) {
+        // Deprecated
     }
 
     override fun refresh(deltaT: Float) {

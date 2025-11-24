@@ -125,22 +125,24 @@ class PortableNaNRender(tileEntity: SixNodeEntity, side: Direction, descriptor: 
     }
 
     override fun draw() {
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+
         Minecraft.getInstance().profiler.push("ACable")
 
-        UtilsClient.bindTexture(descriptor.render?.cableTexture)
-        glListCall()
+        val texture = descriptor.render!!.cableTexture
+        val consumer = buffer.getBuffer(net.minecraft.client.renderer.RenderType.entitySolid(texture))
 
-        GL11.glColor3f(1f, 1f, 1f)
+        CableRender.drawCable(poseStack, consumer, light, overlay, descriptor.render!!, connectedSide, CableRender.connectionType(this, side), descriptor.render!!.widthDiv2 / 2.0f, false)
+        CableRender.drawNode(poseStack, consumer, light, overlay, descriptor.render!!, connectedSide, CableRender.connectionType(this, side))
+
         Minecraft.getInstance().profiler.pop()
     }
 
-    override fun glListDraw() {
-        CableRender.drawCable(descriptor.render!!, connectedSide, CableRender.connectionType(this, side))
-        CableRender.drawNode(descriptor.render!!, connectedSide, CableRender.connectionType(this, side))
-    }
-
     override fun glListEnable(): Boolean {
-        return true
+        return false
     }
 
     override fun getCableRender(lrdu: LRDU): CableRenderDescriptor? {

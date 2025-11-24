@@ -22,6 +22,6 @@ class TurbineRender(
     override fun render(poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         val descriptor = transparentNodedescriptor as TurbineDescriptor
         front?.rotateXnRef(poseStack)
-        descriptor.obj?.draw(poseStack, bufferSource.getBuffer(RenderType.solid()), packedLight, packedOverlay)
+        descriptor.obj?.draw(poseStack, bufferSource, packedLight, packedOverlay)
     }
 }

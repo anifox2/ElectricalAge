@@ -34,12 +34,15 @@ class PowerSocketDescriptor(subID: Int, name: String, obj: Obj3D) :
     }
 
     @JvmOverloads
-    fun draw(color: Int = 0) {
-        if (base != null) base!!.draw()
+    fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, buffer: net.minecraft.client.renderer.MultiBufferSource, combinedLight: Int, combinedOverlay: Int, color: Int = 0) {
+        if (base != null) base!!.draw(poseStack, buffer, combinedLight, combinedOverlay)
         if (socket != null) {
-            setGlColorFromDye(color, 0.7f, 0.3f)
-            socket!!.draw()
-            GL11.glColor3f(1f, 1f, 1f)
+            val rgb = mods.eln.misc.UtilsClient.getDyeColor(color)
+            // setGlColorFromDye(color, 0.7f, 0.3f) -> brightness 0.7, alpha 0.3? No, setGlColorFromDye(dye, brightness, alpha)
+            // The original code was setGlColorFromDye(color, 0.7f, 0.3f)
+            // UtilsClient.setGlColorFromDye(dyeColor: Int, brightness: Float, alpha: Float)
+            
+            socket!!.draw(poseStack, buffer, combinedLight, combinedOverlay, rgb[0] * 0.7f, rgb[1] * 0.7f, rgb[2] * 0.7f, 0.3f)
         }
     }
 

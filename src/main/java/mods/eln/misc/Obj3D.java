@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import org.joml.Matrix4f;
 import org.joml.Matrix3f;
 
@@ -27,7 +29,7 @@ public class Obj3D {
     public float xMax = 0, yMax = 0, zMax = 0;
     public float dimMax, dimMaxInv;
 
-    private String dirPath;
+    public String dirPath;
 
     public void bindTexture(String texFilename) {
         ResourceLocation textureResource = new ResourceLocation("eln", "model/" + dirPath + "/" + texFilename);
@@ -189,6 +191,8 @@ public class Obj3D {
                     .normal(normalMatrix, n.x, n.y, n.z)
                     .endVertex();
         }
+
+
     }
 
     public class Obj3DPart {
@@ -333,6 +337,23 @@ public class Obj3D {
             }
         }
 
+        public void draw(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+            draw(poseStack, bufferSource, packedLight, packedOverlay, 0, 0);
+        }
+
+        public void draw(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float texOffsetX, float texOffsetY) {
+            if (locked) return;
+            for (FaceGroup fg : faceGroup) {
+                VertexConsumer consumer;
+                if (fg.textureResource != null) {
+                    consumer = bufferSource.getBuffer(RenderType.entityCutout(fg.textureResource));
+                } else {
+                    consumer = bufferSource.getBuffer(RenderType.entityCutout(new ResourceLocation("eln", "textures/missing.png")));
+                }
+                fg.draw(poseStack, consumer, packedLight, packedOverlay, texOffsetX, texOffsetY);
+            }
+        }
+
         public void drawColored(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay, int r, int g, int b, int a) {
             drawColored(poseStack, consumer, packedLight, packedOverlay, 0, 0, r, g, b, a);
         }
@@ -359,6 +380,30 @@ public class Obj3D {
             draw(poseStack, consumer, packedLight, packedOverlay, texOffsetX, texOffsetY);
 
             poseStack.popPose();
+        }
+
+        public void draw(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float angle, float x, float y, float z) {
+            draw(poseStack, bufferSource, packedLight, packedOverlay, angle, x, y, z, 0, 0);
+        }
+
+        public void draw(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float angle, float x, float y, float z, float texOffsetX, float texOffsetY) {
+            if (locked) return;
+
+            poseStack.pushPose();
+            poseStack.translate(ox, oy, oz);
+            poseStack.mulPose(new org.joml.Quaternionf().setAngleAxis(Math.toRadians(angle), x, y, z));
+            poseStack.translate(-ox, -oy, -oz);
+
+            draw(poseStack, bufferSource, packedLight, packedOverlay, texOffsetX, texOffsetY);
+
+            poseStack.popPose();
+        }
+
+        public ResourceLocation getTextureResource() {
+            if (faceGroup.size() > 0) {
+                return faceGroup.get(0).textureResource;
+            }
+            return null;
         }
 
         // Returns the bounding box of the vertices we'd draw.
@@ -719,6 +764,19 @@ public class Obj3D {
         Obj3DPart part = nameToPartHash.get(partName);
         if (part != null) {
             part.draw(poseStack, consumer, packedLight, packedOverlay);
+        }
+    }
+
+    public void draw(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+        for (Obj3DPart part : nameToPartHash.values()) {
+            part.draw(poseStack, bufferSource, packedLight, packedOverlay);
+        }
+    }
+
+    public void draw(String partName, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+        Obj3DPart part = nameToPartHash.get(partName);
+        if (part != null) {
+            part.draw(poseStack, bufferSource, packedLight, packedOverlay);
         }
     }
 

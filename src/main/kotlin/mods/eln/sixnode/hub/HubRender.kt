@@ -21,6 +21,19 @@ class HubRender(tileEntity: SixNodeEntity, side: Direction, descriptor: SixNodeD
         val overlay = currentOverlay
         val consumer = buffer.getBuffer(RenderType.solid())
 
+        // Update connectionGrid
+        for (idx in 0 until 4) {
+            val lrdu = LRDU.fromInt(idx)
+            val render = getCableRender(lrdu)
+            if (render != null && connectedSide.mask and (1 shl idx) != 0) {
+                connectionGrid[idx] = true
+            } else {
+                connectionGrid[idx] = false
+            }
+        }
+        connectionGrid[LRDU.Down.toInt()] = true
+        connectionGrid[LRDU.Up.toInt()] = false
+
         poseStack.pushPose()
         front!!.rotatePoseOnX(poseStack)
         
@@ -30,16 +43,7 @@ class HubRender(tileEntity: SixNodeEntity, side: Direction, descriptor: SixNodeD
     }
 
     override fun drawCables() {
-        super.drawCables()
-        for (idx in 0 until 4) {
-            if (cableListReady[idx]) {
-                connectionGrid[LRDU.fromInt(idx).toInt()] = true
-            } else {
-                connectionGrid[LRDU.fromInt(idx).toInt()] = false
-            }
-        }
-        connectionGrid[LRDU.Down.toInt()] = true
-        connectionGrid[LRDU.Up.toInt()] = false;
+        // Deprecated
     }
 
     override fun newGuiDraw(side: Direction, player: Player): Screen? {

@@ -68,16 +68,7 @@ abstract class SixNodeElementRender(@JvmField var blockEntity: SixNodeEntity, @J
     var needRedraw = false
     open fun newConnectionType(connectionType: CableRenderType?) {}
     open fun drawCables() {
-        for (idx in 0..3) {
-            val render = getCableRender(fromInt(idx))
-            cableListReady[idx] = false
-            if (render != null && connectedSide.mask and (1 shl idx) != 0) {
-                GL11.glNewList(cableList[idx], GL11.GL_COMPILE)
-                CableRender.drawCable(render, LRDUMask(1 shl idx), connectionType!!)
-                GL11.glEndList()
-                cableListReady[idx] = true
-            }
-        }
+        // Deprecated
     }
 
     open fun draw() {
@@ -97,10 +88,10 @@ abstract class SixNodeElementRender(@JvmField var blockEntity: SixNodeEntity, @J
                 val lrdu = fromInt(idx)
                 val render = getCableRender(lrdu)
                 if (render != null && connectedSide.mask and (1 shl idx) != 0) {
-                    // setGlColorFromDye(connectionType!!.otherdry[idx])
+                    val rgb = mods.eln.misc.UtilsClient.getDyeColor(connectionType!!.otherdry[idx])
                     val texture = render.cableTexture
                     val consumer = buffer.getBuffer(net.minecraft.client.renderer.RenderType.entitySolid(texture))
-                    CableRender.drawCable(poseStack, consumer, light, overlay, render, LRDUMask(1 shl idx), connectionType!!)
+                    CableRender.drawCable(poseStack, consumer, light, overlay, render, LRDUMask(1 shl idx), connectionType!!, render.widthDiv2 / 2f, false, rgb[0], rgb[1], rgb[2], 1f)
                 }
             }
         }

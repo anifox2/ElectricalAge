@@ -140,7 +140,11 @@ class TachometerRender(entity: TransparentNodeBlockEntity, desc: TransparentNode
     internal var maxRads = TachometerElement.DefaultMaxRads
 
     override fun draw() {
-        renderPreProcess = drawCable(Direction.YN, Eln.instance!!.stdCableRenderSignal, connections, renderPreProcess)
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+        renderPreProcess = drawCable(poseStack, buffer, light, overlay, Direction.YN, Eln.instance!!.stdCableRenderSignal, connections, renderPreProcess)
         super.draw()
     }
 

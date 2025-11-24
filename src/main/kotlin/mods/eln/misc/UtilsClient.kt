@@ -377,6 +377,11 @@ object UtilsClient {
         RenderSystem.setShaderColor(color[0] * brightness, color[1] * brightness, color[2] * brightness, alpha)
     }
 
+    @JvmStatic
+    fun getDyeColor(dyeColor: Int): FloatArray {
+        return net.minecraft.world.item.DyeColor.byId(dyeColor).textureDiffuseColors
+    }
+
     // Helper for translation
     fun tr(s: String): String {
         return s // Placeholder

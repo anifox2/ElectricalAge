@@ -101,47 +101,48 @@ class DcDcDescriptor(name: String, objM: Obj3D, coreM: Obj3D, casingM: Obj3D, va
         return RealisticEnum.UNREALISTIC
     }
     */
-// ...existing code...
 
-    internal fun draw(core: Obj3D.Obj3DPart?, priCableNbr: Int, secCableNbr: Int, hasCasing: Boolean, doorOpen: Float) {
-        main?.draw()
-        core?.draw()
+    // ...existing code...
+
+    internal fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, buffer: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int, core: Obj3D.Obj3DPart?, priCableNbr: Int, secCableNbr: Int, hasCasing: Boolean, doorOpen: Float) {
+        main?.draw(poseStack, buffer, packedLight, packedOverlay)
+        core?.draw(poseStack, buffer, packedLight, packedOverlay)
         if (core != null) {
             if (priCableNbr != 0) {
                 var scale = COIL_SCALE
                 if (priCableNbr < COIL_SCALE_LIMIT) {
                     scale *= priCableNbr.toFloat() / COIL_SCALE_LIMIT
                 }
-                GL11.glPushMatrix()
-                GL11.glScalef(1f, scale * 2f / (priCableNbr + 1), 1f)
-                GL11.glTranslatef(0f, -0.125f * (priCableNbr - 1) / COIL_SCALE, 0f)
+                poseStack.pushPose()
+                poseStack.scale(1f, scale * 2f / (priCableNbr + 1), 1f)
+                poseStack.translate(0f, -0.125f * (priCableNbr - 1) / COIL_SCALE, 0f)
                 for (idx in 0 until priCableNbr) {
-                    coil?.draw()
-                    GL11.glTranslatef(0f, 0.25f / COIL_SCALE, 0f)
+                    coil?.draw(poseStack, buffer, packedLight, packedOverlay)
+                    poseStack.translate(0f, 0.25f / COIL_SCALE, 0f)
                 }
-                GL11.glPopMatrix()
+                poseStack.popPose()
             }
             if (secCableNbr != 0) {
                 var scale = COIL_SCALE
                 if (secCableNbr < COIL_SCALE_LIMIT) {
                     scale *= secCableNbr.toFloat() / COIL_SCALE_LIMIT
                 }
-                GL11.glPushMatrix()
-                GL11.glRotatef(180f, 0f, 1f, 0f)
-                GL11.glScalef(1f, scale * 2f / (secCableNbr + 1), 1f)
-                GL11.glTranslatef(0f, -0.125f * (secCableNbr - 1) / COIL_SCALE, 0f)
+                poseStack.pushPose()
+                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f))
+                poseStack.scale(1f, scale * 2f / (secCableNbr + 1), 1f)
+                poseStack.translate(0f, -0.125f * (secCableNbr - 1) / COIL_SCALE, 0f)
                 for (idx in 0 until secCableNbr) {
-                    coil?.draw()
-                    GL11.glTranslatef(0f, 0.25f / COIL_SCALE, 0f)
+                    coil?.draw(poseStack, buffer, packedLight, packedOverlay)
+                    poseStack.translate(0f, 0.25f / COIL_SCALE, 0f)
                 }
-                GL11.glPopMatrix()
+                poseStack.popPose()
             }
         }
 
         if (hasCasing) {
-            casing?.draw()
-            casingLeftDoor?.draw(-doorOpen * 90, 0f, 1f, 0f)
-            casingRightDoor?.draw(doorOpen * 90, 0f, 1f, 0f)
+            casing?.draw(poseStack, buffer, packedLight, packedOverlay)
+            casingLeftDoor?.draw(poseStack, buffer, packedLight, packedOverlay, -doorOpen * 90, 0f, 1f, 0f)
+            casingRightDoor?.draw(poseStack, buffer, packedLight, packedOverlay, doorOpen * 90, 0f, 1f, 0f)
         }
     }
 }
@@ -417,13 +418,13 @@ class DcDcRender(tileEntity: TransparentNodeBlockEntity, val descriptor: Transpa
         doorOpen = PhysicalInterpolator(0.4f, 4.0f, 0.9f, 0.05f)
     }
 
-    override fun draw() {
-        GL11.glPushMatrix()
-        front!!.glRotateXnRef()
-        (descriptor as DcDcDescriptor).draw(feroPart, primaryStackSize.toInt(), secondaryStackSize.toInt(), hasCasing, doorOpen.get())
-        GL11.glPopMatrix()
-        cableRenderType = drawCable(front!!.down(), priRender, priConn, cableRenderType)
-        cableRenderType = drawCable(front!!.down(), secRender, secConn, cableRenderType)
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        poseStack.pushPose()
+        front!!.rotateXnRef(poseStack)
+        (descriptor as DcDcDescriptor).draw(poseStack, bufferSource, packedLight, packedOverlay, feroPart, primaryStackSize.toInt(), secondaryStackSize.toInt(), hasCasing, doorOpen.get())
+        poseStack.popPose()
+        cableRenderType = drawCable(poseStack, bufferSource, packedLight, packedOverlay, front!!.down(), priRender, priConn, cableRenderType)
+        cableRenderType = drawCable(poseStack, bufferSource, packedLight, packedOverlay, front!!.down(), secRender, secConn, cableRenderType)
     }
 
     override fun networkUnserialize(stream: DataInputStream) {
@@ -508,6 +509,10 @@ class DcDcRender(tileEntity: TransparentNodeBlockEntity, val descriptor: Transpa
 
     override fun newGuiDraw(side: Direction, player: Player): Screen {
         return DcDcGui(player, inventory, this)
+    }
+
+    override fun draw() {
+        // Empty implementation as we use render()
     }
 }
 

@@ -80,20 +80,22 @@ class ConduitCableRender(
         return descriptor.render
     }
 
-    override fun glListEnable() = true
+    override fun glListEnable() = false
 
-    override fun glListDraw() {
-        CableRender.drawCable(descriptor.render, connectedSide, CableRender.connectionType(this, side))
-        CableRender.drawNode(descriptor.render, connectedSide, CableRender.connectionType(this, side))
-    }
-
-    // ...existing code...
     override fun draw() {
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+
         Minecraft.getInstance().profiler.push("ECable")
-        GL11.glColor3f(1f, 1f, 1f)
-        UtilsClient.bindTexture(descriptor.render.cableTexture)
-        glListCall()
-        GL11.glColor3f(1f, 1f, 1f)
+        
+        val texture = descriptor.render.cableTexture
+        val consumer = buffer.getBuffer(net.minecraft.client.renderer.RenderType.entitySolid(texture))
+
+        CableRender.drawCable(poseStack, consumer, light, overlay, descriptor.render, connectedSide, CableRender.connectionType(this, side), descriptor.render.widthDiv2 / 2.0f, false)
+        CableRender.drawNode(poseStack, consumer, light, overlay, descriptor.render, connectedSide, CableRender.connectionType(this, side))
+
         Minecraft.getInstance().profiler.pop()
     }
 // ...existing code...

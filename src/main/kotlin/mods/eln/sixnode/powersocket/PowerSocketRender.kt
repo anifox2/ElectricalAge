@@ -2,9 +2,11 @@ package mods.eln.sixnode.powersocket
 
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
+import mods.eln.cable.CableRender
 import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
+import mods.eln.misc.LRDUMask
 import mods.eln.misc.UtilsClient.setGlColorFromDye
 import mods.eln.node.six.SixNodeDescriptor
 import mods.eln.node.six.SixNodeElementInventory
@@ -33,14 +35,28 @@ class PowerSocketRender(tileEntity: SixNodeEntity?, side: Direction?, descriptor
     }
 
     override fun drawCables() {
-        setGlColorFromDye(paintColor, 1.0f)
-        super.drawCables()
-        GL11.glColor3f(1f, 1f, 1f)
+        // Deprecated
     }
 
     override fun draw() {
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+
+        descriptor.draw(poseStack, buffer, light, overlay, paintColor)
         
-        descriptor.draw(paintColor)
+        // Draw cables
+        val rgb = mods.eln.misc.UtilsClient.getDyeColor(paintColor)
+        val texture = Eln.instance!!.lowCurrentCableRender!!.cableTexture
+        val consumer = buffer.getBuffer(net.minecraft.client.renderer.RenderType.entitySolid(texture))
+        
+        for (idx in 0..3) {
+            val lrdu = LRDU.fromInt(idx)
+            if (connectedSide.mask and (1 shl idx) != 0) {
+                CableRender.drawCable(poseStack, consumer, light, overlay, Eln.instance!!.lowCurrentCableRender!!, LRDUMask(1 shl idx), CableRender.connectionType(this, side), Eln.instance!!.lowCurrentCableRender!!.widthDiv2 / 2.0f, false, rgb[0], rgb[1], rgb[2], 1f)
+            }
+        }
     }
 
     override fun refresh(deltaT: Float) {}

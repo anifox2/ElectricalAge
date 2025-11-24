@@ -35,14 +35,14 @@ class ArcFurnaceDescriptor(name: String, override var obj: Obj3D?): TransparentN
         ghostGroup = gg
     }
 
-    fun draw(front: Direction) {
+    fun draw(front: Direction, poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         if (main != null) {
-            front.glRotateZnRef()
-            //GL11.glRotatef(-90f, 0f, 1f, 0f);
-            GL11.glTranslatef(-1.5f, -0.5f, 2.5f);
-            GL11.glScalef(0.5f, 0.5f, 0.5f);
-            main?.draw()
-            //UtilsClient.drawItemEntity(inEntity, -0.35, 0.04, 0.3, 1, 1f)
+            poseStack.pushPose()
+            front.rotateZnRef(poseStack)
+            poseStack.translate(-1.5, -0.5, 2.5)
+            poseStack.scale(0.5f, 0.5f, 0.5f)
+            main?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+            poseStack.popPose()
         }
     }
 }
@@ -116,8 +116,11 @@ class ArcFurnaceRender(tileEntity: TransparentNodeBlockEntity, descriptor: Trans
         adesc = descriptor as ArcFurnaceDescriptor;
     }
 
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        adesc?.draw(front!!, poseStack, bufferSource, packedLight, packedOverlay)
+    }
+
     override fun draw() {
-        adesc?.draw(front!!)
     }
 
     override fun newGuiDraw(side: Direction, player: Player): Screen {

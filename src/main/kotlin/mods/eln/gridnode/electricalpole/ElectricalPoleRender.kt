@@ -40,8 +40,11 @@ class ElectricalPoleRender(entity: TransparentNodeBlockEntity, descriptor: Trans
     }
 
     override fun draw() {
-        
-        cableRenderType = drawCable(front!!.down(), Eln.instance!!.stdCableRender3200V, eConn, cableRenderType)
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+        cableRenderType = drawCable(poseStack, buffer, light, overlay, front!!.down(), Eln.instance!!.stdCableRender3200V, eConn, cableRenderType)
     }
 
     override fun networkUnserialize(stream: DataInputStream) {

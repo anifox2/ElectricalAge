@@ -20,4 +20,7 @@ class HeatFurnaceDescriptor(
     HeatFurnaceElement::class.java,
     HeatFurnaceRender::class.java
 ) {
+    fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        obj?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+    }
 }

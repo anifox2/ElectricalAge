@@ -39,9 +39,16 @@ class WindTurbineRender(
     }
 
     override fun draw() {
-        renderPreProcess = drawCable(Direction.YN, descriptor.cable.render, eConn, renderPreProcess, false)
-        front?.glRotateXnRef()
-        descriptor.draw(alpha, haloState)
+        val poseStack = currentPoseStack ?: return
+        val buffer = currentBuffer ?: return
+        val light = currentLight
+        val overlay = currentOverlay
+        renderPreProcess = drawCable(poseStack, buffer, light, overlay, Direction.YN, descriptor.cable.render, eConn, renderPreProcess, false)
+        
+        poseStack.pushPose()
+        front?.rotateXnRef(poseStack)
+        descriptor.draw(poseStack, buffer, light, overlay, alpha, haloState)
+        poseStack.popPose()
     }
 
     override fun refresh(deltaT: Float) {

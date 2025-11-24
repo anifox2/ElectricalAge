@@ -228,4 +228,15 @@ enum class Direction(val int: Int) {
             ZP -> poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90f))
         }
     }
+
+    fun rotateZnRef(poseStack: PoseStack) {
+        when (this) {
+            ZN -> {}
+            ZP -> poseStack.mulPose(Axis.YP.rotationDegrees(180f))
+            YN -> poseStack.mulPose(Axis.XP.rotationDegrees(-90f))
+            YP -> poseStack.mulPose(Axis.XP.rotationDegrees(90f))
+            XN -> poseStack.mulPose(Axis.YP.rotationDegrees(90f))
+            XP -> poseStack.mulPose(Axis.YP.rotationDegrees(-90f))
+        }
+    }
 }

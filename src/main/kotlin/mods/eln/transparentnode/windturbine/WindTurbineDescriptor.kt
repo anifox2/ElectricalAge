@@ -58,18 +58,16 @@ class WindTurbineDescriptor(
         this.ghostGroup = ghostGroup
     }
 
-    fun draw(alpha: Float, haloState: Boolean) {
-        main?.draw()
-        rot?.draw(alpha, 1f, 0f, 0f)
+    fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, buffer: net.minecraft.client.renderer.MultiBufferSource, combinedLight: Int, combinedOverlay: Int, alpha: Float, haloState: Boolean) {
+        main?.draw(poseStack, buffer, combinedLight, combinedOverlay)
+        if (rot != null) {
+            poseStack.pushPose()
+            poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(alpha))
+            rot!!.draw(poseStack, buffer, combinedLight, combinedOverlay)
+            poseStack.popPose()
+        }
         if (halo != null && haloState) {
-            UtilsClient.disableLight()
-            UtilsClient.enableBlend()
-            UtilsClient.disableCulling()
-            GL11.glColor3f(1f, 0f, 0f)
-            halo!!.draw()
-            UtilsClient.enableCulling()
-            UtilsClient.disableBlend()
-            UtilsClient.enableLight()
+            halo!!.draw(poseStack, buffer, 15728880, combinedOverlay, 1f, 0f, 0f, 1f)
         }
     }
 }

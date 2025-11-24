@@ -21,6 +21,8 @@ import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
+import com.mojang.blaze3d.vertex.PoseStack
+import net.minecraft.client.renderer.MultiBufferSource
 
 class NixieTubeDescriptor(name: String, override var obj: Obj3D?) : TransparentNodeDescriptor(name, NixieTubeElement::class.java, NixieTubeRender::class.java) {
     val display = obj!!.getPart("display")
@@ -77,6 +79,44 @@ class NixieTubeDescriptor(name: String, override var obj: Obj3D?) : TransparentN
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f)
         tube.draw()
         UtilsClient.disableBlend()
+    }
+
+    fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int, _digit: Int, blank: Boolean, _dots: Int) {
+        var digit = _digit
+        if(digit < 0) digit = 0
+        if(digit > 9) digit = 9
+        var dots = _dots;
+        if(dots < 0) dots = 0
+        if(dots > 3) dots = 3
+
+        base.draw(poseStack, bufferSource, packedLight, packedOverlay)
+
+        // UtilsClient.enableBlend() // Handled by RenderType
+        // UtilsClient.disableLight() // Handled by RenderType
+        // UtilsClient.disableCulling() // Handled by RenderType
+        
+        // obj!!.bindTexture("digit_atlas.png") // Handled by RenderType
+        
+        // GL11.glColor4f(1f, 0.4f, 0.2f, 1.0f) // Handled by vertex color
+        
+        val digitConsumer = bufferSource.getBuffer(net.minecraft.client.renderer.RenderType.entityTranslucent(net.minecraft.resources.ResourceLocation("eln", "model/" + obj!!.dirPath + "/digit_atlas.png")))
+        
+        if(blank) {
+            display.drawColored(poseStack, digitConsumer, packedLight, packedOverlay, 10.0f / 16.0f, 0.0f, 255, 102, 51, 255)
+        } else {
+            display.drawColored(poseStack, digitConsumer, packedLight, packedOverlay, digit.toFloat() / 16.0f, 0.0f, 255, 102, 51, 255)
+            if(dots != 0) {
+                display.drawColored(poseStack, digitConsumer, packedLight, packedOverlay, (11.0f + dots.toFloat()) / 16.0f, 0.0f, 255, 102, 51, 255)
+            }
+        }
+        
+        // UtilsClient.enableLight()
+        // UtilsClient.enableCulling()
+
+        // GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f)
+        val tubeConsumer = bufferSource.getBuffer(net.minecraft.client.renderer.RenderType.entityTranslucent(tube.getTextureResource() ?: net.minecraft.resources.ResourceLocation("eln", "textures/missing.png")))
+        tube.drawColored(poseStack, tubeConsumer, packedLight, packedOverlay, 0f, 0f, 255, 255, 255, 128)
+        // UtilsClient.disableBlend()
     }
 
     override fun getFrontFromPlace(side: Direction, entityLiving: LivingEntity?): Direction {
@@ -191,31 +231,37 @@ class NixieTubeRender(entity: TransparentNodeBlockEntity, _descriptor: Transpare
     var connTypes: Array<CableRenderType?>? = null
     var connection = LRDUMask()
 
+    override fun render(poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        poseStack.pushPose()
+        front?.rotateXnRef(poseStack)
+        descriptor.draw(poseStack, bufferSource, packedLight, packedOverlay, digit, blank, dots)
+        poseStack.popPose()
+
+        if (connTypes == null) {
+            connTypes = arrayOfNulls(4)
+            for (lrdu in LRDU.values()) {
+                connTypes!!.set(lrdu.ordinal, CableRender.connectionType(tileEntity, LRDUMask(1.shl(lrdu.ordinal)), front!!.down()))
+            }
+        }
+
+        poseStack.pushPose()
+        glCableTransform(poseStack, front!!.down())
+        
+        for(lrdu in LRDU.values()) {
+            val render = getCableRenderSide(front!!.down(), lrdu)
+            if (render != null) {
+                val rgb = UtilsClient.getDyeColor(connTypes!![lrdu.ordinal]!!.otherdry[lrdu.toInt()])
+                val texture = render.cableTexture
+                val consumer = bufferSource.getBuffer(net.minecraft.client.renderer.RenderType.entitySolid(texture))
+                val mask = LRDUMask(1.shl(lrdu.ordinal))
+                CableRender.drawCable(poseStack, consumer, packedLight, packedOverlay, render, mask, connTypes!![lrdu.ordinal]!!, render.widthDiv2 / 2f, false, rgb[0], rgb[1], rgb[2], 1f)
+            }
+        }
+        poseStack.popPose()
+    }
+
     override fun draw() {
-        preserveMatrix {
-            front!!.glRotateXnRef()
-            descriptor.draw(digit, blank, dots)
-        }
-
-        preserveMatrix {
-            if (connTypes == null) {
-                connTypes = arrayOfNulls(4)
-
-                for (lrdu in LRDU.values()) {
-                    connTypes!!.set(lrdu.ordinal, CableRender.connectionType(tileEntity, LRDUMask(1.shl(lrdu.ordinal)), front!!.down()))
-                }
-            }
-            glCableTransform(front!!.down())
-            for(lrdu in LRDU.values()) {
-                val render = getCableRenderSide(front!!.down(), lrdu)
-                if (render != null) {
-                    render.bindCableTexture()
-                    Utils.setGlColorFromDye(connTypes!![lrdu.ordinal]!!.otherdry[lrdu.toInt()])
-                    val mask = LRDUMask(1.shl(lrdu.ordinal))
-                    CableRender.drawCable(render, mask, connTypes!![lrdu.ordinal]!!)
-                }
-            }
-        }
+        // Deprecated
     }
 
     override fun networkUnserialize(stream: DataInputStream) {

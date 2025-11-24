@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack
 
 import mods.eln.misc.Direction
 import net.minecraft.world.entity.LivingEntity
+import net.minecraft.client.renderer.MultiBufferSource
 
 class SolarPanelDescriptor(
     name: String,
@@ -65,6 +66,16 @@ class SolarPanelDescriptor(
         if (panel != null) panel!!.draw(poseStack, consumer, packedLight, packedOverlay)
         
         poseStack.popPose()
+    }
+
+    fun draw(poseStack: PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int, angle: Float) {
+        if (main != null) main!!.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        if (panel != null) {
+            poseStack.pushPose()
+            poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(angle))
+            panel!!.draw(poseStack, bufferSource, packedLight, packedOverlay)
+            poseStack.popPose()
+        }
     }
 
     override fun getFrontFromPlace(side: Direction, entityLiving: LivingEntity?): Direction? {
