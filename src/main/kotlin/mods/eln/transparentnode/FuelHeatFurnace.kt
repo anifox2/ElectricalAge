@@ -77,6 +77,25 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
         GL11.glColor3f(1f, 1f, 1f)
     }
 
+    fun draw(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int, installedBurner: Int? = null, on: Boolean = false, heating: Boolean = false) {
+        main?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        if (installedBurner != null) {
+            burners[installedBurner]?.draw(poseStack, bufferSource, packedLight, packedOverlay)
+        }
+
+        if (on) {
+            UtilsClient.drawLight(powerLED, poseStack, bufferSource, packedLight, packedOverlay, 0f, 1f, 0f, 1f)
+        } else {
+            powerLED?.drawColored(poseStack, bufferSource.getBuffer(net.minecraft.client.renderer.RenderType.entityCutout(powerLED.textureResource ?: UtilsClient.whiteTexture)), packedLight, packedOverlay, 0, 128, 0, 255)
+        }
+
+        if (heating) {
+            UtilsClient.drawLight(heatLED, poseStack, bufferSource, packedLight, packedOverlay, 1f, 0f, 0f, 1f)
+        } else {
+            heatLED?.drawColored(poseStack, bufferSource.getBuffer(net.minecraft.client.renderer.RenderType.entityCutout(heatLED.textureResource ?: UtilsClient.whiteTexture)), packedLight, packedOverlay, 128, 0, 0, 255)
+        }
+    }
+
     override fun appendHoverText(itemStack: net.minecraft.world.item.ItemStack, level: net.minecraft.world.level.Level?, list: MutableList<net.minecraft.network.chat.Component>, flag: net.minecraft.world.item.TooltipFlag) {
         super.appendHoverText(itemStack, level, list, flag)
         list.add(Component.literal(tr("Generates heat when supplied with fuel.")))
@@ -286,6 +305,11 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeBlockEntity, descriptor: 
     override fun draw() {
         front!!.glRotateXnRef()
         (transparentNodedescriptor as FuelHeatFurnaceDescriptor).draw(type, mainSwitch, heatPower != 0f)
+    }
+
+    override fun render(poseStack: com.mojang.blaze3d.vertex.PoseStack, bufferSource: net.minecraft.client.renderer.MultiBufferSource, packedLight: Int, packedOverlay: Int) {
+        front!!.rotateXnRef(poseStack)
+        (transparentNodedescriptor as FuelHeatFurnaceDescriptor).draw(poseStack, bufferSource, packedLight, packedOverlay, type, mainSwitch, heatPower != 0f)
     }
 
     override fun newGuiDraw(side: Direction, player: Player) = FuelHeatFurnaceGui(player, inventory, this)

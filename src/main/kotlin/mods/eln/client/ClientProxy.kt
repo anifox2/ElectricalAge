@@ -14,13 +14,16 @@ object ClientProxy : CommonProxy() {
     lateinit var soundClientEventListener: SoundClientEventListener
     val clientKeyHandler = ClientKeyHandler()
 
+    fun setup(modEventBus: net.minecraftforge.eventbus.api.IEventBus) {
+        modEventBus.addListener(this::registerBlockEntityRenderers)
+        modEventBus.addListener(clientKeyHandler::registerBindings)
+    }
+
     override fun registerRenderers() {
         uuidManager = UuidManager()
         soundClientEventListener = SoundClientEventListener(uuidManager)
         
         MinecraftForge.EVENT_BUS.register(clientKeyHandler)
-        FMLJavaModLoadingContext.get().modEventBus.addListener(clientKeyHandler::registerBindings)
-        FMLJavaModLoadingContext.get().modEventBus.addListener(this::registerBlockEntityRenderers)
     }
 
     fun registerBlockEntityRenderers(event: EntityRenderersEvent.RegisterRenderers) {

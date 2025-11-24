@@ -226,6 +226,12 @@ object UtilsClient {
         // TODO: Modern rendering
     }
 
+    fun drawLight(part: Obj3DPart?, poseStack: PoseStack, bufferSource: MultiBufferSource, packedLight: Int, packedOverlay: Int, r: Float, g: Float, b: Float, a: Float) {
+        if (part == null) return
+        val consumer = bufferSource.getBuffer(RenderType.entityCutout(part.textureResource ?: whiteTexture))
+        part.drawColored(poseStack, consumer, 0xF000F0, packedOverlay, (r * 255).toInt(), (g * 255).toInt(), (b * 255).toInt(), (a * 255).toInt())
+    }
+
     @JvmStatic
     fun drawLightNoBind(part: Obj3DPart?) {
         // TODO: Modern rendering

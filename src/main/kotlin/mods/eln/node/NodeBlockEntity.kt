@@ -231,7 +231,19 @@ abstract class NodeBlockEntity(type: net.minecraft.world.level.block.entity.Bloc
         if (tag != null && tag.contains("elnData")) {
             val data = tag.getByteArray("elnData")
             val stream = DataInputStream(java.io.ByteArrayInputStream(data))
-            serverPublishUnserialize(stream)
+            try {
+                // Skip header written by NodeBase.publishPacket
+                stream.readByte() // packetId
+                stream.readInt() // x
+                stream.readInt() // y
+                stream.readInt() // z
+                stream.readByte() // dim
+                stream.readUTF() // uuid
+                
+                serverPublishUnserialize(stream)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
         }
     }
 

@@ -1,5 +1,7 @@
 package mods.eln
 
+import net.minecraftforge.fml.loading.FMLEnvironment
+import net.minecraftforge.api.distmarker.Dist
 import mods.eln.generic.GenericItemUsingDamageDescriptor
 import mods.eln.init.Registration
 import net.minecraftforge.eventbus.api.IEventBus
@@ -129,6 +131,10 @@ class Eln {
         mods.eln.recipe.ElnRecipeTypes.register(modEventBus)
         modEventBus.addListener(this::commonSetup)
         modEventBus.addListener(this::clientSetup)
+
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            ClientProxy.setup(modEventBus)
+        }
 
         treeResinCollectorBlockEntity = Registration.TREE_RESIN_COLLECTOR_BLOCK_ENTITY as net.minecraftforge.registries.RegistryObject<net.minecraft.world.level.block.entity.BlockEntityType<*>>
 

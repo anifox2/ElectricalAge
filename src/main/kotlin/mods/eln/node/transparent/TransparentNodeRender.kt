@@ -25,16 +25,16 @@ open class TransparentNodeRender(context: BlockEntityRendererProvider.Context) :
             // For now, we assume elementRender uses GL11 and we might need to sync or just hope.
             // Actually, we should probably use GL11.glPushMatrix() if the inner code uses GL11.
             
-            GL11.glPushMatrix()
+            // GL11.glPushMatrix()
             // We need to apply the PoseStack transformation to GL11 if we want them to match, 
             // but since we can't easily extract it, we might just use GL11 for translation too if the inner code relies on it.
             // But render() is called with a relative PoseStack.
             // If we ignore PoseStack and use GL11, we might be drawing at 0,0,0 absolute?
             // No, usually the system sets up GL state.
             
-            GL11.glTranslatef(0.5f, 0.5f, 0.5f)
+            // GL11.glTranslatef(0.5f, 0.5f, 0.5f)
             entity.elementRender!!.render(poseStack, bufferSource, packedLight, packedOverlay)
-            GL11.glPopMatrix()
+            // GL11.glPopMatrix()
             
             poseStack.popPose()
         } finally {
