@@ -434,6 +434,9 @@ class FuelHeatFurnaceGui(menu: FuelHeatFurnaceContainer, inventory: Inventory, t
     lateinit var manualControl: GuiVerticalTrackBar
     lateinit var setTemperature: GuiVerticalTrackBarHeat
     private val slotSize = 18
+    
+    private var isDraggingManualControl = false
+    private var isDraggingSetTemperature = false
 
     override fun initGui() {
         super.initGui()
@@ -479,12 +482,16 @@ class FuelHeatFurnaceGui(menu: FuelHeatFurnaceContainer, inventory: Inventory, t
             mainSwitch.message = Component.literal(tr("Furnace is off"))
         mainSwitch.active = !menu.inventory.getItem(FuelHeatFurnaceContainer.FuelBurnerSlot).isEmpty
 
-        manualControl.value = manualControlVal.toFloat()
+        if (!isDraggingManualControl) {
+            manualControl.value = manualControlVal.toFloat()
+        }
         manualControl.setEnable(menu.inventory.getItem(FuelHeatFurnaceContainer.RegulatorSlot).isEmpty && !externalControlledVal)
         manualControl.setComment(0, Utils.plotPercent(tr("Control value at "), manualControl.value.toDouble()))
         manualControl.setComment(1, Utils.plotPower(tr("Heat Power: "), actualHeatPowerVal))
 
-        setTemperature.value = setTemperatureVal.toFloat()
+        if (!isDraggingSetTemperature) {
+            setTemperature.value = setTemperatureVal.toFloat()
+        }
         setTemperature.setEnable(!menu.inventory.getItem(FuelHeatFurnaceContainer.RegulatorSlot).isEmpty && !externalControlledVal)
         setTemperature.temperatureHit = Math.max(0.0, temperatureCelsiusVal)
         setTemperature.setComment(0, tr("Temperature"))
@@ -538,6 +545,7 @@ class FuelHeatFurnaceGui(menu: FuelHeatFurnaceContainer, inventory: Inventory, t
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (manualControl.handleMouseClicked(mouseX.toInt(), mouseY.toInt(), button, leftPos, topPos)) {
+            isDraggingManualControl = true
             if (manualControl.pending) {
                 render.clientSendFloat(FuelHeatFurnaceElement.SetManualControlValueEvent, manualControl.value)
                 menu.element?.manualControl = manualControl.value.toDouble()
@@ -546,6 +554,7 @@ class FuelHeatFurnaceGui(menu: FuelHeatFurnaceContainer, inventory: Inventory, t
             return true
         }
         if (setTemperature.handleMouseClicked(mouseX.toInt(), mouseY.toInt(), button, leftPos, topPos)) {
+            isDraggingSetTemperature = true
             if (setTemperature.pending) {
                 render.clientSendFloat(FuelHeatFurnaceElement.SetTemperatureEvent, setTemperature.value)
                 menu.element?.setTemperature = setTemperature.value.toDouble()
@@ -558,6 +567,7 @@ class FuelHeatFurnaceGui(menu: FuelHeatFurnaceContainer, inventory: Inventory, t
 
     override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, dragX: Double, dragY: Double): Boolean {
         if (manualControl.handleMouseDragged(mouseX.toInt(), mouseY.toInt(), button, leftPos, topPos)) {
+            isDraggingManualControl = true
             if (manualControl.pending) {
                 render.clientSendFloat(FuelHeatFurnaceElement.SetManualControlValueEvent, manualControl.value)
                 menu.element?.manualControl = manualControl.value.toDouble()
@@ -566,6 +576,7 @@ class FuelHeatFurnaceGui(menu: FuelHeatFurnaceContainer, inventory: Inventory, t
             return true
         }
         if (setTemperature.handleMouseDragged(mouseX.toInt(), mouseY.toInt(), button, leftPos, topPos)) {
+            isDraggingSetTemperature = true
             if (setTemperature.pending) {
                 render.clientSendFloat(FuelHeatFurnaceElement.SetTemperatureEvent, setTemperature.value)
                 menu.element?.setTemperature = setTemperature.value.toDouble()
@@ -577,6 +588,8 @@ class FuelHeatFurnaceGui(menu: FuelHeatFurnaceContainer, inventory: Inventory, t
     }
 
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        isDraggingManualControl = false
+        isDraggingSetTemperature = false
         if (manualControl.handleMouseReleased(mouseX.toInt(), mouseY.toInt(), button, leftPos, topPos)) {
             if (manualControl.pending) {
                 render.clientSendFloat(FuelHeatFurnaceElement.SetManualControlValueEvent, manualControl.value)

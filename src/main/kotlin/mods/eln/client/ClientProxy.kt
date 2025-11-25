@@ -25,6 +25,7 @@ object ClientProxy : CommonProxy() {
     fun clientSetup(event: net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent) {
         event.enqueueWork {
             MenuScreens.register(Registration.FUEL_HEAT_FURNACE_MENU.get()) { menu, inv, title -> FuelHeatFurnaceGui(menu, inv, title) }
+            MenuScreens.register(Registration.HEAT_FURNACE_MENU.get()) { menu, inv, title -> mods.eln.transparentnode.heatfurnace.HeatFurnaceGui(menu, inv, title) }
         }
     }
 

@@ -47,6 +47,10 @@ object Registration {
         IForgeMenuType.create(FuelHeatFurnaceContainer::create)
     }
 
+    val HEAT_FURNACE_MENU: RegistryObject<MenuType<mods.eln.transparentnode.heatfurnace.HeatFurnaceContainer>> = MENU_TYPES.register("heat_furnace") {
+        IForgeMenuType.create(mods.eln.transparentnode.heatfurnace.HeatFurnaceContainer::create)
+    }
+
     val TRANSPARENT_NODE_BLOCK: RegistryObject<TransparentNodeBlock> = BLOCKS.register("transparent_node") { TransparentNodeBlock(BlockBehaviour.Properties.of().noOcclusion()) }
     val TRANSPARENT_NODE_ITEM: RegistryObject<Item> = ITEMS.register("transparent_node") { TransparentNodeItem(TRANSPARENT_NODE_BLOCK.get()) }
     val TRANSPARENT_NODE_BLOCK_ENTITY: RegistryObject<BlockEntityType<TransparentNodeBlockEntity>> = BLOCK_ENTITIES.register("transparent_node") {
