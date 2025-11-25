@@ -539,6 +539,13 @@ object CableRender {
             val f2 = floatArrayOf(0f, widthDiv2, widthDiv2, tx + widthDiv2 * 0.5f, ty + widthDiv2 + cable.height + 1.0f / 16.0f)
             val f3 = floatArrayOf(0f, -widthDiv2, widthDiv2, tx - widthDiv2 * 0.5f, ty + widthDiv2 + cable.height + 1.0f / 16.0f)
             drawQuad(consumer, pose, normal, light, overlay, f0, f1, f2, f3, 0f, 0f, 1f, r, g, b, a)
+
+            // Left (Against the wall)
+            val l0 = floatArrayOf(0f, widthDiv2, -widthDiv2, tx + widthDiv2 * 0.5f, ty - widthDiv2)
+            val l1 = floatArrayOf(0f, widthDiv2, widthDiv2, tx + widthDiv2 * 0.5f, ty + widthDiv2)
+            val l2 = floatArrayOf(0f, -widthDiv2, widthDiv2, tx - widthDiv2 * 0.5f, ty + widthDiv2)
+            val l3 = floatArrayOf(0f, -widthDiv2, -widthDiv2, tx - widthDiv2 * 0.5f, ty - widthDiv2)
+            drawQuad(consumer, pose, normal, light, overlay, l0, l3, l2, l1, -1f, 0f, 0f, r, g, b, a)
         }
     }
 }

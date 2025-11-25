@@ -55,7 +55,10 @@ class SixNodeItem(b: Block?) : GenericItemBlockUsingDamage<SixNodeDescriptor>(b!
         }
 
         // Check if we can place
-        val direction = fromIntMinecraftSide(side.ordinal)!!.inverse()
+        var direction = fromIntMinecraftSide(side.ordinal)!!
+        if (!isAddingToExisting) {
+             direction = direction.inverse()
+        }
         val coord = Coordinate(targetPos.x, targetPos.y, targetPos.z, level)
 
         var error: String? = null

@@ -10,7 +10,9 @@ import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import kotlin.math.min
 
-open class BasicContainer(player: Player, protected var inventory: Container, slot: Array<Slot>) : AbstractContainerMenu(null, 0) {
+import net.minecraft.world.inventory.MenuType
+
+open class BasicContainer @JvmOverloads constructor(player: Player, var inventory: Container, slot: Array<Slot>, menuType: MenuType<*>? = null, windowId: Int = 0) : AbstractContainerMenu(menuType, windowId) {
     init {
         for (i in slot.indices) {
             addSlot(slot[i])
@@ -23,13 +25,15 @@ open class BasicContainer(player: Player, protected var inventory: Container, sl
     }
 
     private fun bindPlayerInventory(inventoryPlayer: Inventory) {
+        val baseX = 8
+        val baseY = 84
         for (i in 0..2) {
             for (j in 0..8) {
-                addSlot(SlotWithSkin(inventoryPlayer, j + i * 9 + 9, j * 18, i * 18, SlotSkin.medium))
+                addSlot(SlotWithSkin(inventoryPlayer, j + i * 9 + 9, baseX + j * 18, baseY + i * 18, SlotSkin.medium))
             }
         }
         for (i in 0..8) {
-            addSlot(SlotWithSkin(inventoryPlayer, i, i * 18, 58, SlotSkin.medium))
+            addSlot(SlotWithSkin(inventoryPlayer, i, baseX + i * 18, baseY + 58, SlotSkin.medium))
         }
     }
 

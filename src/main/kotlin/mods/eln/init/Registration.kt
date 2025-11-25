@@ -31,12 +31,21 @@ import mods.eln.node.six.SixNodeItem
 import mods.eln.node.six.SixNodeEntity
 import mods.eln.sixnode.treeresincollector.TreeResinCollectorBlock
 import mods.eln.sixnode.treeresincollector.TreeResinCollectorTileEntity
+import net.minecraft.world.inventory.MenuType
+import net.minecraftforge.common.extensions.IForgeMenuType
+import mods.eln.transparentnode.FuelHeatFurnaceContainer
+import mods.eln.transparentnode.FuelHeatFurnaceGui
 
 object Registration {
     val BLOCKS: DeferredRegister<Block> = DeferredRegister.create(ForgeRegistries.BLOCKS, Eln.MODID)
     val ITEMS: DeferredRegister<Item> = DeferredRegister.create(ForgeRegistries.ITEMS, Eln.MODID)
     val BLOCK_ENTITIES: DeferredRegister<BlockEntityType<*>> = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Eln.MODID)
+    val MENU_TYPES: DeferredRegister<MenuType<*>> = DeferredRegister.create(ForgeRegistries.MENU_TYPES, Eln.MODID)
     val CREATIVE_MODE_TABS: DeferredRegister<CreativeModeTab> = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Eln.MODID)
+
+    val FUEL_HEAT_FURNACE_MENU: RegistryObject<MenuType<FuelHeatFurnaceContainer>> = MENU_TYPES.register("fuel_heat_furnace") {
+        IForgeMenuType.create(FuelHeatFurnaceContainer::create)
+    }
 
     val TRANSPARENT_NODE_BLOCK: RegistryObject<TransparentNodeBlock> = BLOCKS.register("transparent_node") { TransparentNodeBlock(BlockBehaviour.Properties.of().noOcclusion()) }
     val TRANSPARENT_NODE_ITEM: RegistryObject<Item> = ITEMS.register("transparent_node") { TransparentNodeItem(TRANSPARENT_NODE_BLOCK.get()) }
@@ -104,6 +113,7 @@ object Registration {
         BLOCKS.register(eventBus)
         ITEMS.register(eventBus)
         BLOCK_ENTITIES.register(eventBus)
+        MENU_TYPES.register(eventBus)
         CREATIVE_MODE_TABS.register(eventBus)
     }
 }

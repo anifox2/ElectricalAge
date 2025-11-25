@@ -8,6 +8,8 @@ import mods.eln.init.Registration
 import mods.eln.node.six.SixNodeRender
 import mods.eln.node.transparent.TransparentNodeRender
 import net.minecraftforge.client.event.EntityRenderersEvent
+import mods.eln.transparentnode.FuelHeatFurnaceGui
+import net.minecraft.client.gui.screens.MenuScreens
 
 object ClientProxy : CommonProxy() {
     lateinit var uuidManager: UuidManager
@@ -17,6 +19,13 @@ object ClientProxy : CommonProxy() {
     fun setup(modEventBus: net.minecraftforge.eventbus.api.IEventBus) {
         modEventBus.addListener(this::registerBlockEntityRenderers)
         modEventBus.addListener(clientKeyHandler::registerBindings)
+        modEventBus.addListener(this::clientSetup)
+    }
+
+    fun clientSetup(event: net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent) {
+        event.enqueueWork {
+            MenuScreens.register(Registration.FUEL_HEAT_FURNACE_MENU.get()) { menu, inv, title -> FuelHeatFurnaceGui(menu, inv, title) }
+        }
     }
 
     override fun registerRenderers() {

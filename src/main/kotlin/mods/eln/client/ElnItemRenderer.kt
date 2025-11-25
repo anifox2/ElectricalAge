@@ -34,10 +34,12 @@ class ElnItemRenderer : BlockEntityWithoutLevelRenderer(Minecraft.getInstance().
                     
                     val matrix4f = poseStack.last().pose()
                     // Draw quad centered at 0,0
-                    consumer.vertex(matrix4f, -0.5f, 0.5f, 0f).color(255, 255, 255, 255).uv(0f, 1f).uv2(packedLight).endVertex()
-                    consumer.vertex(matrix4f, 0.5f, 0.5f, 0f).color(255, 255, 255, 255).uv(1f, 1f).uv2(packedLight).endVertex()
-                    consumer.vertex(matrix4f, 0.5f, -0.5f, 0f).color(255, 255, 255, 255).uv(1f, 0f).uv2(packedLight).endVertex()
-                    consumer.vertex(matrix4f, -0.5f, -0.5f, 0f).color(255, 255, 255, 255).uv(0f, 0f).uv2(packedLight).endVertex()
+                    // Invert V coordinates because GUI textures are often flipped relative to world rendering?
+                    // Or maybe just standard UVs.
+                    consumer.vertex(matrix4f, -0.5f, 0.5f, 0f).color(255, 255, 255, 255).uv(0f, 0f).uv2(packedLight).endVertex()
+                    consumer.vertex(matrix4f, 0.5f, 0.5f, 0f).color(255, 255, 255, 255).uv(1f, 0f).uv2(packedLight).endVertex()
+                    consumer.vertex(matrix4f, 0.5f, -0.5f, 0f).color(255, 255, 255, 255).uv(1f, 1f).uv2(packedLight).endVertex()
+                    consumer.vertex(matrix4f, -0.5f, -0.5f, 0f).color(255, 255, 255, 255).uv(0f, 1f).uv2(packedLight).endVertex()
                     
                     poseStack.popPose()
                 } else {

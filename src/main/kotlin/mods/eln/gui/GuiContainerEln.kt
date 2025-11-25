@@ -18,6 +18,12 @@ abstract class GuiContainerEln<T : AbstractContainerMenu>(menu: T, inventory: In
     override fun init() {
         super.init()
         helper = newHelper()
+        helper?.let {
+            imageWidth = it.xSize
+            imageHeight = it.ySize
+            leftPos = (width - imageWidth) / 2
+            topPos = (height - imageHeight) / 2
+        }
         initGui()
     }
 

@@ -21,8 +21,8 @@ enum class Direction(val int: Int) {
         return when (this) {
             XN -> v
             XP -> Vec3(-v.x, v.y, -v.z)
-            YN -> Vec3(-v.y, v.x, v.z)
-            YP -> Vec3(v.y, -v.x, v.z)
+            YN -> Vec3(-v.z, v.x, -v.y)
+            YP -> Vec3(v.z, -v.x, -v.y)
             ZN -> Vec3(v.z, v.y, -v.x)
             ZP -> Vec3(-v.z, v.y, v.x)
         }
@@ -52,7 +52,7 @@ enum class Direction(val int: Int) {
         return when (this) {
             XN -> ZP
             XP -> ZN
-            YN -> XP
+            YN -> XN
             YP -> XP
             ZN -> XN
             ZP -> XP
@@ -74,7 +74,7 @@ enum class Direction(val int: Int) {
         return when (this) {
             XN -> ZN
             XP -> ZP
-            YN -> XN
+            YN -> XP
             YP -> XN
             ZN -> XP
             ZP -> XN
@@ -240,11 +240,11 @@ enum class Direction(val int: Int) {
             XP -> poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f))
             YN -> {
                 poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(90f))
-                poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-90f))
+                poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(90f))
             }
             YP -> {
                 poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-90f))
-                poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-90f))
+                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90f))
             }
             ZN -> poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90f))
             ZP -> poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-90f))
