@@ -31,6 +31,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.capabilities.ForgeCapabilities
 import net.minecraftforge.common.util.LazyOptional
+import net.minecraft.nbt.CompoundTag
 
 import mods.eln.init.Registration
 import mods.eln.node.NodeManager
@@ -293,5 +294,22 @@ open class TransparentNodeBlockEntity(type: BlockEntityType<*>, pos: BlockPos, s
 
     override fun isEmpty(): Boolean {
         return sidedInventory.isEmpty
+    }
+
+    override fun load(tag: CompoundTag) {
+        super.load(tag)
+        if (tag.contains("eid")) {
+            val node = TransparentNode()
+            node.coordinate = Coordinate(this)
+            node.level = level
+            node.readFromNBT(tag)
+            this.internalNode = node
+            NodeManager.instance?.addNode(node)
+        }
+    }
+
+    override fun saveAdditional(tag: CompoundTag) {
+        super.saveAdditional(tag)
+        (internalNode as? TransparentNode)?.writeToNBT(tag)
     }
 }
