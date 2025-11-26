@@ -353,6 +353,18 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
         return node!!.coordinate
     }
 
+    /**
+     * Marks the BlockEntity as dirty so the chunk saves the data.
+     * This is required in 1.20.1 for persistence to work correctly.
+     */
+    fun markBlockEntityDirty() {
+        val coord = node!!.coordinate
+        val level = coord.world() ?: return
+        val pos = coord.toBlockPos()
+        val blockEntity = level.getBlockEntity(pos)
+        blockEntity?.setChanged()
+    }
+
     private var uuid = 0
     fun getUuid(): Int {
         if (uuid == 0) {

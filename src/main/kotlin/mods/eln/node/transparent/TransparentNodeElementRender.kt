@@ -97,7 +97,7 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeBlock
             val bos = ByteArrayOutputStream()
             val stream = DataOutputStream(bos)
             preparePacketForServer(stream)
-            stream.writeShort(tileEntity.elementRenderId.toInt())
+            // Note: preparePacketForServer already writes elementRenderId
             stream.writeByte(id.toInt())
             stream.writeByte(if (value) 1 else 0)
             sendPacketToServer(bos)
@@ -111,7 +111,7 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeBlock
             val bos = ByteArrayOutputStream()
             val stream = DataOutputStream(bos)
             preparePacketForServer(stream)
-            stream.writeShort(tileEntity.elementRenderId.toInt())
+            // Note: preparePacketForServer already writes elementRenderId
             stream.writeByte(id.toInt())
             sendPacketToServer(bos)
         } catch (e: IOException) {
@@ -124,7 +124,7 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeBlock
             val bos = ByteArrayOutputStream()
             val stream = DataOutputStream(bos)
             preparePacketForServer(stream)
-            stream.writeShort(tileEntity.elementRenderId.toInt())
+            // Note: preparePacketForServer already writes elementRenderId
             stream.writeByte(id.toInt())
             stream.writeUTF(str)
             sendPacketToServer(bos)
@@ -133,14 +133,14 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeBlock
         }
     }
 
-    fun clientSendFloat(id: Byte, str: Float) {
+    fun clientSendFloat(id: Byte, value: Float) {
         try {
             val bos = ByteArrayOutputStream()
             val stream = DataOutputStream(bos)
             preparePacketForServer(stream)
-            stream.writeShort(tileEntity.elementRenderId.toInt())
+            // Note: preparePacketForServer already writes elementRenderId
             stream.writeByte(id.toInt())
-            stream.writeFloat(str)
+            stream.writeFloat(value)
             sendPacketToServer(bos)
         } catch (e: IOException) {
             e.printStackTrace()
@@ -152,7 +152,7 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeBlock
             val bos = ByteArrayOutputStream()
             val stream = DataOutputStream(bos)
             preparePacketForServer(stream)
-            stream.writeShort(tileEntity.elementRenderId.toInt())
+            // Note: preparePacketForServer already writes elementRenderId
             stream.writeByte(id.toInt())
             stream.writeInt(str)
             sendPacketToServer(bos)

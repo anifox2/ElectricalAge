@@ -178,7 +178,7 @@ object ElnPacketHandler {
             if (node != null && node.nodeUuid == stream.readUTF()) {
                 node.networkUnserialize(stream, player as? ServerPlayer)
             } else {
-                println("packetForNode node found")
+                println("packetForNode node not found")
             }
         } catch (e: IOException) {
             e.printStackTrace()

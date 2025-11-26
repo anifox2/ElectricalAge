@@ -299,13 +299,39 @@ open class TransparentNodeBlockEntity(type: BlockEntityType<*>, pos: BlockPos, s
     override fun load(tag: CompoundTag) {
         super.load(tag)
         if (tag.contains("eid")) {
-            val node = TransparentNode()
-            node.coordinate = Coordinate(this)
-            node.level = level
-            node.readFromNBT(tag)
-            this.internalNode = node
-            NodeManager.instance?.addNode(node)
+            if (level != null) {
+                loadNodeFromTag(tag)
+            } else {
+                loadedTag = tag.copy()
+            }
         }
+    }
+    
+    private var loadedTag: CompoundTag? = null
+    
+    override fun onLoad() {
+        super.onLoad()
+        loadedTag?.let { tag ->
+            loadNodeFromTag(tag)
+            loadedTag = null
+        }
+    }
+
+    private fun loadNodeFromTag(tag: CompoundTag) {
+        if (level!!.isClientSide) return
+        if (internalNode != null) return
+
+        val node = TransparentNode()
+        node.coordinate = Coordinate(this)
+        node.level = level
+        node.readFromNBT(tag)
+        this.internalNode = node
+        NodeManager.instance?.addNode(node)
+        node.initializeFromNBT()
+    }
+
+    override fun setLevel(level: net.minecraft.world.level.Level) {
+        super.setLevel(level)
     }
 
     override fun saveAdditional(tag: CompoundTag) {

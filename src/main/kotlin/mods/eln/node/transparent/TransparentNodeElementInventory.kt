@@ -79,6 +79,8 @@ open class TransparentNodeElementInventory : WorldlyContainer, INBTTReady {
     override fun setChanged() {
         if (transparentNodeElement != null && !transparentNodeElement!!.node!!.isDestructing) {
             transparentNodeElement!!.inventoryChange(this)
+            // Mark the BlockEntity as dirty so the chunk saves the data
+            transparentNodeElement!!.markBlockEntityDirty()
         }
     }
 
